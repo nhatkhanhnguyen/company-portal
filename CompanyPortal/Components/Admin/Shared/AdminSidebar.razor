@@ -1,0 +1,52 @@
+﻿<div class="d-flex flex-column flex-shrink-0 p-3 offcanvas-md offcanvas-start sidebar">
+    <a href="/administration" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto link-dark text-decoration-none">
+        <i class="fa-solid fa-star fa-2x"></i><span class="fs-4 fw-semibold ps-3">Admin CP</span>
+    </a>
+    <hr />
+    <ul class="nav nav-pills flex-column mb-auto fw-semibold">
+        <li class="nav-item">
+            <NavLink Match="NavLinkMatch.All" href="/administration" class="nav-link" ActiveClass="active">
+                <i class="fa-solid fa-house-user"></i> Home
+            </NavLink>
+        </li>
+        <li>
+            <NavLink Match="NavLinkMatch.All" href="/administration/dashboard" class="nav-link" ActiveClass="active">
+                <i class="fa-solid fa-dashboard"></i> Dashboard
+            </NavLink>
+        </li>
+        <li>
+            <NavLink Match="NavLinkMatch.All" href="/administration/products" class="nav-link" ActiveClass="active">
+                <i class="fa-solid fa-layer-group"></i> Products
+            </NavLink>
+        </li>
+        <li>
+            <NavLink Match="NavLinkMatch.All" href="/administration/articles" class="nav-link" ActiveClass="active">
+                <i class="fa-solid fa-newspaper"></i> Articles
+            </NavLink>
+        </li>
+        <li>
+            <NavLink Match="NavLinkMatch.All" href="/administration/contact-requests" class="nav-link" ActiveClass="active">
+                <i class="fa-solid fa-envelope-open-text"></i> Contact Requests
+            </NavLink>
+        </li>
+        <li>
+            <NavLink Match="NavLinkMatch.All" href="/administration/settings" class="nav-link" ActiveClass="active">
+                <i class="fa-solid fa-gears"></i> Settings
+            </NavLink>
+        </li>
+    </ul>
+    <hr>
+    <div class="dropdown">
+        <a href="#" class="d-flex align-items-center link-body-emphasis text-decoration-none dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+            <img src="https://github.com/mdo.png" alt="" width="32" height="32" class="rounded-circle me-2">
+            <strong>mdo</strong>
+        </a>
+        <ul class="dropdown-menu text-small shadow">
+            <li><a class="dropdown-item" href="#">New project...</a></li>
+            <li><a class="dropdown-item" href="#">Settings</a></li>
+            <li><a class="dropdown-item" href="#">Profile</a></li>
+            <li><hr class="dropdown-divOrderIder"></li>
+            <li><a class="dropdown-item" href="#">Sign out</a></li>
+        </ul>
+    </div>
+</div>

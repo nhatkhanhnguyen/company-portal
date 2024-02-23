@@ -1,0 +1,8 @@
+﻿.sidebar {
+    width: 400px;
+}
+
+    .sidebar li svg {
+        width: 24px;
+        margin-right: 8px;
+    }

@@ -1,0 +1,71 @@
+﻿@inject IJSRuntime Js
+
+<div class="modal @_modalClass" tabindex="-1" style="display:@_modalDisplay; overflow-y: auto;">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable @SizeClass" role="document">
+        <div class="modal-content">
+            @if (Header is not null)
+            {
+                <div class="modal-header">
+                    @Header
+                </div>
+            }
+            else
+            {
+                <div class="modal-header">
+                    <h5 class="modal-title">@Title</h5>
+                    <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close" @onclick="Close"></button>
+                </div>
+            }
+            <div class="modal-body">
+                @Body
+            </div>
+            @if (Footer != null)
+            {
+                <div class="modal-footer">
+                    @Footer
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@if (_showBackdrop)
+{
+    <div class="modal-backdrop fade show"></div>
+}
+
+<script>
+    function hideTooltips() {
+        const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+        const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => bootstrap.Tooltip.getInstance(tooltipTriggerEl).hide());
+    }
+</script>
+
+@code {
+    [Parameter] public string Title { get; set; } = string.Empty;
+    [Parameter] public RenderFragment? Body { get; set; }
+    [Parameter] public RenderFragment? Header { get; set; }
+    [Parameter] public RenderFragment? Footer { get; set; }
+
+    [Parameter] public string SizeClass { get; set; } = "";
+
+    private string _modalDisplay = "none;";
+    private string _modalClass = string.Empty;
+    private bool _showBackdrop = false;
+
+    public void Open()
+    {
+        _modalDisplay = "block";
+        _modalClass = "show";
+        _showBackdrop = true;
+
+        Js.InvokeVoidAsync("hideTooltips");
+    }
+
+    public void Close()
+    {
+        _modalDisplay = "none";
+        _modalClass = string.Empty;
+        _showBackdrop = false;
+    }
+}

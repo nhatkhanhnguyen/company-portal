@@ -1,0 +1,33 @@
+﻿@page "/Administration/Articles"
+
+<h3>Articles</h3>
+<hr>
+
+<SfGrid DataSource="@ListProduct"
+        AdaptiveUIMode="AdaptiveMode.Both" AllowPaging="true"
+        AllowFiltering="true" AllowSelection="true"
+        AllowSorting="true" AllowResizing="true"
+        AllowExcelExport="true" EnableAdaptiveUI="true"
+        EnableStickyHeader="true" EnableHover="true">
+    <GridColumns>
+        <GridColumn Field="@nameof(ProductViewModel.Id)" HeaderText="Article ID" TextAlign="TextAlign.Right" Width="120"></GridColumn>
+        <GridColumn Field="@nameof(ProductViewModel.Name)" HeaderText="Article Name" Width="150"></GridColumn>
+        <GridColumn AllowSearching="false" AllowFiltering="false" AllowSorting="false" Field="@nameof(ProductViewModel.Price)" HeaderText=" Price" Type="ColumnType.Decimal" TextAlign="TextAlign.Right" Width="130"></GridColumn>
+        <GridColumn AllowSearching="false" AllowFiltering="false" AllowSorting="false" Field="@nameof(ProductViewModel.DiscountedPrice)" HeaderText="Discounted Price" Type="ColumnType.Decimal" TextAlign="TextAlign.Right" Width="120"></GridColumn>
+    </GridColumns>
+</SfGrid>
+
+@code {
+    public List<ProductViewModel> ListProduct { get; set; } = [];
+
+    protected override void OnInitialized()
+    {
+        ListProduct = Enumerable.Range(1, 5).Select(x => new ProductViewModel
+        {
+            Id = new Random().Next(),
+            Name = (new string[] { "ALFKI", "ANANTR", "ANTON", "BLONP", "BOLID" })[new Random().Next(5)],
+            Price = 10000,
+            DiscountedPrice = 9000
+        }).ToList();
+    }
+}
