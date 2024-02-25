@@ -9,7 +9,7 @@ using MediatR;
 
 namespace CompanyPortal.CQRS.Products.Queries;
 
-public record GetProductByIdQuery(int ProductId, bool ForceLive = false) : ICachedQuery<ProductViewModel>
+public record GetProductByIdQuery(int ProductId, bool ForceRefresh = false) : ICachedQuery<ProductViewModel>
 {
     public class Handler(IRepository<Product> repository, IMapper mapper)
         : IRequestHandler<GetProductByIdQuery, ProductViewModel>
@@ -20,8 +20,6 @@ public record GetProductByIdQuery(int ProductId, bool ForceLive = false) : ICach
             return mapper.Map<ProductViewModel>(result);
         }
     }
-
-    public bool ForceLiveData => ForceLive;
 
     public string Key { get; } = $"product-id-{ProductId}";
 

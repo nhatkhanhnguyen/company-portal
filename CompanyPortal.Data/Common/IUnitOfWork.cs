@@ -2,7 +2,5 @@
 
 public interface IUnitOfWork
 {
-    bool SaveChanges();
-
-    Task<bool> SaveChangesAsync();
+    Task<bool> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

@@ -1,4 +1,4 @@
-﻿<button class="btn @ButtonCssClass" type="button" disabled="@IsLoading">
+﻿<button class="btn @ButtonCssClass" type="button" disabled="@IsLoading" @onclick="OnClick">
     @if (IsLoading)
     {
         <span class="spinner-grow spinner-grow-sm text-light"  aria-hidden="true"></span>
@@ -15,4 +15,5 @@
     [Parameter] public string NormalText { get; set; } = string.Empty;
     [Parameter] public string LoadingText { get; set; } = string.Empty;
     [Parameter] public bool IsLoading { get; set; }
+    [Parameter] public EventCallback<MouseEventArgs> OnClick { get; set; }
 }

@@ -17,7 +17,7 @@ public record CreateArticleCommand(ArticleViewModel Article) : IRequest<bool>
         {
             var entity = mapper.Map<Article>(request.Article);
             await repository.InsertAsync(entity, cancellationToken);
-            return await uow.SaveChangesAsync();
+            return await uow.SaveChangesAsync(cancellationToken);
         }
     }
 }

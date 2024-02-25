@@ -18,7 +18,7 @@ public record CreateResourceCommand(ResourceViewModel Resource) : IRequest<bool>
         {
             var entity = mapper.Map<Resource>(request.Resource);
             await repository.InsertAsync(entity, cancellationToken);
-            return await uow.SaveChangesAsync();
+            return await uow.SaveChangesAsync(cancellationToken);
         }
     }
 }

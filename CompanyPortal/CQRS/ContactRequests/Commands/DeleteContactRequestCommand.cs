@@ -13,7 +13,7 @@ public record DeleteContactRequestCommand(int ContactRequestId, bool ForceDelete
         public async Task<bool> Handle(DeleteContactRequestCommand request, CancellationToken cancellationToken)
         {
             await repository.DeleteByIdAsync(request.ContactRequestId, request.ForceDelete, cancellationToken);
-            return await uow.SaveChangesAsync();
+            return await uow.SaveChangesAsync(cancellationToken);
         }
     }
 }

@@ -16,9 +16,15 @@ public record UpdateOrderCommand(OrderViewModel Order) : IRequest<bool>
     {
         public async Task<bool> Handle(UpdateOrderCommand request, CancellationToken cancellationToken)
         {
-            var entity = mapper.Map<Order>(request.Order);
-            repository.Update(entity);
-            return await uow.SaveChangesAsync();
+            var order = await repository.GetAsync(request.Order.Id, cancellationToken);
+            if (order == null)
+            {
+                return false;
+            }
+
+            mapper.Map(request.Order, order);
+            repository.Update(order);
+            return await uow.SaveChangesAsync(cancellationToken);
         }
     }
 }

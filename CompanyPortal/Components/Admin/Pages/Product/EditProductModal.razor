@@ -66,17 +66,6 @@
                 <ValidationMessage For="@(() => Product.Price)" />
             </div>
             <div class="col-3">
-                <label class="form-label">Discounted Price</label>
-                <InputNumber @bind-Value="Product.DiscountedPrice" class="form-control" placeholder="1000" />
-                <ValidationMessage For="@(() => Product.DiscountedPrice)" />
-            </div>
-            <div class="col-3">
-                <label class="form-label">Discounted Percentage</label>
-                <InputNumber @bind-Value="Product.PercentDiscount" class="form-control" placeholder="10%" />
-                <ValidationMessage For="@(() => Product.PercentDiscount)" />
-            </div>
-
-            <div class="col-3">
                 <div class="form-check d-flex">
                     <InputCheckbox @bind-Value="Product.MarkedAsInactive" class="form-check-input align-self-baseline" />
                     <span class="form-check-label ms-2">

@@ -14,7 +14,7 @@ public class Resource : EntityBase
     [MaxLength(50)]
     public string BlobName { get; set; } = string.Empty;
 
-    [MaxLength(100)]
+    [MaxLength(500)]
     public string Url { get; set; } = string.Empty;
 
     public double Size { get; set; }

@@ -15,9 +15,15 @@ public record UpdateArticleCommand(ArticleViewModel Article) : IRequest<bool>
     {
         public async Task<bool> Handle(UpdateArticleCommand request, CancellationToken cancellationToken)
         {
-            var entity = mapper.Map<Article>(request.Article);
-            repository.Update(entity);
-            return await uow.SaveChangesAsync();
+            var article = await repository.GetAsync(request.Article.Id, cancellationToken);
+            if (article == null)
+            {
+                return false;
+            }
+
+            mapper.Map(request.Article, article);
+            repository.Update(article);
+            return await uow.SaveChangesAsync(cancellationToken);
         }
     }
 }

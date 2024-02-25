@@ -16,9 +16,15 @@ public record UpdateResourceCommand(ResourceViewModel Resource) : IRequest<bool>
     {
         public async Task<bool> Handle(UpdateResourceCommand request, CancellationToken cancellationToken)
         {
-            var entity = mapper.Map<Resource>(request.Resource);
-            repository.Update(entity);
-            return await uow.SaveChangesAsync();
+            var resource = await repository.GetAsync(request.Resource.Id, cancellationToken);
+            if (resource == null)
+            {
+                return false;
+            }
+
+            mapper.Map(request.Resource, resource);
+            repository.Update(resource);
+            return await uow.SaveChangesAsync(cancellationToken);
         }
     }
 }

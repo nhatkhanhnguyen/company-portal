@@ -15,9 +15,15 @@ public record UpdateContactRequestCommand(ContactRequestViewModel ContactRequest
     {
         public async Task<bool> Handle(UpdateContactRequestCommand request, CancellationToken cancellationToken)
         {
-            var entity = mapper.Map<ContactRequest>(request.ContactRequest);
-            repository.Update(entity);
-            return await uow.SaveChangesAsync();
+            var contactRequest = await repository.GetAsync(request.ContactRequest.Id, cancellationToken);
+            if (contactRequest == null)
+            {
+                return false;
+            }
+
+            mapper.Map(request.ContactRequest, contactRequest);
+            repository.Update(contactRequest);
+            return await uow.SaveChangesAsync(cancellationToken);
         }
     }
 }

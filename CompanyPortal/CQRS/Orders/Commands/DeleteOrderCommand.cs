@@ -13,7 +13,7 @@ public record DeleteOrderCommand(int OrderId, bool ForceDelete = false) : IReque
         public async Task<bool> Handle(DeleteOrderCommand request, CancellationToken cancellationToken)
         {
             await repository.DeleteByIdAsync(request.OrderId, request.ForceDelete, cancellationToken);
-            return await uow.SaveChangesAsync();
+            return await uow.SaveChangesAsync(cancellationToken);
         }
     }
 }

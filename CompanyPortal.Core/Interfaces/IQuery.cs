@@ -2,13 +2,13 @@
 
 namespace CompanyPortal.Core.Interfaces;
 
-public interface IQuery<TResponse> : IRequest<TResponse>;
+public interface IQuery<out TResponse> : IRequest<TResponse>;
 
-public interface ICachedQuery<TResponse> : IQuery<TResponse>, ICachedQuery;
+public interface ICachedQuery<out TResponse> : IQuery<TResponse>, ICachedQuery;
 
 public interface ICachedQuery
 {
-    bool ForceLiveData { get; }
+    bool ForceRefresh { get; }
     string Key { get; }
     TimeSpan? Expiration { get; }
 }

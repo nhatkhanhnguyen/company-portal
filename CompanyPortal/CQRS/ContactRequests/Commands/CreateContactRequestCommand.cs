@@ -18,7 +18,7 @@ public record CreateContactRequestCommand(ContactRequestViewModel ContactRequest
         {
             var entity = mapper.Map<ContactRequest>(request.ContactRequest);
             await repository.InsertAsync(entity, cancellationToken);
-            return await uow.SaveChangesAsync();
+            return await uow.SaveChangesAsync(cancellationToken);
         }
     }
 }

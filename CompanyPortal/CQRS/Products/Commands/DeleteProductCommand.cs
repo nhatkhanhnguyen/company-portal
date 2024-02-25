@@ -13,7 +13,7 @@ public record DeleteProductCommand(int ProductId, bool ForceDelete = false) : IR
         public async Task<bool> Handle(DeleteProductCommand request, CancellationToken cancellationToken)
         {
             await repository.DeleteByIdAsync(request.ProductId, request.ForceDelete, cancellationToken);
-            return await uow.SaveChangesAsync();
+            return await uow.SaveChangesAsync(cancellationToken);
         }
     }
 }

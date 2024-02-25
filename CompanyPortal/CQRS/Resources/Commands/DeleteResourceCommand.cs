@@ -13,7 +13,7 @@ public record DeleteResourceCommand(int ResourceId, bool ForceDelete = false) : 
         public async Task<bool> Handle(DeleteResourceCommand request, CancellationToken cancellationToken)
         {
             await repository.DeleteByIdAsync(request.ResourceId, request.ForceDelete, cancellationToken);
-            return await uow.SaveChangesAsync();
+            return await uow.SaveChangesAsync(cancellationToken);
         }
     }
 }

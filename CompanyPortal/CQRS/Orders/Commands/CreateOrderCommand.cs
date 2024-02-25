@@ -18,7 +18,7 @@ public record CreateOrderCommand(OrderViewModel Order) : IRequest<bool>
         {
             var entity = mapper.Map<Order>(request.Order);
             await repository.InsertAsync(entity, cancellationToken);
-            return await uow.SaveChangesAsync();
+            return await uow.SaveChangesAsync(cancellationToken);
         }
     }
 }

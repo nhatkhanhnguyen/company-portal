@@ -1,22 +1,37 @@
 ﻿<div class="container-fluid">
     <div class="wrapper row">
-        <div class="preview col-md-6">
-
-            <div class="preview-pic tab-content">
-                <div class="tab-pane active" id="pic-1"><img src="http://placekitten.com/400/252" /></div>
-                <div class="tab-pane" id="pic-2"><img src="http://placekitten.com/400/252" /></div>
-                <div class="tab-pane" id="pic-3"><img src="http://placekitten.com/400/252" /></div>
-                <div class="tab-pane" id="pic-4"><img src="http://placekitten.com/400/252" /></div>
-                <div class="tab-pane" id="pic-5"><img src="http://placekitten.com/400/252" /></div>
+        <div class="col-md-6">
+            <div class="carousel slide" id="productImages" data-bs-ride="carousel">
+                <div class="carousel-indicators">
+                    @foreach (var image in Product!.Images)
+                    {
+                        <button type="button" class="@(Product!.Images.IndexOf(image) == 0 ? "active" : "" )"
+                                data-bs-slide-to="@Product!.Images.IndexOf(image)"
+                                data-bs-target="#productImages">
+                            <img class="img-fluid" src="@image.Url" />
+                        </button>
+                    }
+                </div>
+                <div class="carousel-inner">
+                    @foreach (var image in Product!.Images)
+                    {
+                        <div class="carousel-item @(Product!.Images.IndexOf(image) == 0 ? "active" : "" )" data-bs-interval="5000">
+                            <img src="@image.Url" class="d-block w-100" alt="@image.Name">
+                            <div class="carousel-caption d-none d-md-block">
+                                <p>@image.Name</p>
+                            </div>
+                        </div>
+                    }
+                </div>
+                <button class="carousel-control-prev" type="button" data-bs-target="#productImages" data-bs-slide="prev">
+                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Previous</span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#productImages" data-bs-slide="next">
+                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Next</span>
+                </button>
             </div>
-            <ul class="preview-thumbnail nav nav-tabs">
-                <li class="active"><a data-target="#pic-1" data-toggle="tab"><img src="http://placekitten.com/200/126" /></a></li>
-                <li><a data-target="#pic-2" data-toggle="tab"><img src="http://placekitten.com/200/126" /></a></li>
-                <li><a data-target="#pic-3" data-toggle="tab"><img src="http://placekitten.com/200/126" /></a></li>
-                <li><a data-target="#pic-4" data-toggle="tab"><img src="http://placekitten.com/200/126" /></a></li>
-                <li><a data-target="#pic-5" data-toggle="tab"><img src="http://placekitten.com/200/126" /></a></li>
-            </ul>
-
         </div>
         <div class="details col-md-6">
             <h3 class="product-title">@Product!.Name</h3>

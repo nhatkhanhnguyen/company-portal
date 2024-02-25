@@ -8,16 +8,23 @@ using MediatR;
 
 namespace CompanyPortal.CQRS.Products.Commands;
 
-public record UpdateProductCommand(ProductViewModel Product) : IRequest<bool>
+public record UpdateProductCommand(ProductViewModel Product) : IRequest<int>
 {
     public class Handler(IMapper mapper, IRepository<Product> repository, IUnitOfWork uow)
-        : IRequestHandler<UpdateProductCommand, bool>
+        : IRequestHandler<UpdateProductCommand, int>
     {
-        public async Task<bool> Handle(UpdateProductCommand request, CancellationToken cancellationToken)
+        public async Task<int> Handle(UpdateProductCommand request, CancellationToken cancellationToken)
         {
-            var entity = mapper.Map<Product>(request.Product);
-            repository.Update(entity);
-            return await uow.SaveChangesAsync();
+            var product = await repository.GetAsync(request.Product.Id, cancellationToken);
+            if (product == null)
+            {
+                return 0;
+            }
+
+            mapper.Map(request.Product, product);
+            repository.Update(product);
+            await uow.SaveChangesAsync(cancellationToken);
+            return product.Id;
         }
     }
 }

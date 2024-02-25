@@ -20,41 +20,42 @@
         Toolbar="_toolbarItems"
         AllowExcelExport="true" AllowPdfExport="true">
     <GridPageSettings PageSize="10"></GridPageSettings>
-    <GridSearchSettings Fields="@(new[] { "ProductId", "Name", "Description", "Price" })"></GridSearchSettings>
+    <GridSearchSettings Fields="@(new[] { "Name", "Description", "Price", "Tags" })"></GridSearchSettings>
     <GridEvents OnToolbarClick="ToolbarClickHandler" TValue="ProductViewModel">
     </GridEvents>
     <GridColumns>
-        <GridColumn Field="@nameof(ProductViewModel.Id)" Width="64"
-                    HeaderText="ID">
+        <GridColumn Field="@nameof(ProductViewModel.Id)"
+                    HeaderText="ID"
+                    Width="64">
         </GridColumn>
         <GridColumn Field="@nameof(ProductViewModel.Name)"
-                    HeaderText="TÊN">
+                    HeaderText="TÊN"
+                    Width="384"
+                    Type="ColumnType.String">
         </GridColumn>
-        <GridColumn Field="@nameof(ProductViewModel.Price)" Width="128"
+        <GridColumn Field="@nameof(ProductViewModel.Price)" Width="156"
                     HeaderText="GIÁ"
                     Format="#,#00đ"
                     Type="ColumnType.Decimal">
         </GridColumn>
-        <GridColumn Field="@nameof(ProductViewModel.DiscountedPrice)" Width="128"
-                    HeaderText="GIÁ GIẢM"
-                    Type="ColumnType.Decimal">
-        </GridColumn>
-        <GridColumn Field="@nameof(ProductViewModel.PercentDiscount)" Width="96"
-                    HeaderText="% GIẢM"
-                    Format="P"
-                    Type="ColumnType.Decimal">
-        </GridColumn>
-        <GridColumn HeaderText="HIỂN THỊ" TextAlign="TextAlign.Center" Width="100">
+        <GridColumn HeaderText="TAGS">
             <Template>
                 @{
                     var product = context as ProductViewModel;
-                    if (product!.IsActive)
+                    foreach (var tag in product!.Tags.Split(' '))
+                    {
+                        <span class="badge rounded-pill text-bg-info me-1">@tag</span>
+                    }
+                }
+            </Template>
+        </GridColumn>
+        <GridColumn HeaderText="ẨN" TextAlign="TextAlign.Center" Width="50">
+            <Template>
+                @{
+                    var product = context as ProductViewModel;
+                    if (!product!.IsActive)
                     {
                         <i class="fa-solid fa-check" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Hiện"></i>
-                    }
-                    else
-                    {
-                        <i class="fa-solid fa-xmark" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Ẩn"></i>
                     }
                 }
             </Template>
@@ -153,17 +154,6 @@
                 <ValidationMessage For="@(() => _editingProduct.Price)" />
             </div>
             <div class="col-3">
-                <label class="form-label">Discounted Price</label>
-                <InputNumber @bind-Value="_editingProduct.DiscountedPrice" class="form-control" placeholder="1000" disabled="@_isLoading" />
-                <ValidationMessage For="@(() => _editingProduct.DiscountedPrice)" />
-            </div>
-            <div class="col-3">
-                <label class="form-label">Discounted Percentage</label>
-                <InputNumber @bind-Value="_editingProduct.PercentDiscount" class="form-control" placeholder="10%" disabled="@_isLoading" />
-                <ValidationMessage For="@(() => _editingProduct.PercentDiscount)" />
-            </div>
-
-            <div class="col-3">
                 <div class="form-check d-flex">
                     <InputCheckbox @bind-Value="_editingProduct.MarkedAsInactive" class="form-check-input align-self-baseline" disabled="@_isLoading" />
                     <span class="form-check-label ms-2">
@@ -176,7 +166,7 @@
     </Body>
     <Footer>
         <button class="btn btn-danger float-end me-2" @onclick="() => EditDialog.Close()">Close</button>
-        <LoadingButton ButtonCssClass="btn-primary" IsLoading="true" LoadingText="Saving" NormalText="Save" />
+        <LoadingButton ButtonCssClass="btn-primary" IsLoading="_isLoading" LoadingText="Saving" NormalText="Save" @onclick="SaveAsync" />
     </Footer>
 </ModalDialog>
 
@@ -250,7 +240,7 @@
     private string _errorMessage = "";
     private bool _forceDelete;
     private ProductViewModel _editingProduct = new();
-    private List<ResourceViewModel> _oldEditingProductImageList = [];
+    private List<ResourceViewModel> _originalProductImages = [];
     private bool _isLoading;
 
     private readonly List<ItemModel> _toolbarItems = [
@@ -277,7 +267,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        _listProduct = await Mediator.Send(new GetAllProductsQuery());
+        _listProduct = await Mediator.Send(new GetAllProductsQuery(true));
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -292,17 +282,17 @@
         {
             var images = await Mediator.Send(new GetProductImagesByIdQuery(id.Value));
             _editingProduct.Images = images;
-            _oldEditingProductImageList = images;
+            _originalProductImages = images;
         }
         EditDialog.Open();
         await DescriptionEditor.RefreshUIAsync();
     }
 
-    private async void ShowProductViewDialog(int id)
+    private async Task ShowProductViewDialog(int id)
     {
         _editingProduct = _listProduct.First(x => x.Id == id);
-        var images = await Mediator.Send(new GetProductImagesByIdQuery(id));
-        _editingProduct.Images = images.ToList();
+        var images = await Mediator.Send(new GetProductImagesByIdQuery(id, true));
+        _editingProduct.Images = images;
         ViewDialog.Open();
     }
 
@@ -321,31 +311,41 @@
         var isUpdate = _editingProduct.Id > 0;
         _editingProduct.IsActive = !_editingProduct.MarkedAsInactive;
 
-        var result = isUpdate
+        var productId = isUpdate
             ? await Mediator.Send(new UpdateProductCommand(_editingProduct))
             : await Mediator.Send(new CreateProductCommand(_editingProduct));
 
-        foreach (var newImage in _editingProduct.Images.Where(x => x.Status == UploadFileStatus.New))
+        if (productId > 0)
         {
-            var imageUploadResult = await Mediator.Send(new UploadToAzureBlobStorageCommand(newImage));
-            newImage.Url = imageUploadResult.Url;
-            newImage.BlobName = imageUploadResult.BlobName;
-        }
+            // Get new images, upload and create new record in database
+            var newImages = _editingProduct.Images.Where(x => x.Status == UploadFileStatus.New);
+            foreach (var newImage in newImages)
+            {
+                var imageUploadResult = await Mediator.Send(new UploadToAzureBlobStorageCommand(newImage));
+                newImage.Url = imageUploadResult.Url;
+                newImage.BlobName = imageUploadResult.BlobName;
+                newImage.ProductId = productId;
+                await Mediator.Send(new CreateResourceCommand(newImage));
+            }
 
-        var removedBlobNames =
-            from oldImage in _oldEditingProductImageList
-            join newImage in _editingProduct.Images.Where(x => x.Status == UploadFileStatus.Old)
-            on oldImage.Name equals newImage.Name into gj
-            from subgroup in gj.DefaultIfEmpty()
-            select oldImage.BlobName;
+            // Left outer join to get removed original images
+            var removedImages =
+                from original in _originalProductImages
+                join image in _editingProduct.Images.Where(x => x.Status == UploadFileStatus.Old)
+                    on original.Name equals image.Name into gj
+                from subgroup in gj.DefaultIfEmpty()
+                select new
+                {
+                    original.Id,
+                    original.BlobName
+                };
 
-        foreach (var removedBlobName in removedBlobNames)
-        {
-            await Mediator.Send(new DeleteFromAzureBlobStorageCommand(removedBlobName));
-        }
+            foreach (var removedImage in removedImages)
+            {
+                await Mediator.Send(new DeleteFromAzureBlobStorageCommand(removedImage.BlobName));
+                await Mediator.Send(new DeleteResourceCommand(removedImage.Id));
+            }
 
-        if (result)
-        {
             _listProduct = await Mediator.Send(new GetAllProductsQuery(true));
             await ProductGrid.Refresh();
             EditDialog.Close();
@@ -367,8 +367,8 @@
         if (result)
         {
             _listProduct = await Mediator.Send(new GetAllProductsQuery(true));
-            await ProductGrid.Refresh();
             DeleteDialog.Close();
+            await ProductGrid.Refresh();
         }
         else
         {

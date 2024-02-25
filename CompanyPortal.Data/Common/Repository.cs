@@ -1,10 +1,10 @@
 ﻿using CompanyPortal.Core.Common;
 using CompanyPortal.Core.Providers;
+using CompanyPortal.Data.Database;
 
 using Microsoft.EntityFrameworkCore;
 
 using System.Linq.Expressions;
-using CompanyPortal.Data.Database;
 
 namespace CompanyPortal.Data.Common;
 
@@ -80,19 +80,6 @@ public sealed class RepositoryBase<TEntity>(ApplicationDbContext context, IUserP
         _dbSet.Update(entity);
     }
 
-    public void Delete(TEntity entity, bool forceDelete = false)
-    {
-        UpdateEntityInfo(entity, true);
-        if (forceDelete)
-        {
-            _dbSet.Remove(entity);
-        }
-        else
-        {
-            Update(entity);
-        }
-    }
-
     public async Task DeleteByIdAsync(int id, bool forceDelete = false, CancellationToken cancellationToken = default)
     {
         var entity = await _dbSet.FindAsync([id], cancellationToken: cancellationToken);
@@ -127,27 +114,6 @@ public sealed class RepositoryBase<TEntity>(ApplicationDbContext context, IUserP
         }
 
         return Task.CompletedTask;
-    }
-
-    public Task<int> CountAsync(CancellationToken cancellationToken)
-    {
-        return GetAll().CountAsync(cancellationToken);
-    }
-
-    public Task<int> CountAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken)
-    {
-        return Query(predicate).CountAsync(cancellationToken);
-    }
-
-    public Task<long> LongCountAsync(CancellationToken cancellationToken)
-    {
-        return GetAll().LongCountAsync(cancellationToken);
-    }
-
-    public Task<long> LongCountAsync(Expression<Func<TEntity, bool>> predicate,
-        CancellationToken cancellationToken)
-    {
-        return Query(predicate).LongCountAsync(cancellationToken);
     }
 
     private void UpdateEntityInfo(TEntity entity, bool deleted = false)

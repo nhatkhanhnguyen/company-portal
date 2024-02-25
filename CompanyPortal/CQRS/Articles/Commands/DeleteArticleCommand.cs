@@ -12,7 +12,7 @@ public record DeleteArticleCommand(int ArticleId, bool ForceDelete = false) : IR
         public async Task<bool> Handle(DeleteArticleCommand request, CancellationToken cancellationToken)
         {
             await repository.DeleteByIdAsync(request.ArticleId, request.ForceDelete, cancellationToken);
-            return await uow.SaveChangesAsync();
+            return await uow.SaveChangesAsync(cancellationToken);
         }
     }
 }

@@ -16,12 +16,6 @@ public class Product : EntityBase
     [Column(TypeName = "decimal(11, 0)")]
     public decimal Price { get; set; }
 
-    [Column(TypeName = "decimal(11, 0)")]
-    public decimal? PercentDiscount { get; set; }
-
-    [Column(TypeName = "decimal(11, 0)")]
-    public decimal? DiscountedPrice { get; set; }
-
     public virtual ICollection<Resource> Images { get; set; } = [];
 
     [MaxLength(100)]

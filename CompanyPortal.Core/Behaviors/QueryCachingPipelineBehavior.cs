@@ -9,7 +9,7 @@ public sealed class QueryCachingPipelineBehavior<TRequest, TResponse>(ICacheServ
 {
     public async Task<TResponse?> Handle(TRequest request, RequestHandlerDelegate<TResponse?> next, CancellationToken cancellationToken)
     {
-        if (request.ForceLiveData)
+        if (request.ForceRefresh)
         {
             return await next();
         }
