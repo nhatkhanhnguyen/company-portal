@@ -1,0 +1,22 @@
+﻿.product-image {
+    width: 100px;
+    height: auto;
+}
+
+.table-uploader-items {
+    min-height: 90px;
+}
+
+.img-uploader-image-preview {
+    max-width: 200px;
+}
+
+.uploader-file-name {
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.validation-message {
+    font-size: .875em;
+    color: red;
+}

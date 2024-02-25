@@ -9,16 +9,12 @@
                     @Header
                 </div>
             }
-            else
+            @if (Body is not null)
             {
-                <div class="modal-header">
-                    <h5 class="modal-title">@Title</h5>
-                    <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close" @onclick="Close"></button>
+                <div class="modal-body">
+                    @Body
                 </div>
             }
-            <div class="modal-body">
-                @Body
-            </div>
             @if (Footer != null)
             {
                 <div class="modal-footer">
@@ -43,9 +39,13 @@
 
 @code {
     [Parameter] public string Title { get; set; } = string.Empty;
+
     [Parameter] public RenderFragment? Body { get; set; }
     [Parameter] public RenderFragment? Header { get; set; }
     [Parameter] public RenderFragment? Footer { get; set; }
+
+    [Parameter] public EventCallback OnClose { get; set; }
+    [Parameter] public EventCallback OnOpen { get; set; }
 
     [Parameter] public string SizeClass { get; set; } = "";
 
@@ -58,8 +58,7 @@
         _modalDisplay = "block";
         _modalClass = "show";
         _showBackdrop = true;
-
-        Js.InvokeVoidAsync("hideTooltips");
+        Js.InvokeVoidAsync("hideTooltips"); 
     }
 
     public void Close()

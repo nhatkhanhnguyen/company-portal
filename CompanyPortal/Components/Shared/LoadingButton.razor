@@ -1,0 +1,18 @@
+﻿<button class="btn @ButtonCssClass" type="button" disabled="@IsLoading">
+    @if (IsLoading)
+    {
+        <span class="spinner-grow spinner-grow-sm text-light"  aria-hidden="true"></span>
+        <span role="status">@LoadingText</span>
+    }
+    else
+    {
+        @NormalText
+    }
+</button>
+
+@code {
+    [Parameter] public string ButtonCssClass { get; set; } = string.Empty;
+    [Parameter] public string NormalText { get; set; } = string.Empty;
+    [Parameter] public string LoadingText { get; set; } = string.Empty;
+    [Parameter] public bool IsLoading { get; set; }
+}

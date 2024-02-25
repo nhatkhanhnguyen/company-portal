@@ -10,7 +10,7 @@ public class ProductFormValidator : AbstractValidator<ProductViewModel>
     {
         RuleFor(x => x.Name).NotEmpty();
         RuleFor(x => x.Description).NotEmpty();
-        RuleFor(x => x.Price).NotEmpty().GreaterThan(0);
+        RuleFor(x => x.Price).GreaterThan(0);
         RuleFor(x => x.DiscountedPrice).Must(OptionalPropertiesAreValid).WithMessage("Only one of DiscountedPrice and PercentDiscount could be set");
     }
 

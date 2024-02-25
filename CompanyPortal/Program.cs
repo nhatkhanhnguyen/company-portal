@@ -1,10 +1,13 @@
 using CompanyPortal.Components;
 using CompanyPortal.Components.Account;
 using CompanyPortal.Components.Admin.Validators;
+using CompanyPortal.Core.Behaviors;
+using CompanyPortal.Core.Interfaces;
 using CompanyPortal.Core.Providers;
 using CompanyPortal.Data.Common;
 using CompanyPortal.Data.Database;
 using CompanyPortal.Data.Database.Entities;
+using CompanyPortal.Services;
 
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -35,12 +38,8 @@ builder.Services.AddAuthentication(options =>
     })
     .AddIdentityCookies();
 
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ??
-                       throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(connectionString));
+builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
-
 builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
@@ -48,6 +47,14 @@ builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.Requ
     .AddDefaultTokenProviders();
 
 builder.Services.AddHttpContextAccessor();
+builder.Services.AddMemoryCache();
+builder.Services.AddSingleton<ICacheService, CacheService>();
+builder.Services.AddMediatR(cfg =>
+{
+    cfg.RegisterServicesFromAssembly(typeof(Program).Assembly);
+    cfg.AddOpenBehavior(typeof(QueryCachingPipelineBehavior<,>));
+});
+
 builder.Services.AddScoped<IdentityUserAccessor>();
 builder.Services.AddScoped<IdentityRedirectManager>();
 builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>();
@@ -57,14 +64,16 @@ builder.Services.AddScoped(typeof(IRepository<>), typeof(RepositoryBase<>));
 
 builder.Services.AddScoped<ProductFormValidator>();
 
-builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
-
 builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
 builder.Services.AddAzureClients(clientBuilder =>
 {
-    clientBuilder.AddBlobServiceClient(builder.Configuration["AzureStorage:Blob"]
-        ?? throw new InvalidOperationException("Connection string 'AzureStorage:Blob' not found."),
-        preferMsi: true);
+    clientBuilder.AddBlobServiceClient(builder.Configuration["AzureStorage:Blob"])
+        .ConfigureOptions(options =>
+        {
+            options.Retry.Mode = Azure.Core.RetryMode.Exponential;
+            options.Retry.MaxRetries = 5;
+            options.Retry.MaxDelay = TimeSpan.FromSeconds(120);
+        });
 });
 
 var app = builder.Build();

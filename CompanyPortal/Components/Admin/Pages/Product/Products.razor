@@ -1,0 +1,424 @@
+﻿@using MediatR
+@using CompanyPortal.CQRS.Products.Commands
+@using CompanyPortal.CQRS.Products.Queries
+@using CompanyPortal.CQRS.Resources.Commands
+@using Syncfusion.Blazor.Navigations
+@using Syncfusion.Blazor.RichTextEditor
+
+@inject IJSRuntime Js
+
+@page "/Administration/Products"
+@inject IMediator Mediator
+
+<h3>Products</h3>
+<hr />
+
+<SfGrid DataSource="@_listProduct" @ref="ProductGrid" ID="sfGridProduct"
+        AllowPaging="true" AllowSelection="true"
+        AllowSorting="true" AllowResizing="true"
+        EnableStickyHeader="true" EnableHover="true"
+        Toolbar="_toolbarItems"
+        AllowExcelExport="true" AllowPdfExport="true">
+    <GridPageSettings PageSize="10"></GridPageSettings>
+    <GridSearchSettings Fields="@(new[] { "ProductId", "Name", "Description", "Price" })"></GridSearchSettings>
+    <GridEvents OnToolbarClick="ToolbarClickHandler" TValue="ProductViewModel">
+    </GridEvents>
+    <GridColumns>
+        <GridColumn Field="@nameof(ProductViewModel.Id)" Width="64"
+                    HeaderText="ID">
+        </GridColumn>
+        <GridColumn Field="@nameof(ProductViewModel.Name)"
+                    HeaderText="TÊN">
+        </GridColumn>
+        <GridColumn Field="@nameof(ProductViewModel.Price)" Width="128"
+                    HeaderText="GIÁ"
+                    Format="#,#00đ"
+                    Type="ColumnType.Decimal">
+        </GridColumn>
+        <GridColumn Field="@nameof(ProductViewModel.DiscountedPrice)" Width="128"
+                    HeaderText="GIÁ GIẢM"
+                    Type="ColumnType.Decimal">
+        </GridColumn>
+        <GridColumn Field="@nameof(ProductViewModel.PercentDiscount)" Width="96"
+                    HeaderText="% GIẢM"
+                    Format="P"
+                    Type="ColumnType.Decimal">
+        </GridColumn>
+        <GridColumn HeaderText="HIỂN THỊ" TextAlign="TextAlign.Center" Width="100">
+            <Template>
+                @{
+                    var product = context as ProductViewModel;
+                    if (product!.IsActive)
+                    {
+                        <i class="fa-solid fa-check" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Hiện"></i>
+                    }
+                    else
+                    {
+                        <i class="fa-solid fa-xmark" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Ẩn"></i>
+                    }
+                }
+            </Template>
+        </GridColumn>
+        <GridColumn TextAlign="TextAlign.Right">
+            <Template>
+                @{
+                    var product = context as ProductViewModel;
+                    <button class="btn btn-sm btn-info" @onclick="() => ShowProductViewDialog(product!.Id)" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Preview">
+                        <i class="fa-solid fa-eye"></i> XEM
+                    </button>
+                    <button class="btn btn-sm btn-primary" @onclick="() => ShowEditDialog(product!.Id)" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Edit">
+                        <i class="fa-solid fa-pen-to-square"></i> SỬA
+                    </button>
+                    <button class="btn btn-sm btn-danger" @onclick="() => ShowDeleteDialog(product!.Id)" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Delete">
+                        <i class="fa-solid fa-trash"></i> XÓA
+                    </button>
+                }
+            </Template>
+        </GridColumn>
+    </GridColumns>
+</SfGrid>
+
+<div class="row">
+    <div class="col-12 mt-2">
+        <button class="btn btn-primary float-end" @onclick="() => ShowEditDialog()">
+            <i class="fa-solid fa-plus"></i> THÊM SẢN PHẨM
+        </button>
+    </div>
+</div>
+
+<ModalDialog @ref="EditDialog" SizeClass="modal-xl">
+    <Header>
+        <h5 class="modal-title">@(_editingProduct.Id > 0 ? "Edit" : "Create")</h5>
+        <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close" @onclick="() => EditDialog.Close()"></button>
+    </Header>
+    <Body>
+        <EditForm Model="_editingProduct" OnValidSubmit="SaveAsync" id="FormProduct" class="row g-3">
+            <FluentValidationValidator ValidatorType="typeof(ProductFormValidator)" />
+            <div class="col-6">
+                <label class="form-label">Name</label>
+                <InputText class="form-control" @bind-Value="_editingProduct.Name" disabled="@_isLoading" />
+                <ValidationMessage For="@(() => _editingProduct.Name)" />
+            </div>
+            <div class="col-6">
+                <label class="form-label">Tags</label>
+                <InputText type="text" @bind-Value="_editingProduct.Tags" class="form-control" placeholder="airplane, car ..." disabled="@_isLoading" />
+            </div>
+            <div class="col-6">
+                <label class="form-label">Images</label>
+                <SfUploader @ref="ImagesUploader" ID="UploadFiles" AllowedExtensions=".png,.jpeg,.jpg" AllowMultiple Enabled="!_isLoading">
+                     <UploaderEvents ValueChange="OnUploaderChange"></UploaderEvents>
+                     <UploaderTemplates>
+                         <Template Context="fileContext">
+                             <table class="table mb-0 table-uploader-items">
+                                 <tbody class="align-middle">
+                                     <tr>
+                                         <td class="align-middle">
+                                             <input type="hidden" />
+                                             <img style="max-width: 200px" class="img-fluid rounded img-uploader-image-preview" alt="Preview Image @(fileContext.Name)"
+                                                  src="@(_editingProduct.Images.Count > 0 ? _editingProduct.Images.FirstOrDefault(item => item.Name == fileContext.Name)?.Base64Content : string.Empty)">
+                                         </td>
+                                         <td class="align-middle">
+                                             <span class="uploader-file-name">
+                                                 Name: @fileContext.Name
+                                            </span>
+                                            <br />
+                                            <i>Size: @Math.Round(fileContext.Size / 1024 / 1024, 2) MB</i>
+                                        </td>
+                                        <td class="align-middle">
+                                            <button class="btn btn-danger btn-sm" @onclick="() => RemoveFile(fileContext)">
+                                                <i class="fa-solid fa-trash"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </Template>
+                    </UploaderTemplates>
+                </SfUploader>
+                @if (_editingProduct.Images.Count > 0)
+                {
+                    <button class="btn btn-sm btn-danger float-right mt-2" @onclick="ClearUploader">Clear</button>
+                }
+            </div>
+            <div class="col-6">
+                <label class="form-label">Description</label>
+                <SfRichTextEditor @ref="DescriptionEditor" @bind-Value="_editingProduct.Description" EnableHtmlEncode="true" Height="400" Enabled="!_isLoading">
+                    <RichTextEditorToolbarSettings Items="@_descriptionEditorTools" />
+                </SfRichTextEditor>
+                <ValidationMessage For="@(() => _editingProduct.Description)" />
+            </div>
+            <div class="col-3">
+                <label class="form-label">Price</label>
+                <InputNumber @bind-Value="_editingProduct.Price" class="form-control" disabled="@_isLoading" />
+                <ValidationMessage For="@(() => _editingProduct.Price)" />
+            </div>
+            <div class="col-3">
+                <label class="form-label">Discounted Price</label>
+                <InputNumber @bind-Value="_editingProduct.DiscountedPrice" class="form-control" placeholder="1000" disabled="@_isLoading" />
+                <ValidationMessage For="@(() => _editingProduct.DiscountedPrice)" />
+            </div>
+            <div class="col-3">
+                <label class="form-label">Discounted Percentage</label>
+                <InputNumber @bind-Value="_editingProduct.PercentDiscount" class="form-control" placeholder="10%" disabled="@_isLoading" />
+                <ValidationMessage For="@(() => _editingProduct.PercentDiscount)" />
+            </div>
+
+            <div class="col-3">
+                <div class="form-check d-flex">
+                    <InputCheckbox @bind-Value="_editingProduct.MarkedAsInactive" class="form-check-input align-self-baseline" disabled="@_isLoading" />
+                    <span class="form-check-label ms-2">
+                        Mark as inactive. This will hide the product from user.
+                    </span>
+                </div>
+
+            </div>
+        </EditForm>
+    </Body>
+    <Footer>
+        <button class="btn btn-danger float-end me-2" @onclick="() => EditDialog.Close()">Close</button>
+        <LoadingButton ButtonCssClass="btn-primary" IsLoading="true" LoadingText="Saving" NormalText="Save" />
+    </Footer>
+</ModalDialog>
+
+<ModalDialog @ref="@ViewDialog" SizeClass="modal-xl">
+    <Header>
+        <h5 class="modal-title">Preview</h5>
+        <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close" @onclick="() => ViewDialog.Close()"></button>
+    </Header>
+    <Body>
+        <ProductView IsEditing="true" Product="@_editingProduct" />
+    </Body>
+</ModalDialog>
+
+<ModalDialog @ref="@DeleteDialog">
+    <Header>
+        <h1 class="modal-title fs-5">
+            <i class="fa-solid fa-triangle-exclamation"></i> Delete @_editingProduct.Name!
+        </h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" @onclick="() => DeleteDialog.Close()"></button>
+    </Header>
+    <Body>
+        <p>Are you sure you want to delete @_editingProduct.Name. This action can't be un-done.</p>
+        <InputCheckbox @bind-Value="_forceDelete" /> Delete permanently
+    </Body>
+    <Footer>
+        <button class="btn btn-danger float-end" @onclick="DeleteAsync">Yes</button>
+        <button class="btn btn-primary float-end me-2" @onclick="() => DeleteDialog.Close()">No</button>
+    </Footer>
+</ModalDialog>
+
+<ModalDialog @ref="@ErrorDialog">
+    <Header>
+        <h1 class="modal-title fs-5">
+            <i class="fa-solid fa-circle-exclamation"></i> Error occured
+        </h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" @onclick="() => ErrorDialog.Close()"></button>
+    </Header>
+    <Body>
+        <p>@_errorMessage</p>
+    </Body>
+    <Footer>
+        <button class="btn btn-primary float-middle" @onclick="() => ErrorDialog.Close()">OK</button>
+    </Footer>
+</ModalDialog>
+
+<script>
+    function addTooltips() {
+        const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+        const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
+    }
+</script>
+
+<style>
+    .validation-message {
+        font-size: .875em;
+        color: red;
+    }
+</style>
+
+@code {
+    private ModalDialog EditDialog { get; set; } = default!;
+    private ModalDialog ViewDialog { get; set; } = default!;
+    private ModalDialog DeleteDialog { get; set; } = default!;
+    private ModalDialog ErrorDialog { get; set; } = default!;
+
+    private SfGrid<ProductViewModel> ProductGrid { get; set; } = default!;
+    private SfRichTextEditor DescriptionEditor { get; set; } = default!;
+    private SfUploader ImagesUploader { get; set; } = default!;
+
+    private List<ProductViewModel> _listProduct = [];
+    private string _errorMessage = "";
+    private bool _forceDelete;
+    private ProductViewModel _editingProduct = new();
+    private List<ResourceViewModel> _oldEditingProductImageList = [];
+    private bool _isLoading;
+
+    private readonly List<ItemModel> _toolbarItems = [
+        new ItemModel { Text = "Xuất Excel", Id = "sfGridProduct_excelexport", PrefixIcon = "fa-solid fa-file-excel" },
+        new ItemModel { Text = "Xuất PDF", Id = "sfGridProduct_pdfexport", PrefixIcon = "fa-solid fa-file-pdf" }
+    ];
+
+    private readonly List<ToolbarItemModel> _descriptionEditorTools =
+    [
+        new ToolbarItemModel { Command = ToolbarCommand.Bold },
+        new ToolbarItemModel { Command = ToolbarCommand.Italic },
+        new ToolbarItemModel { Command = ToolbarCommand.Underline },
+        new ToolbarItemModel { Command = ToolbarCommand.Separator },
+        new ToolbarItemModel { Command = ToolbarCommand.Formats },
+        new ToolbarItemModel { Command = ToolbarCommand.Alignments },
+        new ToolbarItemModel { Command = ToolbarCommand.UnorderedList },
+        new ToolbarItemModel { Command = ToolbarCommand.Separator },
+        new ToolbarItemModel { Command = ToolbarCommand.CreateLink },
+        new ToolbarItemModel { Command = ToolbarCommand.Image },
+        new ToolbarItemModel { Command = ToolbarCommand.Video },
+        new ToolbarItemModel { Command = ToolbarCommand.CreateTable },
+        new ToolbarItemModel { Command = ToolbarCommand.Separator }
+    ];
+
+    protected override async Task OnInitializedAsync()
+    {
+        _listProduct = await Mediator.Send(new GetAllProductsQuery());
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await Js.InvokeVoidAsync("addTooltips");
+    }
+
+    private async Task ShowEditDialog(int? id = null)
+    {
+        _editingProduct = id != null ? _listProduct.First(x => x.Id == id) : new ProductViewModel();
+        if (id != null)
+        {
+            var images = await Mediator.Send(new GetProductImagesByIdQuery(id.Value));
+            _editingProduct.Images = images;
+            _oldEditingProductImageList = images;
+        }
+        EditDialog.Open();
+        await DescriptionEditor.RefreshUIAsync();
+    }
+
+    private async void ShowProductViewDialog(int id)
+    {
+        _editingProduct = _listProduct.First(x => x.Id == id);
+        var images = await Mediator.Send(new GetProductImagesByIdQuery(id));
+        _editingProduct.Images = images.ToList();
+        ViewDialog.Open();
+    }
+
+    private void ShowDeleteDialog(int? id = null)
+    {
+        _editingProduct = id != null ? _listProduct.First(x => x.Id == id) : new ProductViewModel();
+        if (id != null)
+        {
+            DeleteDialog.Open();
+        }
+    }
+
+    private async Task SaveAsync()
+    {
+        _isLoading = true;
+        var isUpdate = _editingProduct.Id > 0;
+        _editingProduct.IsActive = !_editingProduct.MarkedAsInactive;
+
+        var result = isUpdate
+            ? await Mediator.Send(new UpdateProductCommand(_editingProduct))
+            : await Mediator.Send(new CreateProductCommand(_editingProduct));
+
+        foreach (var newImage in _editingProduct.Images.Where(x => x.Status == UploadFileStatus.New))
+        {
+            var imageUploadResult = await Mediator.Send(new UploadToAzureBlobStorageCommand(newImage));
+            newImage.Url = imageUploadResult.Url;
+            newImage.BlobName = imageUploadResult.BlobName;
+        }
+
+        var removedBlobNames =
+            from oldImage in _oldEditingProductImageList
+            join newImage in _editingProduct.Images.Where(x => x.Status == UploadFileStatus.Old)
+            on oldImage.Name equals newImage.Name into gj
+            from subgroup in gj.DefaultIfEmpty()
+            select oldImage.BlobName;
+
+        foreach (var removedBlobName in removedBlobNames)
+        {
+            await Mediator.Send(new DeleteFromAzureBlobStorageCommand(removedBlobName));
+        }
+
+        if (result)
+        {
+            _listProduct = await Mediator.Send(new GetAllProductsQuery(true));
+            await ProductGrid.Refresh();
+            EditDialog.Close();
+        }
+        else
+        {
+            EditDialog.Close();
+            var request = isUpdate ? "updating" : "creating";
+            _errorMessage = $"There is a problem while {request} product {_editingProduct.Name}.";
+            ErrorDialog.Open();
+        }
+        _isLoading = false;
+    }
+
+    private async Task DeleteAsync()
+    {
+        _isLoading = true;
+        var result = await Mediator.Send(new DeleteProductCommand(_editingProduct.Id, _forceDelete));
+        if (result)
+        {
+            _listProduct = await Mediator.Send(new GetAllProductsQuery(true));
+            await ProductGrid.Refresh();
+            DeleteDialog.Close();
+        }
+        else
+        {
+            DeleteDialog.Close();
+            _errorMessage = $"There is a problem while deleting product {_editingProduct.Name}.";
+            ErrorDialog.Open();
+        }
+        _isLoading = false;
+    }
+
+    private async Task ToolbarClickHandler(ClickEventArgs args)
+    {
+        switch (args.Item.Id)
+        {
+            // ProductId is combination of Grid's ID and itemname
+            case "sfGridProduct_excelexport":
+                await ProductGrid.ExportToExcelAsync();
+                break;
+            case "sfGridProduct_pdfexport":
+                await ProductGrid.ExportToPdfAsync();
+                break;
+        }
+    }
+
+    private async Task OnUploaderChange(UploadChangeEventArgs args)
+    {
+        foreach (var file in args.Files)
+        {
+            var stream = new MemoryStream();
+            await file.File.OpenReadStream(long.MaxValue).CopyToAsync(stream);
+            var base64 = Convert.ToBase64String(stream.ToArray());
+            _editingProduct.Images.Add(new ResourceViewModel
+                {
+                    Base64Content = "data:image/" + file.FileInfo.Type + ";base64," + base64,
+                    Name = file.FileInfo.Name,
+                    Size = file.FileInfo.Size,
+                    Status = UploadFileStatus.New
+                });
+        }
+    }
+
+    private async Task RemoveFile(FileInfo file)
+    {
+        _editingProduct.Images.RemoveAt(_editingProduct.Images.FindIndex(x => x.Name == file.Name));
+        await ImagesUploader.RemoveAsync([file]);
+    }
+
+    private async Task ClearUploader()
+    {
+        _editingProduct.Images.RemoveAll(x => x.Status == UploadFileStatus.New);
+        await ImagesUploader.ClearAllAsync();
+    }
+}

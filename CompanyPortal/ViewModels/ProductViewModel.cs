@@ -21,7 +21,7 @@ public class ProductViewModel : ViewModelBase
 
     public string Tags { get; set; } = string.Empty;
 
-    public IEnumerable<ResourceViewModel> Images { get; set; } = [];
+    public List<ResourceViewModel> Images { get; set; } = [];
 
     public bool MarkedAsInactive { get; set; } = false;
 }

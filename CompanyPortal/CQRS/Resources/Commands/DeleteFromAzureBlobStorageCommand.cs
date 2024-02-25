@@ -4,23 +4,17 @@ using MediatR;
 
 namespace CompanyPortal.CQRS.Resources.Commands;
 
-public record DeleteFromAzureBlobStorageCommand(string BlobId) : IRequest<bool>
+public record DeleteFromAzureBlobStorageCommand(string BlobName) : IRequest<bool>
 {
-    public class Handler(BlobContainerClient client, ILogger<DeleteFromAzureBlobStorageCommand> logger) : IRequestHandler<DeleteFromAzureBlobStorageCommand, bool>
+    public class Handler(BlobServiceClient blobServiceClient)
+        : IRequestHandler<DeleteFromAzureBlobStorageCommand, bool>
     {
         public async Task<bool> Handle(DeleteFromAzureBlobStorageCommand request, CancellationToken cancellationToken)
         {
-            try
-            {
-                var blob = client.GetBlobClient(request.BlobId);
-                var result = await blob.DeleteAsync(cancellationToken: cancellationToken);
-                return !result.IsError;
-            }
-            catch (Exception ex)
-            {
-                logger.LogError(ex.Message);
-                return false;
-            }
+            var containerClient = blobServiceClient.GetBlobContainerClient("product-image");
+            var blobClient = containerClient.GetBlobClient(request.BlobName);
+            var result = await blobClient.DeleteAsync(cancellationToken: cancellationToken);
+            return !result.IsError;
         }
     }
 }
