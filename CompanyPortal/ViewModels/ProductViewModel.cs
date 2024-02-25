@@ -18,4 +18,10 @@ public class ProductViewModel : ViewModelBase
     public List<ResourceViewModel> Images { get; set; } = [];
 
     public bool MarkedAsInactive { get; set; } = false;
+
+    public string[]? TagList
+    {
+        get => Tags.Split(' ');
+        set => Tags = string.Join(" ", value ?? []);
+    }
 }
