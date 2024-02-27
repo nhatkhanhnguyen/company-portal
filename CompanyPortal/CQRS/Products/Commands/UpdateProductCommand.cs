@@ -10,19 +10,23 @@ namespace CompanyPortal.CQRS.Products.Commands;
 
 public record UpdateProductCommand(ProductViewModel Product) : IRequest<int>
 {
-    public class Handler(IMapper mapper, IRepository<Product> repository, IUnitOfWork uow)
+    public class Handler(IMapper mapper, IRepository<Product> productRepository, IRepository<Resource> resourceRepository, IUnitOfWork uow)
         : IRequestHandler<UpdateProductCommand, int>
     {
         public async Task<int> Handle(UpdateProductCommand request, CancellationToken cancellationToken)
         {
-            var product = await repository.GetAsync(request.Product.Id, cancellationToken);
+            var product = await productRepository.GetAsync(request.Product.Id, cancellationToken);
             if (product == null)
             {
                 return 0;
             }
 
             mapper.Map(request.Product, product);
-            repository.Update(product);
+            productRepository.Update(product);
+            if (product.IsActive)
+            {
+                resourceRepository.Activate(x => x.ProductId == request.Product.Id);
+            }
             await uow.SaveChangesAsync(cancellationToken);
             return product.Id;
         }

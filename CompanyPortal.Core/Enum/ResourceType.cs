@@ -2,8 +2,10 @@
 
 public enum ResourceType
 {
-    CoverImage = 1,
-    Image = 2,
-    Video = 3,
-    Document = 4
+    Image = 1,
+    Video = 2,
+    Word = 3,
+    Excel = 4,
+    Pdf = 5,
+    Other = 6
 }

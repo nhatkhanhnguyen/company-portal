@@ -7,12 +7,12 @@ using MediatR;
 
 namespace CompanyPortal.CQRS.Resources.Commands;
 
-public record UploadToAzureBlobStorageCommand(ResourceViewModel Resource) : IRequest<(string Url, string BlobName)>
+public record UploadToStorageCommand(ResourceViewModel Resource) : IRequest<(string Url, string BlobName)>
 {
     public class Handler(BlobServiceClient blobServiceClient)
-        : IRequestHandler<UploadToAzureBlobStorageCommand, (string Url, string BlobName)>
+        : IRequestHandler<UploadToStorageCommand, (string Url, string BlobName)>
     {
-        public async Task<(string Url, string BlobName)> Handle(UploadToAzureBlobStorageCommand request, CancellationToken cancellationToken)
+        public async Task<(string Url, string BlobName)> Handle(UploadToStorageCommand request, CancellationToken cancellationToken)
         {
             var containerClient = blobServiceClient.GetBlobContainerClient("product-image");
             var blobName = $"{Guid.NewGuid()}.{request.Resource.Name.Split('.')[1]}";

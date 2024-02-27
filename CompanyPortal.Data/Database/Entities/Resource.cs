@@ -8,10 +8,10 @@ namespace CompanyPortal.Data.Database.Entities;
 
 public class Resource : EntityBase
 {
-    [MaxLength(50)]
+    [MaxLength(100)]
     public string Name { get; set; } = string.Empty;
 
-    [MaxLength(50)]
+    [MaxLength(100)]
     public string BlobName { get; set; } = string.Empty;
 
     [MaxLength(500)]

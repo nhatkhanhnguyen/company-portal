@@ -1,17 +1,7 @@
 ﻿<div class="container-fluid">
     <div class="wrapper row">
-        <div class="col-md-6">
-            <div class="carousel slide" id="productImages" data-bs-ride="carousel">
-                <div class="carousel-indicators">
-                    @foreach (var image in Product!.Images)
-                    {
-                        <button type="button" class="@(Product!.Images.IndexOf(image) == 0 ? "active" : "" )"
-                                data-bs-slide-to="@Product!.Images.IndexOf(image)"
-                                data-bs-target="#productImages">
-                            <img class="img-fluid" src="@image.Url" />
-                        </button>
-                    }
-                </div>
+        <div class="col-6">
+            <div class="carousel slide carousel-fade carousel-thumbs-top" id="productImages" data-bs-ride="carousel">
                 <div class="carousel-inner">
                     @foreach (var image in Product!.Images)
                     {
@@ -23,43 +13,27 @@
                         </div>
                     }
                 </div>
-                <button class="carousel-control-prev" type="button" data-bs-target="#productImages" data-bs-slide="prev">
-                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                    <span class="visually-hidden">Previous</span>
-                </button>
-                <button class="carousel-control-next" type="button" data-bs-target="#productImages" data-bs-slide="next">
-                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                    <span class="visually-hidden">Next</span>
-                </button>
+            </div>
+            <div class="slider-thumbnails row">
+                @foreach (var image in Product!.Images)
+                {
+                    <button type="button" data-bs-target="#productImages" data-bs-slide-to="@(Product!.Images.IndexOf(image))" class="slider-thumbnail">
+                        <img src="@image.Url" class="img-fluid">
+                    </button>
+                }
             </div>
         </div>
-        <div class="details col-md-6">
+        <div class="details col-6">
             <h3 class="product-title">@Product!.Name</h3>
-            <div class="rating">
-                <div class="stars">
-                    <span class="fa fa-star checked"></span>
-                    <span class="fa fa-star checked"></span>
-                    <span class="fa fa-star checked"></span>
-                    <span class="fa fa-star"></span>
-                    <span class="fa fa-star"></span>
-                </div>
-                <span class="review-no">41 reviews</span>
-            </div>
             <p class="product-description">@Product.Description</p>
-            <h4 class="price">current price: <span>@Product.Price</span></h4>
-            <p class="vote"><strong>91%</strong> of buyers enjoyed this product! <strong>(87 votes)</strong></p>
+            <h4 class="price">Giá bán: <span>@Product.Price</span></h4>
+            <h4>Giảm còn: <span></span></h4>
             <h5 class="sizes">
                 sizes:
                 <span class="size" data-toggle="tooltip" title="small">s</span>
                 <span class="size" data-toggle="tooltip" title="medium">m</span>
                 <span class="size" data-toggle="tooltip" title="large">l</span>
                 <span class="size" data-toggle="tooltip" title="xtra large">xl</span>
-            </h5>
-            <h5 class="colors">
-                colors:
-                <span class="color orange not-available" data-toggle="tooltip" title="Not In store"></span>
-                <span class="color green"></span>
-                <span class="color blue"></span>
             </h5>
             @if (!IsEditing)
             {
@@ -72,6 +46,45 @@
     </div>
 </div>
 
+<style>
+    .carousel-item img {
+        height: 20vh !important;
+        object-fit: cover;
+    }
+
+    .slider-thumbnails {
+        display: flex;
+        flex-wrap: nowrap;
+        white-space: nowrap;
+        overflow-x: auto;
+        height: 70px;
+        margin-top: 10px;
+        margin-right: 0 !important;
+    }
+
+        .slider-thumbnails .slider-thumbnail:first-child {
+            margin-left: auto;
+        }
+
+        .slider-thumbnails .slider-thumbnail:last-child {
+            margin-right: auto;
+        }
+
+    .slider-thumbnail {
+        width: 100px !important;
+        border: 0;
+        height: 50px;
+        padding-right: 5px;
+        background: none;
+    }
+
+        .slider-thumbnail img {
+            width: 100px !important;
+            object-fit: cover;
+            height: 50px;
+        }
+
+</style>
 @code {
     [Parameter] public ProductViewModel? Product { get; set; }
 

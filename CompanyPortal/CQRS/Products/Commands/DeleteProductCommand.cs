@@ -7,12 +7,13 @@ namespace CompanyPortal.CQRS.Products.Commands;
 
 public record DeleteProductCommand(int ProductId, bool ForceDelete = false) : IRequest<bool>
 {
-    public class Handler(IRepository<Product> repository, IUnitOfWork uow)
+    public class Handler(IRepository<Product> productRepository, IRepository<Resource> resourceRepository, IUnitOfWork uow)
         : IRequestHandler<DeleteProductCommand, bool>
     {
         public async Task<bool> Handle(DeleteProductCommand request, CancellationToken cancellationToken)
         {
-            await repository.DeleteByIdAsync(request.ProductId, request.ForceDelete, cancellationToken);
+            resourceRepository.Delete(x => x.ProductId == request.ProductId, request.ForceDelete);
+            productRepository.Delete(x => x.Id == request.ProductId, request.ForceDelete);
             return await uow.SaveChangesAsync(cancellationToken);
         }
     }

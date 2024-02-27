@@ -33,7 +33,7 @@ public sealed class RepositoryBase<TEntity>(ApplicationDbContext context, IUserP
 
     public IQueryable<TEntity> Query(Expression<Func<TEntity, bool>> predicate)
     {
-        return GetAll().Where(predicate);
+        return _dbSet.Where(predicate);
     }
 
     public async Task<TEntity?> GetAsync(int id, CancellationToken cancellationToken)
@@ -80,6 +80,15 @@ public sealed class RepositoryBase<TEntity>(ApplicationDbContext context, IUserP
         _dbSet.Update(entity);
     }
 
+    public void Activate(Expression<Func<TEntity, bool>> predicate)
+    {
+        var entities = _dbSet.Where(predicate);
+        foreach (var entity in entities)
+        {
+            entity.IsActive = true;
+        }
+    }
+
     public async Task DeleteByIdAsync(int id, bool forceDelete = false, CancellationToken cancellationToken = default)
     {
         var entity = await _dbSet.FindAsync([id], cancellationToken: cancellationToken);
@@ -97,9 +106,9 @@ public sealed class RepositoryBase<TEntity>(ApplicationDbContext context, IUserP
         }
     }
 
-    public Task DeleteAsync(Expression<Func<TEntity, bool>> predicate, bool forceDelete = false)
+    public void Delete(Expression<Func<TEntity, bool>> predicate, bool forceDelete = false)
     {
-        var listEntity = GetAll().Where(predicate);
+        var listEntity = _dbSet.Where(predicate);
         foreach (var entity in listEntity)
         {
             if (forceDelete)
@@ -112,8 +121,6 @@ public sealed class RepositoryBase<TEntity>(ApplicationDbContext context, IUserP
                 _dbSet.Update(entity);
             }
         }
-
-        return Task.CompletedTask;
     }
 
     private void UpdateEntityInfo(TEntity entity, bool deleted = false)

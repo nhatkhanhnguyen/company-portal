@@ -94,6 +94,12 @@ public interface IRepository<TEntity> where TEntity : EntityBase
     /// <param name="entity">Entity</param>
     void Update(TEntity entity);
 
+    /// <summary>
+    /// Activate entities by setting IsActive = true
+    /// </summary>
+    /// <param name="predicate">A condition to filter entities</param>
+    void Activate(Expression<Func<TEntity, bool>> predicate);
+
     #endregion
 
     #region Delete
@@ -114,7 +120,7 @@ public interface IRepository<TEntity> where TEntity : EntityBase
     /// </summary>
     /// <param name="predicate">A condition to filter entities</param>
     /// <param name="forceDelete">Completely remove entity if set to true, otherwise set IsActive = false</param>
-    Task DeleteAsync(Expression<Func<TEntity, bool>> predicate, bool forceDelete = false);
+    void Delete(Expression<Func<TEntity, bool>> predicate, bool forceDelete = false);
 
     #endregion
 }

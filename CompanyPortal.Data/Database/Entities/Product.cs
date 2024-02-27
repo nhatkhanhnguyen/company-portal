@@ -16,8 +16,11 @@ public class Product : EntityBase
     [Column(TypeName = "decimal(11, 0)")]
     public decimal Price { get; set; }
 
-    public virtual ICollection<Resource> Images { get; set; } = [];
+    [MaxLength(700)]
+    public string Description { get; set; } = string.Empty;
 
-    [MaxLength(100)]
+    [MaxLength(50)]
     public string Tags { get; set; } = string.Empty;
+
+    public virtual ICollection<Resource> Images { get; set; } = [];
 }

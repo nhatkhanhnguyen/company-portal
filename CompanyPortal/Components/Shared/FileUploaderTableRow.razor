@@ -1,0 +1,59 @@
+﻿@using CompanyPortal.Core.Enum
+
+<tr class="@TableRowCss pd-2">
+    @if (ShowPreview)
+    {
+        <td class="@TableRowCss p-2">
+            @switch (File.ResourceType)
+            {
+                case ResourceType.Image:
+                    <img src="@(File.Status == UploadFileStatus.Old ? File.Url : File.Base64Content)" class="img-fluid rounded w-100 h-auto object-fit-cover file-uploader-preview @PreviewImageCss" alt="Preview @File.Name" />
+                    break;
+                case ResourceType.Word:
+                    <i class="fa-solid fa-file-word fa-4x"></i>
+                    break;
+                case ResourceType.Excel:
+                    <i class="fa-solid fa-file-excel fa-4x"></i>
+                    break;
+                case ResourceType.Pdf:
+                    <i class="fa-solid fa-file-pdf fa-4x"></i>
+                    break;
+                case ResourceType.Video:
+                    <i class="fa-solid fa-file-video fa-4x"></i>
+                    break;
+                case ResourceType.Other:
+                default:
+                    <i class="fa-solid fa-file fa-4x"></i>
+                    break;
+            }
+        </td>
+    }
+    <td class="@TableRowCss">
+        <b>Tên file: @(File.Name.Length > 32 ? File.Name[..32] : File.Name) ...</b>
+        <br />
+        <i>Kích thước: @Math.Round(File.Size / 1024, 2) KB</i>
+    </td>
+    <td class="@TableRowCss">
+        <button type="button" class="btn btn-danger btn-sm" @onclick="() => Remove(File)">
+            <i class="@RemoveIconCss"></i>
+        </button>
+    </td>
+</tr>
+
+@code
+{
+    [Parameter] public bool ShowPreview { get; set; }
+
+    [Parameter] public string? TableRowCss { get; set; }
+    [Parameter] public string? TableCellCss { get; set; }
+    [Parameter] public string? PreviewImageCss { get; set; }
+    [Parameter] public string? RemoveIconCss { get; set; } = "fa-solid fa-trash";
+
+    [Parameter] public required ResourceViewModel File { get; set; }
+    [Parameter] public EventCallback<ResourceViewModel> OnRowRemove { get; set; }
+
+    public async Task Remove(ResourceViewModel file)
+    {
+        await OnRowRemove.InvokeAsync(file);
+    }
+}

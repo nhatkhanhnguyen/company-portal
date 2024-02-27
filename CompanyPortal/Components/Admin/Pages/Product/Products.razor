@@ -4,6 +4,8 @@
 @using CompanyPortal.CQRS.Resources.Commands
 @using Syncfusion.Blazor.Navigations
 @using Syncfusion.Blazor.RichTextEditor
+@using CompanyPortal.Core.Extensions
+@using CompanyPortal.Core.Enum
 
 @inject IJSRuntime Js
 
@@ -30,7 +32,7 @@
         </GridColumn>
         <GridColumn Field="@nameof(ProductViewModel.Name)"
                     HeaderText="TÊN"
-                    Width="384"
+                    Width="486"
                     Type="ColumnType.String">
         </GridColumn>
         <GridColumn Field="@nameof(ProductViewModel.Price)" Width="156"
@@ -64,10 +66,10 @@
             <Template>
                 @{
                     var product = context as ProductViewModel;
-                    <button class="btn btn-sm btn-info" @onclick="() => ShowProductViewDialog(product!.Id)" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Preview">
+                    <button class="btn btn-sm btn-info" @onclick="() => ShowProductViewDialogAsync(product!.Id)" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Preview">
                         <i class="fa-solid fa-eye"></i> XEM
                     </button>
-                    <button class="btn btn-sm btn-primary" @onclick="() => ShowEditDialog(product!.Id)" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Edit">
+                    <button class="btn btn-sm btn-primary" @onclick="() => ShowEditDialogAsync(product!.Id)" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Edit">
                         <i class="fa-solid fa-pen-to-square"></i> SỬA
                     </button>
                     <button class="btn btn-sm btn-danger" @onclick="() => ShowDeleteDialog(product!.Id)" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Delete">
@@ -81,7 +83,7 @@
 
 <div class="row">
     <div class="col-12 mt-2">
-        <button class="btn btn-primary float-end" @onclick="() => ShowEditDialog()">
+        <button class="btn btn-primary float-end" @onclick="() => ShowEditDialogAsync()">
             <i class="fa-solid fa-plus"></i> THÊM SẢN PHẨM
         </button>
     </div>
@@ -89,85 +91,55 @@
 
 <ModalDialog @ref="EditDialog" SizeClass="modal-xl">
     <Header>
-        <h5 class="modal-title">@(_editingProduct.Id > 0 ? "Edit" : "Create")</h5>
+        <h5 class="modal-title">@(_selectedProduct.Id > 0 ? "Edit" : "Create")</h5>
         <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close" @onclick="() => EditDialog.Close()"></button>
     </Header>
     <Body>
-        <EditForm Model="_editingProduct" OnValidSubmit="SaveAsync" id="FormProduct" class="row g-3">
+        <EditForm Model="_selectedProduct" OnValidSubmit="InsertOrUpdateAsync" id="FormProduct" class="row g-3">
             <FluentValidationValidator ValidatorType="typeof(ProductFormValidator)" />
             <div class="col-6">
-                <label class="form-label">Name</label>
-                <InputText class="form-control" @bind-Value="_editingProduct.Name" disabled="@_isLoading" />
-                <ValidationMessage For="@(() => _editingProduct.Name)" />
+                <Label For="@(() => _selectedProduct.Images)" CssClass="form-label"></Label>
+                <FileUploader @bind-ExistingFiles="_selectedProduct.Images" @ref="FileUploader" Id="fileUploader" AcceptFileExtensions=".jpg,.png" AllowMultiple="true" ShowPreview="true"></FileUploader>
             </div>
             <div class="col-6">
-                <label class="form-label">Tags</label>
-                <SfMultiSelect TValue="string[]" TItem="string" @bind-Value="@_editingProduct.TagList" Mode="VisualMode.Box" AllowCustomValue="true" Enabled="!_isLoading" />
-                @* <InputText type="text" @bind-Value="_editingProduct.Tags" class="form-control" placeholder="airplane car ..." disabled="@_isLoading" /> *@
-            </div>
-            <div class="col-6">
-                <label class="form-label">Images</label>
-                <SfUploader @ref="ImagesUploader" ID="UploadFiles" AllowedExtensions=".png,.jpeg,.jpg" AllowMultiple Enabled="!_isLoading">
-                     <UploaderEvents ValueChange="OnUploaderChange"></UploaderEvents>
-                     <UploaderTemplates>
-                         <Template Context="fileContext">
-                             <table class="table mb-0 table-uploader-items">
-                                 <tbody class="align-middle">
-                                     <tr>
-                                         <td class="align-middle">
-                                             <input type="hidden" />
-                                             <img style="max-width: 200px" class="img-fluid rounded img-uploader-image-preview" alt="Preview Image @(fileContext.Name)"
-                                                  src="@(_editingProduct.Images.Count > 0 ? _editingProduct.Images.FirstOrDefault(item => item.Name == fileContext.Name)?.Base64Content : string.Empty)">
-                                         </td>
-                                         <td class="align-middle">
-                                             <span class="uploader-file-name">
-                                                 Name: @fileContext.Name
-                                            </span>
-                                            <br />
-                                            <i>Size: @Math.Round(fileContext.Size / 1024 / 1024, 2) MB</i>
-                                        </td>
-                                        <td class="align-middle">
-                                            <button class="btn btn-danger btn-sm" @onclick="() => RemoveFile(fileContext)">
-                                                <i class="fa-solid fa-trash"></i>
-                                            </button>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </Template>
-                    </UploaderTemplates>
-                </SfUploader>
-                @if (_editingProduct.Images.Count > 0)
-                {
-                    <button class="btn btn-sm btn-danger float-right mt-2" @onclick="ClearUploader">Clear</button>
-                }
-            </div>
-            <div class="col-6">
-                <label class="form-label">Description</label>
-                <SfRichTextEditor @ref="DescriptionEditor" @bind-Value="_editingProduct.Description" EnableHtmlEncode="true" Height="400" Enabled="!_isLoading">
-                    <RichTextEditorToolbarSettings Items="@_descriptionEditorTools" />
-                </SfRichTextEditor>
-                <ValidationMessage For="@(() => _editingProduct.Description)" />
-            </div>
-            <div class="col-3">
-                <label class="form-label">Price</label>
-                <InputNumber @bind-Value="_editingProduct.Price" class="form-control" disabled="@_isLoading" />
-                <ValidationMessage For="@(() => _editingProduct.Price)" />
-            </div>
-            <div class="col-3">
-                <div class="form-check d-flex">
-                    <InputCheckbox @bind-Value="_editingProduct.MarkedAsInactive" class="form-check-input align-self-baseline" disabled="@_isLoading" />
-                    <span class="form-check-label ms-2">
-                        Mark as inactive. This will hide the product from user.
-                    </span>
-                </div>
+                <div class="row">
+                    <div class="col-12 mb-3">
+                        <Label For="@(() => _selectedProduct.Name)" CssClass="form-label"></Label>
+                        <InputText class="form-control" @bind-Value="_selectedProduct.Name" disabled="@_isLoading" />
+                        <ValidationMessage For="@(() => _selectedProduct.Name)" />
+                    </div>
+                    <div class="col-12 mb-3">
+                        <Label For="@(() => _selectedProduct.Tags)" CssClass="form-label"></Label>
+                        <InputText type="text" @bind-Value="_selectedProduct.Tags" class="form-control" placeholder="airplane car ..." disabled="@_isLoading" />
+                    </div>
 
+                    <div class="col-12 mb-3">
+                        <Label For="@(() => _selectedProduct.Description)" CssClass="form-label"></Label>
+                        <SfRichTextEditor @ref="DescriptionEditor" ID="descriptionEditor" @bind-Value="_selectedProduct.Description" Height="400">
+                            <RichTextEditorToolbarSettings Items="@_descriptionEditorTools" />
+                        </SfRichTextEditor>
+                        <ValidationMessage For="@(() => _selectedProduct.Description)" />
+                    </div>
+                    <div class="col-12 mb-3">
+                        <Label For="@(() => _selectedProduct.Price)" CssClass="form-label"></Label>
+                        <InputNumber @bind-Value="_selectedProduct.Price" class="form-control" disabled="@_isLoading" />
+                        <ValidationMessage For="@(() => _selectedProduct.Price)" />
+                    </div>
+                    <div class="col-12">
+                        <div class="form-check d-flex">
+                            <InputCheckbox @bind-Value="_selectedProduct.MarkedAsInactive" class="form-check-input align-self-baseline" disabled="@_isLoading" />
+                            <span class="form-check-label ms-2">
+                                <Label For="@(() => _selectedProduct.MarkedAsInactive)" CssClass="form-label"></Label>
+                            </span>
+                        </div>
+                    </div>
+                </div>
             </div>
         </EditForm>
     </Body>
     <Footer>
         <button class="btn btn-danger float-end me-2" @onclick="() => EditDialog.Close()">Close</button>
-        <LoadingButton ButtonCssClass="btn-primary" IsLoading="_isLoading" LoadingText="Saving" NormalText="Save" @onclick="SaveAsync" />
+        <LoadingButton ButtonCssClass="btn-primary" IsLoading="_isLoading" LoadingText="Saving" NormalText="Save" @onclick="InsertOrUpdateAsync" />
     </Footer>
 </ModalDialog>
 
@@ -177,23 +149,23 @@
         <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close" @onclick="() => ViewDialog.Close()"></button>
     </Header>
     <Body>
-        <ProductView IsEditing="true" Product="@_editingProduct" />
+        <ProductView IsEditing="true" Product="@_selectedProduct" />
     </Body>
 </ModalDialog>
 
 <ModalDialog @ref="@DeleteDialog">
     <Header>
         <h1 class="modal-title fs-5">
-            <i class="fa-solid fa-triangle-exclamation"></i> Delete @_editingProduct.Name!
+            <i class="fa-solid fa-triangle-exclamation"></i> Delete @_selectedProduct.Name!
         </h1>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" @onclick="() => DeleteDialog.Close()"></button>
     </Header>
     <Body>
-        <p>Are you sure you want to delete @_editingProduct.Name. This action can't be un-done.</p>
+        <p>Are you sure you want to delete @_selectedProduct.Name. This action can't be un-done.</p>
         <InputCheckbox @bind-Value="_forceDelete" /> Delete permanently
     </Body>
     <Footer>
-        <button class="btn btn-danger float-end" @onclick="DeleteAsync">Yes</button>
+        <LoadingButton ButtonCssClass="btn-primary" IsLoading="_isLoading" LoadingText="Deleting" NormalText="Yes" @onclick="() => DeleteAsync(_forceDelete)" />
         <button class="btn btn-primary float-end me-2" @onclick="() => DeleteDialog.Close()">No</button>
     </Footer>
 </ModalDialog>
@@ -232,6 +204,7 @@
     private ModalDialog ViewDialog { get; set; } = default!;
     private ModalDialog DeleteDialog { get; set; } = default!;
     private ModalDialog ErrorDialog { get; set; } = default!;
+    private FileUploader FileUploader { get; set; } = default!;
 
     private SfGrid<ProductViewModel> ProductGrid { get; set; } = default!;
     private SfRichTextEditor DescriptionEditor { get; set; } = default!;
@@ -240,34 +213,35 @@
     private List<ProductViewModel> _listProduct = [];
     private string _errorMessage = "";
     private bool _forceDelete;
-    private ProductViewModel _editingProduct = new();
+    private ProductViewModel _selectedProduct = new();
     private List<ResourceViewModel> _originalProductImages = [];
     private bool _isLoading;
 
     private readonly List<ItemModel> _toolbarItems = [
         new ItemModel { Text = "Xuất Excel", Id = "sfGridProduct_excelexport", PrefixIcon = "fa-solid fa-file-excel" },
-        new ItemModel { Text = "Xuất PDF", Id = "sfGridProduct_pdfexport", PrefixIcon = "fa-solid fa-file-pdf" }
+    new ItemModel { Text = "Xuất PDF", Id = "sfGridProduct_pdfexport", PrefixIcon = "fa-solid fa-file-pdf" }
     ];
 
     private readonly List<ToolbarItemModel> _descriptionEditorTools =
     [
         new ToolbarItemModel { Command = ToolbarCommand.Bold },
-        new ToolbarItemModel { Command = ToolbarCommand.Italic },
-        new ToolbarItemModel { Command = ToolbarCommand.Underline },
-        new ToolbarItemModel { Command = ToolbarCommand.Separator },
-        new ToolbarItemModel { Command = ToolbarCommand.Formats },
-        new ToolbarItemModel { Command = ToolbarCommand.Alignments },
-        new ToolbarItemModel { Command = ToolbarCommand.UnorderedList },
-        new ToolbarItemModel { Command = ToolbarCommand.Separator },
-        new ToolbarItemModel { Command = ToolbarCommand.CreateLink },
-        new ToolbarItemModel { Command = ToolbarCommand.Image },
-        new ToolbarItemModel { Command = ToolbarCommand.Video },
-        new ToolbarItemModel { Command = ToolbarCommand.CreateTable },
-        new ToolbarItemModel { Command = ToolbarCommand.Separator }
+    new ToolbarItemModel { Command = ToolbarCommand.Italic },
+    new ToolbarItemModel { Command = ToolbarCommand.Underline },
+    new ToolbarItemModel { Command = ToolbarCommand.Separator },
+    new ToolbarItemModel { Command = ToolbarCommand.Formats },
+    new ToolbarItemModel { Command = ToolbarCommand.Alignments },
+    new ToolbarItemModel { Command = ToolbarCommand.UnorderedList },
+    new ToolbarItemModel { Command = ToolbarCommand.Separator },
+    new ToolbarItemModel { Command = ToolbarCommand.CreateLink },
+    new ToolbarItemModel { Command = ToolbarCommand.Image },
+    new ToolbarItemModel { Command = ToolbarCommand.Video },
+    new ToolbarItemModel { Command = ToolbarCommand.CreateTable },
+    new ToolbarItemModel { Command = ToolbarCommand.Separator }
     ];
 
     protected override async Task OnInitializedAsync()
     {
+        _isLoading = false;
         _listProduct = await Mediator.Send(new GetAllProductsQuery(true));
     }
 
@@ -276,107 +250,69 @@
         await Js.InvokeVoidAsync("addTooltips");
     }
 
-    private async Task ShowEditDialog(int? id = null)
+    private async Task ShowEditDialogAsync(int? id = null)
     {
-        _editingProduct = id != null ? _listProduct.First(x => x.Id == id) : new ProductViewModel();
+        _selectedProduct = id != null ? _listProduct.First(x => x.Id == id).Clone() : new ProductViewModel();
+        _selectedProduct.Images = [];
         if (id != null)
         {
-            var images = await Mediator.Send(new GetProductImagesByIdQuery(id.Value));
-            _editingProduct.Images = images;
+            var images = await Mediator.Send(new GetProductImagesByIdQuery(id.Value, true));
+            _selectedProduct.Images = [.. images];
             _originalProductImages = images;
         }
         EditDialog.Open();
-        await DescriptionEditor.RefreshUIAsync();
     }
 
-    private async Task ShowProductViewDialog(int id)
+    private async Task ShowProductViewDialogAsync(int id)
     {
-        _editingProduct = _listProduct.First(x => x.Id == id);
+        _selectedProduct = _listProduct.First(x => x.Id == id);
         var images = await Mediator.Send(new GetProductImagesByIdQuery(id, true));
-        _editingProduct.Images = images;
+        _selectedProduct.Images = images;
         ViewDialog.Open();
     }
 
-    private void ShowDeleteDialog(int? id = null)
+    private void ShowDeleteDialog(int id)
     {
-        _editingProduct = id != null ? _listProduct.First(x => x.Id == id) : new ProductViewModel();
-        if (id != null)
-        {
-            DeleteDialog.Open();
-        }
+        _selectedProduct = _listProduct.First(x => x.Id == id);
+        DeleteDialog.Open();
     }
 
-    private async Task SaveAsync()
+    // Data
+
+    private async Task InsertOrUpdateAsync()
     {
         _isLoading = true;
-        var isUpdate = _editingProduct.Id > 0;
-        _editingProduct.IsActive = !_editingProduct.MarkedAsInactive;
+        var product = _selectedProduct.Clone();
+        product.IsActive = !_selectedProduct.MarkedAsInactive;
+        product.Images = [.. _selectedProduct.Images, .. FileUploader.GetNewFiles()];
+        var productId = _selectedProduct.Id > 0 ? await UpdateProductAsync(product) : await CreateProductAsync(product);
 
-        var productId = isUpdate
-            ? await Mediator.Send(new UpdateProductCommand(_editingProduct))
-            : await Mediator.Send(new CreateProductCommand(_editingProduct));
-
-        if (productId > 0)
+        if (productId <= 0)
         {
-            // Get new images, upload and create new record in database
-            var newImages = _editingProduct.Images.Where(x => x.Status == UploadFileStatus.New);
-            foreach (var newImage in newImages)
-            {
-                var imageUploadResult = await Mediator.Send(new UploadToAzureBlobStorageCommand(newImage));
-                newImage.Url = imageUploadResult.Url;
-                newImage.BlobName = imageUploadResult.BlobName;
-                newImage.ProductId = productId;
-                await Mediator.Send(new CreateResourceCommand(newImage));
-            }
-
-            // Left outer join to get removed original images
-            var removedImages =
-                from original in _originalProductImages
-                join image in _editingProduct.Images.Where(x => x.Status == UploadFileStatus.Old)
-                    on original.Name equals image.Name into gj
-                from subgroup in gj.DefaultIfEmpty()
-                select new
-                {
-                    original.Id,
-                    original.BlobName
-                };
-
-            foreach (var removedImage in removedImages)
-            {
-                await Mediator.Send(new DeleteFromAzureBlobStorageCommand(removedImage.BlobName));
-                await Mediator.Send(new DeleteResourceCommand(removedImage.Id));
-            }
-
-            _listProduct = await Mediator.Send(new GetAllProductsQuery(true));
-            EditDialog.Close();
-        }
-        else
-        {
-            EditDialog.Close();
-            var request = isUpdate ? "updating" : "creating";
-            _errorMessage = $"There is a problem while {request} product {_editingProduct.Name}.";
+            var request = _selectedProduct.Id > 0 ? "updating" : "creating";
+            _errorMessage = $"There is a problem while {request} product {_selectedProduct.Name}.";
             ErrorDialog.Open();
         }
+        EditDialog.Close();
+        _listProduct = await Mediator.Send(new GetAllProductsQuery(true));
         _isLoading = false;
     }
 
-    private async Task DeleteAsync()
+    private async Task DeleteAsync(bool forceDelete)
     {
         _isLoading = true;
-        var result = await Mediator.Send(new DeleteProductCommand(_editingProduct.Id, _forceDelete));
-        if (result)
+        var result = await Mediator.Send(new DeleteProductCommand(_selectedProduct.Id, forceDelete));
+        if (!result)
         {
-            _listProduct = await Mediator.Send(new GetAllProductsQuery(true));
-            DeleteDialog.Close();
-        }
-        else
-        {
-            DeleteDialog.Close();
-            _errorMessage = $"There is a problem while deleting product {_editingProduct.Name}.";
+            _errorMessage = $"There is a problem while deleting product {_selectedProduct.Name}.";
             ErrorDialog.Open();
         }
+        _listProduct = await Mediator.Send(new GetAllProductsQuery(true));
+        DeleteDialog.Close();
         _isLoading = false;
     }
+
+    // Events
 
     private async Task ToolbarClickHandler(ClickEventArgs args)
     {
@@ -392,32 +328,54 @@
         }
     }
 
-    private async Task OnUploaderChange(UploadChangeEventArgs args)
+    private async Task<int> UpdateProductAsync(ProductViewModel product)
     {
-        foreach (var file in args.Files)
+        var productId = await Mediator.Send(new UpdateProductCommand(product));
+        if (productId > 0)
         {
-            var stream = new MemoryStream();
-            await file.File.OpenReadStream(long.MaxValue).CopyToAsync(stream);
-            var base64 = Convert.ToBase64String(stream.ToArray());
-            _editingProduct.Images.Add(new ResourceViewModel
-                {
-                    Base64Content = "data:image/" + file.FileInfo.Type + ";base64," + base64,
-                    Name = file.FileInfo.Name,
-                    Size = file.FileInfo.Size,
-                    Status = UploadFileStatus.New
-                });
+            var removedOldImages = GetRemovedOldImages(_originalProductImages, product.Images.Where(x => x.Status == UploadFileStatus.Old));
+            await DeleteProductImagesAsync(removedOldImages, true);
+            await CreateProductImagesAsync(productId, product.Images.Where(x => x.Status == UploadFileStatus.New));
+        }
+
+        return productId;
+    }
+
+    private async Task<int> CreateProductAsync(ProductViewModel product)
+    {
+        var productId = await Mediator.Send(new CreateProductCommand(product));
+        if (productId > 0)
+        {
+            await CreateProductImagesAsync(productId, product.Images);
+        }
+
+        return productId;
+    }
+
+    private async Task CreateProductImagesAsync(int productId, IEnumerable<ResourceViewModel> newImages)
+    {
+        foreach (var image in newImages)
+        {
+            var imageUploadResult = await Mediator.Send(new UploadToStorageCommand(image));
+            image.Url = imageUploadResult.Url;
+            image.BlobName = imageUploadResult.BlobName;
+            image.ProductId = productId;
+            image.ResourceType = ResourceType.Image;
+            await Mediator.Send(new CreateResourceCommand(image));
         }
     }
 
-    private async Task RemoveFile(FileInfo file)
+    private async Task DeleteProductImagesAsync(List<ResourceViewModel> images, bool forceDelete = false)
     {
-        _editingProduct.Images.RemoveAt(_editingProduct.Images.FindIndex(x => x.Name == file.Name));
-        await ImagesUploader.RemoveAsync([file]);
+        var result = await Mediator.Send(new DeleteResourcesCommand(images.Select(x => x.Id), forceDelete));
+        if (result && forceDelete)
+        {
+            await Mediator.Send(new DeleteFromStorageCommand(images.Select(x => x.BlobName)));
+        }
     }
 
-    private async Task ClearUploader()
+    private List<ResourceViewModel> GetRemovedOldImages(IEnumerable<ResourceViewModel> originalOldImages, IEnumerable<ResourceViewModel> newOldImages)
     {
-        _editingProduct.Images.RemoveAll(x => x.Status == UploadFileStatus.New);
-        await ImagesUploader.ClearAllAsync();
+        return originalOldImages.Where(p => newOldImages.All(p2 => p2.Id != p.Id)).ToList();
     }
 }

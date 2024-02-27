@@ -1,0 +1,93 @@
+﻿@using Microsoft.Net.Http.Headers
+@using Microsoft.Identity.Client
+@using CompanyPortal.Core.Enum
+<div class="row">
+    <div class="col-12">
+        <div class="input-group">
+            <InputFile disable="@Disable" OnChange="OnInputFileChange" id="@Id" class="@($"form-control {ChooseFileButtonCss}")" aria-label="Upload" accept="@AcceptFileExtensions" multiple="@AllowMultiple" />
+        </div>
+        <div class="table-responsive mt-2 file-uploader-table-container">
+            <table class="table table-hover table-striped @TableCss">
+                <tbody class="@TableBodyCss align-middle">
+                    @foreach (var file in ExistingFiles)
+                    {
+                        <FileUploaderTableRow File="file" ShowPreview="ShowPreview" TableRowCss="@TableRowCss" TableCellCss="@TableCellCss" PreviewImageCss="@PreviewImageCss" RemoveIconCss="@RemoveIconCss" OnRowRemove="x => RemoveFile(x)" />
+                    }
+                    @foreach (var file in _newFiles)
+                    {
+                        <FileUploaderTableRow File="file" ShowPreview="ShowPreview" TableRowCss="@TableRowCss" TableCellCss="@TableCellCss" PreviewImageCss="@PreviewImageCss" RemoveIconCss="@RemoveIconCss" OnRowRemove="x => RemoveFile(x)" />
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public string? AcceptFileExtensions { get; set; }
+    [Parameter] public bool AllowMultiple { get; set; } = true;
+    [Parameter] public bool Disable { get; set; }
+    [Parameter] public bool ShowPreview { get; set; }
+
+    [Parameter] public List<ResourceViewModel> ExistingFiles { get; set; } = [];
+    [Parameter] public EventCallback<List<ResourceViewModel>> ExistingFilesChanged { get; set; }
+
+    // Styling properties
+    [Parameter] public string Id { get; set; } = "fileUploader";
+    [Parameter] public string? ChooseFileButtonCss { get; set; }
+    [Parameter] public string? TableCss { get; set; }
+    [Parameter] public string? TableBodyCss { get; set; }
+    [Parameter] public string? TableRowCss { get; set; }
+    [Parameter] public string? TableCellCss { get; set; }
+    [Parameter] public string? PreviewImageCss { get; set; }
+    [Parameter] public string? RemoveIconCss { get; set; } = "fa-solid fa-trash";
+
+    private List<ResourceViewModel> _newFiles = [];
+
+    public List<ResourceViewModel> GetNewFiles()
+    {
+        return _newFiles;
+    }
+
+    private async Task OnInputFileChange(InputFileChangeEventArgs e)
+    {
+        const long maxFileSize = 5 * 1024 * 2024;
+        foreach (var file in e.GetMultipleFiles())
+        {
+            var stream = new MemoryStream();
+            await file.OpenReadStream(maxFileSize).CopyToAsync(stream);
+            var base64 = Convert.ToBase64String(stream.ToArray());
+            _newFiles.Add(new ResourceViewModel
+                {
+                    Base64Content = $"data:{file.ContentType};base64,{base64}",
+                    Name = file.Name,
+                    Size = file.Size,
+                    Status = UploadFileStatus.New,
+                    ResourceType = GetResourceTypeByMimeType(file.ContentType)
+                });
+        }
+    }
+
+    private ResourceType GetResourceTypeByMimeType(string mimeType)
+    {
+        switch (mimeType)
+        {
+            case "application/vnd.ms-excel":
+            case "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":
+                return ResourceType.Excel;
+            case "application/msword":
+            case "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+                return ResourceType.Word;
+            case "application/pdf": return ResourceType.Pdf;
+            case "image/jpeg":
+            case "image/png": return ResourceType.Image;
+            default: return ResourceType.Other;
+        }
+    }
+
+    private void RemoveFile(ResourceViewModel file)
+    {
+        ExistingFiles.Remove(file);
+        _newFiles.Remove(file);
+    }
+}
