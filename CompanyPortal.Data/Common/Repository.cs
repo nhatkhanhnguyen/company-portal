@@ -80,7 +80,7 @@ public sealed class RepositoryBase<TEntity>(ApplicationDbContext context, IUserP
         _dbSet.Update(entity);
     }
 
-    public void Activate(Expression<Func<TEntity, bool>> predicate)
+    public void Undelete(Expression<Func<TEntity, bool>> predicate)
     {
         var entities = _dbSet.Where(predicate);
         foreach (var entity in entities)

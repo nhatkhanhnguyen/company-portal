@@ -99,7 +99,7 @@
             <FluentValidationValidator ValidatorType="typeof(ProductFormValidator)" />
             <div class="col-6">
                 <Label For="@(() => _selectedProduct.Images)" CssClass="form-label"></Label>
-                <FileUploader @bind-ExistingFiles="_selectedProduct.Images" @ref="FileUploader" Id="fileUploader" AcceptFileExtensions=".jpg,.png" AllowMultiple="true" ShowPreview="true"></FileUploader>
+                <FileUploader Files="_selectedProduct.Images" ButtonText="Chọn ảnh" HintText="Nhấp để chọn" @ref="ImageUploader" Id="fileUploader" AcceptFileExtensions=".jpg,.png" AllowMultiple="true" ShowPreview="true"></FileUploader>
             </div>
             <div class="col-6">
                 <div class="row">
@@ -115,7 +115,7 @@
 
                     <div class="col-12 mb-3">
                         <Label For="@(() => _selectedProduct.Description)" CssClass="form-label"></Label>
-                        <SfRichTextEditor @ref="DescriptionEditor" ID="descriptionEditor" @bind-Value="_selectedProduct.Description" Height="400">
+                        <SfRichTextEditor @ref="DescriptionEditor" ID="descriptionEditor" @bind-Value="_selectedProduct.Description" Height="400" Enabled="!_isLoading">
                             <RichTextEditorToolbarSettings Items="@_descriptionEditorTools" />
                         </SfRichTextEditor>
                         <ValidationMessage For="@(() => _selectedProduct.Description)" />
@@ -204,11 +204,10 @@
     private ModalDialog ViewDialog { get; set; } = default!;
     private ModalDialog DeleteDialog { get; set; } = default!;
     private ModalDialog ErrorDialog { get; set; } = default!;
-    private FileUploader FileUploader { get; set; } = default!;
+    private FileUploader ImageUploader { get; set; } = default!;
 
     private SfGrid<ProductViewModel> ProductGrid { get; set; } = default!;
     private SfRichTextEditor DescriptionEditor { get; set; } = default!;
-    private SfUploader ImagesUploader { get; set; } = default!;
 
     private List<ProductViewModel> _listProduct = [];
     private string _errorMessage = "";
@@ -284,7 +283,6 @@
         _isLoading = true;
         var product = _selectedProduct.Clone();
         product.IsActive = !_selectedProduct.MarkedAsInactive;
-        product.Images = [.. _selectedProduct.Images, .. FileUploader.GetNewFiles()];
         var productId = _selectedProduct.Id > 0 ? await UpdateProductAsync(product) : await CreateProductAsync(product);
 
         if (productId <= 0)

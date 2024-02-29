@@ -13,7 +13,9 @@ using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Azure;
+
 using Serilog;
+
 using Syncfusion.Blazor;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -76,6 +78,7 @@ builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped(typeof(IRepository<>), typeof(RepositoryBase<>));
 
 builder.Services.AddScoped<ProductFormValidator>();
+builder.Services.AddScoped<CategoryFormValidator>();
 
 builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
 builder.Services.AddAzureClients(clientBuilder =>

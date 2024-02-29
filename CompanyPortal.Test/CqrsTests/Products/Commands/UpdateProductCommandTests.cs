@@ -1,4 +1,5 @@
 ﻿using CompanyPortal.CQRS.Products.Commands;
+using CompanyPortal.Data.Common;
 using CompanyPortal.Data.Database.Entities;
 using CompanyPortal.Test.Common;
 using CompanyPortal.ViewModels;
@@ -13,10 +14,12 @@ public class UpdateProductCommandTests : TestsBase<Product>
     public async Task UpdateProductCommand_ShouldUpdate()
     {
         _mockRepository.Setup(x => x.Update(It.IsAny<Product>()));
+        var mockResourceRepository = new Mock<IRepository<Resource>>();
+        mockResourceRepository.Setup(x => x.Update(It.IsAny<Resource>()));
         _mockUow.Setup(x => x.SaveChangesAsync(CancellationToken.None)).ReturnsAsync(true);
         var product = new ProductViewModel();
         var command = new UpdateProductCommand(product);
-        var commandHandler = new UpdateProductCommand.Handler(_mapper, _mockRepository.Object, _mockUow.Object);
+        var commandHandler = new UpdateProductCommand.Handler(_mapper, _mockRepository.Object, mockResourceRepository.Object, _mockUow.Object);
 
         await _mockMediator.Object.Send(command);
         var result = await commandHandler.Handle(command, CancellationToken.None);

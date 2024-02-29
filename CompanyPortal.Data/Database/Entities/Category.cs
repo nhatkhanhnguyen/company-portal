@@ -3,6 +3,7 @@
 using System.ComponentModel.DataAnnotations;
 
 namespace CompanyPortal.Data.Database.Entities;
+
 public class Category : EntityBase
 {
     [MaxLength(100)]

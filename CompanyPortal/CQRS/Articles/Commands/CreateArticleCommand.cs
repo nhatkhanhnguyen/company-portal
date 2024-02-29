@@ -8,16 +8,17 @@ using MediatR;
 
 namespace CompanyPortal.CQRS.Articles.Commands;
 
-public record CreateArticleCommand(ArticleViewModel Article) : IRequest<bool>
+public record CreateArticleCommand(ArticleViewModel Article) : IRequest<int>
 {
     public class Handler(IMapper mapper, IRepository<Article> repository, IUnitOfWork uow)
-        : IRequestHandler<CreateArticleCommand, bool>
+        : IRequestHandler<CreateArticleCommand, int>
     {
-        public async Task<bool> Handle(CreateArticleCommand request, CancellationToken cancellationToken)
+        public async Task<int> Handle(CreateArticleCommand request, CancellationToken cancellationToken)
         {
             var entity = mapper.Map<Article>(request.Article);
             await repository.InsertAsync(entity, cancellationToken);
-            return await uow.SaveChangesAsync(cancellationToken);
+            await uow.SaveChangesAsync(cancellationToken);
+            return entity.Id;
         }
     }
 }

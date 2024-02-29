@@ -8,22 +8,33 @@ using MediatR;
 
 namespace CompanyPortal.CQRS.Articles.Commands;
 
-public record UpdateArticleCommand(ArticleViewModel Article) : IRequest<bool>
+public record UpdateArticleCommand(ArticleViewModel Article) : IRequest<int>
 {
-    public class Handler(IMapper mapper, IRepository<Article> repository, IUnitOfWork uow)
-        : IRequestHandler<UpdateArticleCommand, bool>
+    public class Handler(IMapper mapper, IRepository<Article> repository, IRepository<Resource> resourceRepository, IUnitOfWork uow)
+        : IRequestHandler<UpdateArticleCommand, int>
     {
-        public async Task<bool> Handle(UpdateArticleCommand request, CancellationToken cancellationToken)
+        public async Task<int> Handle(UpdateArticleCommand request, CancellationToken cancellationToken)
         {
             var article = await repository.GetAsync(request.Article.Id, cancellationToken);
             if (article == null)
             {
-                return false;
+                return 0;
             }
 
             mapper.Map(request.Article, article);
+
+            if (article.IsActive)
+            {
+                resourceRepository.Undelete(x => x.ArticleId == request.Article.Id);
+            }
+            else
+            {
+                resourceRepository.Delete(x => x.ArticleId == request.Article.Id);
+            }
+
             repository.Update(article);
-            return await uow.SaveChangesAsync(cancellationToken);
+            await uow.SaveChangesAsync(cancellationToken);
+            return article.Id;
         }
     }
 }

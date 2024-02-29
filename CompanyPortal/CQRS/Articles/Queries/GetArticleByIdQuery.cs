@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 
+using CompanyPortal.Core.Interfaces;
 using CompanyPortal.Data.Common;
 using CompanyPortal.Data.Database.Entities;
 using CompanyPortal.ViewModels;
@@ -8,7 +9,7 @@ using MediatR;
 
 namespace CompanyPortal.CQRS.Articles.Queries;
 
-public record GetArticleByIdQuery(int ArticleId) : IRequest<ArticleViewModel>
+public record GetArticleByIdQuery(int ArticleId, bool ForceRefresh) : ICachedQuery<ArticleViewModel>
 {
 
     public class Handler(IRepository<Article> repository, IMapper mapper)
@@ -20,4 +21,8 @@ public record GetArticleByIdQuery(int ArticleId) : IRequest<ArticleViewModel>
             return mapper.Map<ArticleViewModel>(result);
         }
     }
+
+    public string Key { get; } = $"article-id-{ArticleId}";
+
+    public TimeSpan? Expiration => null;
 }

@@ -95,10 +95,10 @@ public interface IRepository<TEntity> where TEntity : EntityBase
     void Update(TEntity entity);
 
     /// <summary>
-    /// Activate entities by setting IsActive = true
+    /// Undelete entities by setting IsActive = true
     /// </summary>
     /// <param name="predicate">A condition to filter entities</param>
-    void Activate(Expression<Func<TEntity, bool>> predicate);
+    void Undelete(Expression<Func<TEntity, bool>> predicate);
 
     #endregion
 

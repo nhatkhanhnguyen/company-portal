@@ -7,22 +7,22 @@ using CompanyPortal.ViewModels;
 
 using MediatR;
 
-namespace CompanyPortal.CQRS.Articles.Queries;
+namespace CompanyPortal.CQRS.Categories.Queries;
 
-public record GetAllArticlesQuery(bool ForceRefresh = false) : ICachedQuery<List<ArticleViewModel>>
+public record GetAllCategoriesQuery(bool ForceRefresh = false) : ICachedQuery<List<CategoryViewModel>>
 {
     public class Handler(IRepository<Article> repository, IMapper mapper)
-        : IRequestHandler<GetAllArticlesQuery, List<ArticleViewModel>>
+        : IRequestHandler<GetAllCategoriesQuery, List<CategoryViewModel>>
     {
-        public async Task<List<ArticleViewModel>> Handle(GetAllArticlesQuery request,
+        public async Task<List<CategoryViewModel>> Handle(GetAllCategoriesQuery request,
             CancellationToken cancellationToken)
         {
             var result = await repository.GetAllListAsync(cancellationToken);
-            return mapper.Map<List<ArticleViewModel>>(result);
+            return mapper.Map<List<CategoryViewModel>>(result);
         }
     }
 
-    public string Key => "articles";
+    public string Key => "categories";
 
     public TimeSpan? Expiration => null;
 }
