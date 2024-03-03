@@ -6,29 +6,27 @@
     <div class="col-12">
         <div class="input-group custom-file-button">
             <label class="input-group-text" for="@Id">@ButtonText</label>
-            <InputFile
-                disable="@Disable"
-                OnChange="OnInputFileChange"
-                id="@Id"
-                class="@($"form-control {ChooseFileButtonCss}")"
-                aria-label="Upload"
-                accept="@AcceptFileExtensions"
-                multiple="@AllowMultiple"/>
+            <InputFile disable="@Disable"
+                       OnChange="OnInputFileChange"
+                       id="@Id"
+                       class="@($"form-control {ChooseFileButtonCss}")"
+                       aria-label="Upload"
+                       accept="@AcceptFileExtensions"
+                       multiple="@AllowMultiple" />
         </div>
         <div class="table-responsive mt-2 file-uploader-table-container">
             <table class="table table-hover table-striped @TableCss">
                 <tbody class="@TableBodyCss align-middle">
-                @foreach (var file in Files)
-                {
-                    <FileUploaderTableRow 
-                        File="@file" 
-                        ShowPreview="@ShowPreview" 
-                        TableRowCss="@TableRowCss" 
-                        TableCellCss="@TableCellCss" 
-                        PreviewImageCss="@PreviewImageCss" 
-                        RemoveIconCss="@RemoveIconCss" 
-                        OnRowRemove="x => RemoveFile(x)" />
-                }
+                    @foreach (var file in Files)
+                    {
+                        <FileUploaderTableRow File="@file"
+                                              ShowPreview="@ShowPreview"
+                                              TableRowCss="@TableRowCss"
+                                              TableCellCss="@TableCellCss"
+                                              PreviewImageCss="@PreviewImageCss"
+                                              RemoveIconCss="@RemoveIconCss"
+                                              OnRowRemove="x => RemoveFile(x)" />
+                    }
                 </tbody>
             </table>
         </div>
@@ -40,13 +38,13 @@
         margin-left: -2px !important;
     }
 
-    .custom-file-button input[type=file]::-webkit-file-upload-button {
-        display: none;
-    }
+        .custom-file-button input[type=file]::-webkit-file-upload-button {
+            display: none;
+        }
 
-    .custom-file-button input[type=file]::file-selector-button {
-        display: none;
-    }
+        .custom-file-button input[type=file]::file-selector-button {
+            display: none;
+        }
 
     .custom-file-button:hover label {
         background-color: #dde0e3;
@@ -73,10 +71,13 @@
     [Parameter] public string? PreviewImageCss { get; set; }
     [Parameter] public string? RemoveIconCss { get; set; } = "fa-solid fa-trash";
 
+    [Parameter] public EventCallback OnFilesSelected { get; set; }
+
     private async Task OnInputFileChange(InputFileChangeEventArgs e)
     {
         const long maxFileSize = 5 * 1024 * 2024;
-        foreach (var file in e.GetMultipleFiles())
+        var files = e.GetMultipleFiles();
+        foreach (var file in files)
         {
             var stream = new MemoryStream();
             await file.OpenReadStream(maxFileSize).CopyToAsync(stream);
@@ -90,6 +91,7 @@
                     ResourceType = GetResourceTypeByMimeType(file.ContentType)
                 });
         }
+        await OnFilesSelected.InvokeAsync();
     }
 
     private ResourceType GetResourceTypeByMimeType(string mimeType)
