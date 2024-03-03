@@ -101,10 +101,13 @@
     [Parameter] public string? PreviewImageCss { get; set; }
     [Parameter] public string? RemoveIconCss { get; set; } = "fa-solid fa-trash";
 
+    [Parameter] public EventCallback OnFilesSelected { get; set; }
+
     private async Task OnInputFileChange(InputFileChangeEventArgs e)
     {
         const long maxFileSize = 5 * 1024 * 2024;
-        foreach (var file in e.GetMultipleFiles())
+        var files = e.GetMultipleFiles();
+        foreach (var file in files)
         {
             var stream = new MemoryStream();
             await file.OpenReadStream(maxFileSize).CopyToAsync(stream);
@@ -118,6 +121,7 @@
                     ResourceType = GetResourceTypeByMimeType(file.ContentType)
                 });
         }
+        await OnFilesSelected.InvokeAsync();
     }
 
     private ResourceType GetResourceTypeByMimeType(string mimeType)
