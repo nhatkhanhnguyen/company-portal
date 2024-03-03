@@ -37,6 +37,16 @@
     }
 </script>
 
+<style>
+    .modal-xxl {
+        width: 70vw;
+        max-width: none;
+        height: 70vh;
+        margin-right: auto;
+        margin-left: auto;
+    }
+</style>
+
 @code {
     [Parameter] public string Title { get; set; } = string.Empty;
 
@@ -58,7 +68,7 @@
         _modalDisplay = "block";
         _modalClass = "show";
         _showBackdrop = true;
-        Js.InvokeVoidAsync("hideTooltips"); 
+        Js.InvokeVoidAsync("hideTooltips");
     }
 
     public void Close()

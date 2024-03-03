@@ -79,6 +79,7 @@ builder.Services.AddScoped(typeof(IRepository<>), typeof(RepositoryBase<>));
 
 builder.Services.AddScoped<ProductFormValidator>();
 builder.Services.AddScoped<CategoryFormValidator>();
+builder.Services.AddScoped<ArticleFormValidator>();
 
 builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
 builder.Services.AddAzureClients(clientBuilder =>

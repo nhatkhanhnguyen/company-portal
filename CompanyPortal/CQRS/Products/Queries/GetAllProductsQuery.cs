@@ -6,6 +6,7 @@ using CompanyPortal.Data.Database.Entities;
 using CompanyPortal.ViewModels;
 
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 
 namespace CompanyPortal.CQRS.Products.Queries;
 
@@ -17,7 +18,10 @@ public record GetAllProductsQuery(bool ForceRefresh = false) : ICachedQuery<List
         public async Task<List<ProductViewModel>> Handle(GetAllProductsQuery request,
             CancellationToken cancellationToken)
         {
-            var result = await repository.GetAllListAsync(cancellationToken);
+            var result = await repository
+                .GetAll()
+                .Include(x => x.Category)
+                .ToListAsync(cancellationToken);
             return mapper.Map<List<ProductViewModel>>(result);
         }
     }

@@ -8,7 +8,8 @@ public class CategoryFormValidator : AbstractValidator<CategoryViewModel>
 {
     public CategoryFormValidator()
     {
-        RuleFor(x => x.Name).NotEmpty();
-        RuleFor(x => x.Description).NotEmpty();
+        RuleFor(x => x.Name).NotEmpty().WithMessage("Tên danh mục không được bỏ trống.");
+        RuleFor(x => x.Description).NotEmpty().WithMessage("Mô tả ngắn của danh mục không được bỏ trống.");
+        RuleFor(x => x.ExternalId).NotEmpty().WithMessage("Mã danh mục không được bỏ trống.");
     }
 }

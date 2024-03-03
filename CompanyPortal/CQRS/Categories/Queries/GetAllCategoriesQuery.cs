@@ -11,7 +11,7 @@ namespace CompanyPortal.CQRS.Categories.Queries;
 
 public record GetAllCategoriesQuery(bool ForceRefresh = false) : ICachedQuery<List<CategoryViewModel>>
 {
-    public class Handler(IRepository<Article> repository, IMapper mapper)
+    public class Handler(IRepository<Category> repository, IMapper mapper)
         : IRequestHandler<GetAllCategoriesQuery, List<CategoryViewModel>>
     {
         public async Task<List<CategoryViewModel>> Handle(GetAllCategoriesQuery request,

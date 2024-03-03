@@ -1,34 +1,63 @@
-﻿@using Microsoft.Net.Http.Headers
-@using Microsoft.Identity.Client
-@using CompanyPortal.Core.Enum
+﻿@using CompanyPortal.Core.Enum
 
 <div class="row">
     <div class="col-12">
         <div class="input-group custom-file-button">
             <label class="input-group-text" for="@Id">@ButtonText</label>
-            <InputFile
-                disable="@Disable"
-                OnChange="OnInputFileChange"
-                id="@Id"
-                class="@($"form-control {ChooseFileButtonCss}")"
-                aria-label="Upload"
-                accept="@AcceptFileExtensions"
-                multiple="@AllowMultiple"/>
+            <InputFile disable="@Disable"
+                       OnChange="OnInputFileChange"
+                       id="@Id"
+                       class="@($"form-control {ChooseFileButtonCss}")"
+                       aria-label="Upload"
+                       accept="@AcceptFileExtensions"
+                       multiple="@AllowMultiple" />
         </div>
         <div class="table-responsive mt-2 file-uploader-table-container">
             <table class="table table-hover table-striped @TableCss">
                 <tbody class="@TableBodyCss align-middle">
-                @foreach (var file in Files)
-                {
-                    <FileUploaderTableRow 
-                        File="@file" 
-                        ShowPreview="@ShowPreview" 
-                        TableRowCss="@TableRowCss" 
-                        TableCellCss="@TableCellCss" 
-                        PreviewImageCss="@PreviewImageCss" 
-                        RemoveIconCss="@RemoveIconCss" 
-                        OnRowRemove="x => RemoveFile(x)" />
-                }
+                    @foreach (var file in Files)
+                    {
+                        <tr class="@TableRowCss pd-2">
+                            @if (ShowPreview)
+                            {
+                                <td class="@TableRowCss p-2">
+                                    @switch (file.ResourceType)
+                                    {
+                                        case ResourceType.Image:
+                                            <img src="@(file.Status == UploadFileStatus.Old ? file.Url : file.Base64Content)"
+                                                 class="img-fluid rounded w-100 h-auto object-fit-cover file-uploader-preview @PreviewImageCss" alt="Preview @file.Name" />
+                                            break;
+                                        case ResourceType.Word:
+                                            <i class="fa-solid fa-file-word fa-4x"></i>
+                                            break;
+                                        case ResourceType.Excel:
+                                            <i class="fa-solid fa-file-excel fa-4x"></i>
+                                            break;
+                                        case ResourceType.Pdf:
+                                            <i class="fa-solid fa-file-pdf fa-4x"></i>
+                                            break;
+                                        case ResourceType.Video:
+                                            <i class="fa-solid fa-file-video fa-4x"></i>
+                                            break;
+                                        case ResourceType.Other:
+                                        default:
+                                            <i class="fa-solid fa-file fa-4x"></i>
+                                            break;
+                                    }
+                                </td>
+                            }
+                            <td class="@TableRowCss">
+                                <b>Tên file: @(file.Name.Length > 32 ? file.Name[..32] : file.Name) ...</b>
+                                <br />
+                                <i>Kích thước: @Math.Round(file.Size / 1024, 2) KB</i>
+                            </td>
+                            <td class="@TableRowCss">
+                                <button type="button" class="btn btn-danger btn-sm" @onclick="() => RemoveFile(file)">
+                                    <i class="@RemoveIconCss"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    }
                 </tbody>
             </table>
         </div>
@@ -40,13 +69,13 @@
         margin-left: -2px !important;
     }
 
-    .custom-file-button input[type=file]::-webkit-file-upload-button {
-        display: none;
-    }
+        .custom-file-button input[type=file]::-webkit-file-upload-button {
+            display: none;
+        }
 
-    .custom-file-button input[type=file]::file-selector-button {
-        display: none;
-    }
+        .custom-file-button input[type=file]::file-selector-button {
+            display: none;
+        }
 
     .custom-file-button:hover label {
         background-color: #dde0e3;
@@ -64,7 +93,6 @@
     // Styling properties
     [Parameter] public string Id { get; set; } = "fileUploader";
     [Parameter] public string ButtonText { get; set; } = "Choose Files";
-    [Parameter] public string HintText { get; set; } = "No file choosen";
     [Parameter] public string? ChooseFileButtonCss { get; set; }
     [Parameter] public string? TableCss { get; set; }
     [Parameter] public string? TableBodyCss { get; set; }

@@ -9,6 +9,8 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 {
     public DbSet<Product> Products => Set<Product>();
 
+    public DbSet<ProductVariant> ProductVariants => Set<ProductVariant>();
+
     public DbSet<Category> Categories => Set<Category>();
 
     public DbSet<Article> Articles => Set<Article>();

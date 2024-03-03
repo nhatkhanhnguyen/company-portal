@@ -7,9 +7,13 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace CompanyPortal.Data.Database.Entities;
 
-[Index(nameof(Name))]
+[Index(nameof(Name), IsUnique = true)]
+[Index(nameof(ExternalId), IsUnique = true)]
 public class Product : EntityBase
 {
+    [MaxLength(50)]
+    public string ExternalId { get; set; } = string.Empty;
+
     [MaxLength(100)]
     public string Name { get; set; } = string.Empty;
 
@@ -22,5 +26,12 @@ public class Product : EntityBase
     [MaxLength(50)]
     public string Tags { get; set; } = string.Empty;
 
+    public int? CategoryId { get; set; }
+
+    [ForeignKey(nameof(CategoryId))] 
+    public Category? Category { get; set; }
+
     public virtual ICollection<Resource> Images { get; set; } = [];
+
+    public virtual ICollection<ProductVariant> ProductVariants { get; set; } = [];
 }

@@ -4,6 +4,7 @@ using CompanyPortal.Data.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CompanyPortal.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240301151656_UpdateArticleEntity")]
+    partial class UpdateArticleEntity
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -193,16 +196,6 @@ namespace CompanyPortal.Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<string>("ExternalId")
-                        .IsRequired()
-                        .HasMaxLength(5)
-                        .HasColumnType("nvarchar(5)");
-
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
@@ -220,8 +213,6 @@ namespace CompanyPortal.Data.Migrations
                         .HasColumnType("rowversion");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("Name");
 
                     b.ToTable("Categories");
                 });
@@ -422,10 +413,7 @@ namespace CompanyPortal.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int?>("ArticleId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("CategoryId")
+                    b.Property<int?>("CategoryId")
                         .HasColumnType("int");
 
                     b.Property<string>("CreatedBy")
@@ -449,11 +437,6 @@ namespace CompanyPortal.Data.Migrations
                         .IsRequired()
                         .HasMaxLength(700)
                         .HasColumnType("nvarchar(700)");
-
-                    b.Property<string>("ExternalId")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
@@ -481,71 +464,11 @@ namespace CompanyPortal.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ArticleId");
-
                     b.HasIndex("CategoryId");
 
-                    b.HasIndex("ExternalId")
-                        .IsUnique();
-
-                    b.HasIndex("Name")
-                        .IsUnique();
+                    b.HasIndex("Name");
 
                     b.ToTable("Products");
-                });
-
-            modelBuilder.Entity("CompanyPortal.Data.Database.Entities.ProductVariant", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("CreatedBy")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTimeOffset>("DateCreated")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<DateTimeOffset?>("DateDeleted")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<DateTimeOffset?>("DateModified")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<string>("DeletedBy")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("ModidifedBy")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<decimal>("Price")
-                        .HasColumnType("decimal(11, 0)");
-
-                    b.Property<int>("ProductId")
-                        .HasColumnType("int");
-
-                    b.Property<byte[]>("Version")
-                        .IsConcurrencyToken()
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("rowversion");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ProductId");
-
-                    b.ToTable("ProductVariants");
                 });
 
             modelBuilder.Entity("CompanyPortal.Data.Database.Entities.Resource", b =>
@@ -773,28 +696,9 @@ namespace CompanyPortal.Data.Migrations
 
             modelBuilder.Entity("CompanyPortal.Data.Database.Entities.Product", b =>
                 {
-                    b.HasOne("CompanyPortal.Data.Database.Entities.Article", null)
-                        .WithMany("RelatedProducts")
-                        .HasForeignKey("ArticleId");
-
-                    b.HasOne("CompanyPortal.Data.Database.Entities.Category", "Category")
+                    b.HasOne("CompanyPortal.Data.Database.Entities.Category", null)
                         .WithMany("Products")
-                        .HasForeignKey("CategoryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Category");
-                });
-
-            modelBuilder.Entity("CompanyPortal.Data.Database.Entities.ProductVariant", b =>
-                {
-                    b.HasOne("CompanyPortal.Data.Database.Entities.Product", "Product")
-                        .WithMany("ProductVariants")
-                        .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Product");
+                        .HasForeignKey("CategoryId");
                 });
 
             modelBuilder.Entity("CompanyPortal.Data.Database.Entities.Resource", b =>
@@ -863,11 +767,6 @@ namespace CompanyPortal.Data.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("CompanyPortal.Data.Database.Entities.Article", b =>
-                {
-                    b.Navigation("RelatedProducts");
-                });
-
             modelBuilder.Entity("CompanyPortal.Data.Database.Entities.Category", b =>
                 {
                     b.Navigation("Products");
@@ -881,8 +780,6 @@ namespace CompanyPortal.Data.Migrations
             modelBuilder.Entity("CompanyPortal.Data.Database.Entities.Product", b =>
                 {
                     b.Navigation("Images");
-
-                    b.Navigation("ProductVariants");
                 });
 #pragma warning restore 612, 618
         }
