@@ -5,12 +5,17 @@
 @using Syncfusion.Blazor.RichTextEditor
 @using CompanyPortal.Core.Extensions
 
-@inject IJSRuntime Js
-
 @page "/Administration/Categories"
 @inject IMediator Mediator
 
-<h3>Categories</h3>
+<div class="row">
+    <div class="col-12 d-flex justify-content-between">
+        <h3>DANH MỤC</h3>
+        <button class="btn btn-primary float-end" @onclick="() => ShowEditDialogAsync(null)">
+            <i class="fa-solid fa-plus"></i> THÊM DANH MỤC
+        </button>
+    </div>
+</div>
 <hr />
 
 <SfGrid DataSource="@_listCategory" @ref="CategoryGrid" ID="sfGridCategory"
@@ -44,7 +49,7 @@
                     var category = context as CategoryViewModel;
                     if (!category!.IsActive)
                     {
-                        <i class="fa-solid fa-check" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Hiện"></i>
+                        <i class="fa-solid fa-check"></i>
                     }
                 }
             </Template>
@@ -53,118 +58,14 @@
             <Template>
                 @{
                     var category = context as CategoryViewModel;
-                    <button class="btn btn-sm btn-info" @onclick="() => ShowViewDialogAsync(category!.Id)" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Preview">
-                        <i class="fa-solid fa-eye"></i> XEM
-                    </button>
-                    <button class="btn btn-sm btn-primary" @onclick="() => ShowEditDialogAsync(category!.Id)" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Edit">
-                        <i class="fa-solid fa-pen-to-square"></i> SỬA
-                    </button>
-                    <button class="btn btn-sm btn-danger" @onclick="() => ShowDeleteDialog(category!.Id)" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Delete">
-                        <i class="fa-solid fa-trash"></i> XÓA
-                    </button>
+                    <LoadingButton IconCss="fa-solid fa-eye" ButtonCssClass="btn-info rounded-pill" IsLoading="_isLoading" LoadingText="Đang tải" NormalText="XEM" OnClick="() => ShowViewDialog(category!)" />
+                    <LoadingButton IconCss="fa-solid fa-pen-to-square" ButtonCssClass="btn-primary rounded-pill" IsLoading="_isLoading" LoadingText="Đang tải" NormalText="SỬA" OnClick="() => ShowEditDialogAsync(category!)" />
+                    <LoadingButton IconCss="fa-solid fa-trash" ButtonCssClass="btn-danger rounded-pill" IsLoading="_isLoading" LoadingText="Đang tải" NormalText="XÓA" OnClick="() => ShowDeleteDialogAsync(category!)" />
                 }
             </Template>
         </GridColumn>
     </GridColumns>
 </SfGrid>
-
-<div class="row">
-    <div class="col-12 mt-2">
-        <button class="btn btn-primary float-end" @onclick="() => ShowEditDialogAsync()">
-            <i class="fa-solid fa-plus"></i> THÊM DANH MỤC
-        </button>
-    </div>
-</div>
-
-<ModalDialog @ref="EditDialog">
-    <Header>
-        <h5 class="modal-title">@(_selectedCategory.Id > 0 ? "Edit" : "Create")</h5>
-        <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close" @onclick="() => EditDialog.Close()"></button>
-    </Header>
-    <Body>
-        <EditForm Model="_selectedCategory" OnValidSubmit="InsertOrUpdateAsync" id="FormCategory" class="row g-3">
-            <FluentValidationValidator ValidatorType="typeof(CategoryFormValidator)" />
-            <div class="col-12 mb-3">
-                <Label For="@(() => _selectedCategory.Name)" CssClass="form-label"></Label>
-                <InputText class="form-control" @bind-Value="_selectedCategory.Name" disabled="@_isLoading" />
-                <ValidationMessage For="@(() => _selectedCategory.Name)" />
-            </div>
-            <div class="col-12 mb-3">
-                <Label For="@(() => _selectedCategory.ExternalId)" CssClass="form-label"></Label>
-                <InputText class="form-control" @bind-Value="_selectedCategory.ExternalId" disabled="@_isLoading" />
-                <ValidationMessage For="@(() => _selectedCategory.ExternalId)" />
-            </div>
-            <div class="col-12 mb-3">
-                <Label For="@(() => _selectedCategory.Description)" CssClass="form-label"></Label>
-                <SfRichTextEditor ID="descriptionEditor" @bind-Value="_selectedCategory.Description" Height="400" Enabled="!_isLoading">
-                    <RichTextEditorToolbarSettings Items="@_descriptionEditorTools" />
-                </SfRichTextEditor>
-                <ValidationMessage For="@(() => _selectedCategory.Description)" />
-            </div>
-            <div class="col-12">
-                <div class="form-check d-flex">
-                    <InputCheckbox @bind-Value="_selectedCategory.MarkedAsInactive" class="form-check-input align-self-baseline" disabled="@_isLoading" />
-                    <span class="form-check-label ms-2">
-                        <Label For="@(() => _selectedCategory.MarkedAsInactive)" CssClass="form-label"></Label>
-                    </span>
-                </div>
-            </div>
-        </EditForm>
-    </Body>
-    <Footer>
-        <button class="btn btn-danger float-end me-2" @onclick="() => EditDialog.Close()">Close</button>
-        <LoadingButton ButtonCssClass="btn-primary" IsLoading="_isLoading" LoadingText="Saving" NormalText="Save" @onclick="InsertOrUpdateAsync" />
-    </Footer>
-</ModalDialog>
-
-<ModalDialog @ref="@ViewDialog" SizeClass="modal-xl">
-    <Header>
-        <h5 class="modal-title">Preview</h5>
-        <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close" @onclick="() => ViewDialog.Close()"></button>
-    </Header>
-    <Body>
-        <CategoryDetail Category="@_selectedCategory" />
-    </Body>
-</ModalDialog>
-
-<ModalDialog @ref="@DeleteDialog">
-    <Header>
-        <h1 class="modal-title fs-5">
-            <i class="fa-solid fa-triangle-exclamation"></i> Delete @_selectedCategory.Name!
-        </h1>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" @onclick="() => DeleteDialog.Close()"></button>
-    </Header>
-    <Body>
-        <p>Are you sure you want to delete @_selectedCategory.Name. This action can't be un-done.</p>
-        <InputCheckbox @bind-Value="_forceDelete" /> Delete permanently
-    </Body>
-    <Footer>
-        <LoadingButton ButtonCssClass="btn-primary" IsLoading="_isLoading" LoadingText="Deleting" NormalText="Yes" @onclick="() => DeleteAsync(_forceDelete)" />
-        <button class="btn btn-primary float-end me-2" @onclick="() => DeleteDialog.Close()">No</button>
-    </Footer>
-</ModalDialog>
-
-<ModalDialog @ref="@ErrorDialog">
-    <Header>
-        <h1 class="modal-title fs-5">
-            <i class="fa-solid fa-circle-exclamation"></i> Error occured
-        </h1>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" @onclick="() => ErrorDialog.Close()"></button>
-    </Header>
-    <Body>
-        <p>@_errorMessage</p>
-    </Body>
-    <Footer>
-        <button class="btn btn-primary float-middle" @onclick="() => ErrorDialog.Close()">OK</button>
-    </Footer>
-</ModalDialog>
-
-<script>
-    function addTooltips() {
-        const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
-        const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
-    }
-</script>
 
 <style>
     .validation-message {
@@ -174,104 +75,104 @@
 </style>
 
 @code {
-    private ModalDialog EditDialog { get; set; } = default!;
-    private ModalDialog ViewDialog { get; set; } = default!;
-    private ModalDialog DeleteDialog { get; set; } = default!;
-    private ModalDialog ErrorDialog { get; set; } = default!;
+    [CascadingParameter] public IModalService Modal { get; set; } = default!;
 
     private SfGrid<CategoryViewModel> CategoryGrid { get; set; } = default!;
-
     private List<CategoryViewModel> _listCategory = [];
+
     private string _errorMessage = "";
     private bool _forceDelete;
     private CategoryViewModel _selectedCategory = new();
     private bool _isLoading;
 
-    private readonly List<ItemModel> _toolbarItems = [
+    private readonly List<ItemModel> _toolbarItems =
+    [
         new ItemModel { Text = "Xuất Excel", Id = "sfGridCategory_excelexport", PrefixIcon = "fa-solid fa-file-excel" },
-        new ItemModel { Text = "Xuất PDF", Id = "sfGridCategory_pdfexport", PrefixIcon = "fa-solid fa-file-pdf" }
+    new ItemModel { Text = "Xuất PDF", Id = "sfGridCategory_pdfexport", PrefixIcon = "fa-solid fa-file-pdf" }
     ];
 
     private readonly List<ToolbarItemModel> _descriptionEditorTools =
     [
         new ToolbarItemModel { Command = ToolbarCommand.Bold },
-        new ToolbarItemModel { Command = ToolbarCommand.Italic },
-        new ToolbarItemModel { Command = ToolbarCommand.Underline },
-        new ToolbarItemModel { Command = ToolbarCommand.Separator },
-        new ToolbarItemModel { Command = ToolbarCommand.Formats },
-        new ToolbarItemModel { Command = ToolbarCommand.Alignments },
-        new ToolbarItemModel { Command = ToolbarCommand.UnorderedList },
-        new ToolbarItemModel { Command = ToolbarCommand.Separator },
-        new ToolbarItemModel { Command = ToolbarCommand.CreateLink },
-        new ToolbarItemModel { Command = ToolbarCommand.Image },
-        new ToolbarItemModel { Command = ToolbarCommand.Video },
-        new ToolbarItemModel { Command = ToolbarCommand.CreateTable },
-        new ToolbarItemModel { Command = ToolbarCommand.Separator }
+    new ToolbarItemModel { Command = ToolbarCommand.Italic },
+    new ToolbarItemModel { Command = ToolbarCommand.Underline },
+    new ToolbarItemModel { Command = ToolbarCommand.Separator },
+    new ToolbarItemModel { Command = ToolbarCommand.Formats },
+    new ToolbarItemModel { Command = ToolbarCommand.Alignments },
+    new ToolbarItemModel { Command = ToolbarCommand.UnorderedList },
+    new ToolbarItemModel { Command = ToolbarCommand.Separator },
+    new ToolbarItemModel { Command = ToolbarCommand.CreateLink },
+    new ToolbarItemModel { Command = ToolbarCommand.Image },
+    new ToolbarItemModel { Command = ToolbarCommand.Video },
+    new ToolbarItemModel { Command = ToolbarCommand.CreateTable },
+    new ToolbarItemModel { Command = ToolbarCommand.Separator }
     ];
 
     protected override async Task OnInitializedAsync()
     {
-        _isLoading = false;
         _listCategory = await Mediator.Send(new GetAllCategoriesQuery(true));
     }
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
+    private async Task ShowEditDialogAsync(CategoryViewModel? selectedCategory)
     {
-        await Js.InvokeVoidAsync("addTooltips");
-    }
+        var category = selectedCategory != null ? selectedCategory.Clone() : new CategoryViewModel();
+        category.Products = category.Id > 0 ? await Mediator.Send(new GetCategoryProductsByIdQuery(category.Id, true)) : [];
 
-    private async Task ShowEditDialogAsync(int? id = null)
-    {
-        _selectedCategory = id != null ? _listCategory.First(x => x.Id == id).Clone() : new CategoryViewModel();
-        await GetCategoryProductsAsync(id);
-        EditDialog.Open();
-    }
-
-    private async Task ShowViewDialogAsync(int id)
-    {
-        _selectedCategory = _listCategory.First(x => x.Id == id);
-        await GetCategoryProductsAsync(id);
-        ViewDialog.Open();
-    }
-
-    private void ShowDeleteDialog(int id)
-    {
-        _selectedCategory = _listCategory.First(x => x.Id == id);
-        DeleteDialog.Open();
-    }
-
-    // Data
-
-    private async Task InsertOrUpdateAsync()
-    {
-        _isLoading = true;
-        var category = _selectedCategory.Clone();
-        category.IsActive = !_selectedCategory.MarkedAsInactive;
-        var productId = _selectedCategory.Id > 0 ? await UpdateCategoryAsync(category) : await CreateCategoryAsync(category);
-
-        if (productId <= 0)
+        var parameters = new ModalParameters().Add("Category", category);
+        var options = new ModalOptions
+            {
+                Size = ModalSize.ExtraLarge
+            };
+        var modalResult = await Modal.Show<CreateCategoryDialog>(
+            selectedCategory == null ? "THÊM DANH MỤC" : "CHỈNH SỬA DANH MỤC",
+            parameters,
+            options).Result;
+        if (modalResult.Confirmed)
         {
-            var request = _selectedCategory.Id > 0 ? "updating" : "creating";
-            _errorMessage = $"There is a problem while {request} category {_selectedCategory.Name}.";
-            ErrorDialog.Open();
+            var data = (CategoryViewModel)modalResult.Data!;
+            var result = selectedCategory != null ? await UpdateCategoryAsync(data) : await CreateCategoryAsync(data);
+            if (result)
+            {
+                _listCategory = await Mediator.Send(new GetAllCategoriesQuery(true));
+            }
+            else
+            {
+                Modal.Show<ErrorDialog>("", new ModalParameters().Add("ErrorMessage", "Có lỗi xảy ra khi lưu danh mục!"));
+            }
         }
-        EditDialog.Close();
-        _listCategory = await Mediator.Send(new GetAllCategoriesQuery(true));
-        _isLoading = false;
     }
 
-    private async Task DeleteAsync(bool forceDelete)
+    private async Task ShowViewDialog(CategoryViewModel selectedCategory)
     {
-        _isLoading = true;
-        var result = await Mediator.Send(new DeleteCategoryCommand(_selectedCategory.Id, forceDelete));
-        if (!result)
+        var products = await Mediator.Send(new GetCategoryProductsByIdQuery(selectedCategory.Id, true));
+        selectedCategory.Products = products;
+        var options = new ModalOptions
+            {
+                Size = ModalSize.ExtraLarge,
+                HideHeader = true,
+                AnimationType = ModalAnimationType.PopInOut
+            };
+        var parameters = new ModalParameters().Add("Category", selectedCategory);
+        Modal.Show<ViewCategoryDialog>(parameters, options);
+    }
+
+    private async Task ShowDeleteDialogAsync(CategoryViewModel selectedCategory)
+    {
+        var parameters = new ModalParameters().Add("Category", selectedCategory);
+        var modalResult = await Modal.Show<DeleteCategoryDialog>("Xóa danh mục", parameters).Result;
+        if (modalResult.Confirmed)
         {
-            _errorMessage = $"There is a problem while deleting category {_selectedCategory.Name}.";
-            ErrorDialog.Open();
+            var data = (bool)modalResult.Data!;
+            var result = await Mediator.Send(new DeleteCategoryCommand(selectedCategory.Id, data));
+            if (result)
+            {
+                _listCategory = await Mediator.Send(new GetAllCategoriesQuery(true));
+            }
+            else
+            {
+                Modal.Show<ErrorDialog>("Có lỗi xảy ra!", new ModalParameters().Add("ErrorMessage", "Có lỗi xảy ra khi xóa danh mục. Vui lòng thử lại sau!"));
+            }
         }
-        _listCategory = await Mediator.Send(new GetAllCategoriesQuery(true));
-        DeleteDialog.Close();
-        _isLoading = false;
     }
 
     // Events
@@ -290,20 +191,15 @@
         }
     }
 
-    private async Task<int> UpdateCategoryAsync(CategoryViewModel category)
+    private async Task<bool> UpdateCategoryAsync(CategoryViewModel category)
     {
-        var categoryId = await Mediator.Send(new UpdateCategoryCommand(category));
-        return categoryId;
+        var result = await Mediator.Send(new UpdateCategoryCommand(category));
+        return result.IsSuccess;
     }
 
-    private async Task<int> CreateCategoryAsync(CategoryViewModel product)
+    private async Task<bool> CreateCategoryAsync(CategoryViewModel product)
     {
-        var productId = await Mediator.Send(new CreateCategoryCommand(product));
-        return productId;
-    }
-
-    private async Task GetCategoryProductsAsync(int? categoryId)
-    {
-        _selectedCategory.Products = categoryId != null ? await Mediator.Send(new GetCategoryProductsByIdQuery(categoryId.Value, true)) : [];
+        var result = await Mediator.Send(new CreateCategoryCommand(product));
+        return result.IsSuccess;
     }
 }

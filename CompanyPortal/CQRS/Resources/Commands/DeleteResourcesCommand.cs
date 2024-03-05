@@ -4,7 +4,7 @@ using MediatR;
 
 namespace CompanyPortal.CQRS.Resources.Commands;
 
-public record DeleteResourcesCommand(IEnumerable<int> ResourceIds, bool ForceDelete = false) : IRequest<bool>
+public record DeleteResourcesCommand(List<int> ResourceIds, bool ForceDelete = false) : IRequest<bool>
 {
     public class Handler(IRepository<Resource> repository, IUnitOfWork uow) : IRequestHandler<DeleteResourcesCommand, bool>
     {

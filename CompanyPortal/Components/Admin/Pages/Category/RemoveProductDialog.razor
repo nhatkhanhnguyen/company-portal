@@ -1,0 +1,15 @@
+﻿<p>Bạn có chắc chắn là muốn gỡ sản phẩm @Product.Name ra khỏi danh mục này?</p>
+<p>Gỡ sản phẩm ra khỏi danh mục này sẽ không xóa sản phẩm ra khỏi hệ thống.</p>
+
+<hr />
+<div class="row">
+    <div class="col-12 d-flex justify-content-end">
+        <button class="btn-danger rounded-pill me-2" @onclick="() => BlazoredModal.CloseAsync()"><i class="fa-solid fa-trash"></i> GỠ</button>
+        <button class="btn btn-info rounded-pill" @onclick="() => BlazoredModal.CancelAsync()"><i class="fa-solid fa-xmark"></i> KHÔNG</button>
+    </div>
+</div>
+
+@code {
+    [CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; } = default!;
+    [Parameter] public ProductViewModel Product { get; set; } = default!;
+}

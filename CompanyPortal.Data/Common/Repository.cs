@@ -106,6 +106,22 @@ public sealed class RepositoryBase<TEntity>(ApplicationDbContext context, IUserP
         }
     }
 
+    public void Delete(TEntity? entity, bool forceDelete = false)
+    {
+        if (entity != null)
+        {
+            if (forceDelete)
+            {
+                _dbSet.Remove(entity);
+            }
+            else
+            {
+                UpdateEntityInfo(entity, true);
+                Update(entity);
+            }
+        }
+    }
+
     public void Delete(Expression<Func<TEntity, bool>> predicate, bool forceDelete = false)
     {
         var listEntity = _dbSet.Where(predicate);

@@ -13,14 +13,14 @@
                        multiple="@AllowMultiple" />
         </div>
         <div class="table-responsive mt-2 file-uploader-table-container">
-            <table class="table table-hover table-striped @TableCss">
+            <table class="table @TableCss">
                 <tbody class="@TableBodyCss align-middle">
-                    @foreach (var file in Files)
+                    @foreach (var file in Files.Where(x => x.Status != UploadFileStatus.Removed))
                     {
                         <tr class="@TableRowCss pd-2">
                             @if (ShowPreview)
                             {
-                                <td class="@TableRowCss p-2">
+                                <td class="@TableRowCss p-2 file-uploader-preview-cell">
                                     @switch (file.ResourceType)
                                     {
                                         case ResourceType.Image:
@@ -52,7 +52,7 @@
                                 <i>Kích thước: @Math.Round(file.Size / 1024, 2) KB</i>
                             </td>
                             <td class="@TableRowCss">
-                                <button type="button" class="btn btn-danger btn-sm" @onclick="() => RemoveFile(file)">
+                                <button type="button" class="btn btn-danger btn-sm" @onclick="() => file.Status = UploadFileStatus.Removed">
                                     <i class="@RemoveIconCss"></i>
                                 </button>
                             </td>
@@ -139,10 +139,5 @@
             case "image/png": return ResourceType.Image;
             default: return ResourceType.Other;
         }
-    }
-
-    private void RemoveFile(ResourceViewModel file)
-    {
-        Files.Remove(file);
     }
 }

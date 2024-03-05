@@ -1,6 +1,4 @@
-﻿@inject IJSRuntime Js
-
-<div class="modal @_modalClass" tabindex="-1" style="display:@_modalDisplay; overflow-y: auto;">
+﻿<div id="@Id" class="modal fade @_modalClass" tabindex="-1" style="display:@_modalDisplay; overflow-y: auto;">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable @SizeClass" role="document">
         <div class="modal-content">
             @if (Header is not null)
@@ -30,13 +28,6 @@
     <div class="modal-backdrop fade show"></div>
 }
 
-<script>
-    function hideTooltips() {
-        const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
-        const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => bootstrap.Tooltip.getInstance(tooltipTriggerEl).hide());
-    }
-</script>
-
 <style>
     .modal-xxl {
         width: 70vw;
@@ -49,14 +40,10 @@
 
 @code {
     [Parameter] public string Title { get; set; } = string.Empty;
-
+    [Parameter] public string Id { get; set; } = string.Empty;
     [Parameter] public RenderFragment? Body { get; set; }
     [Parameter] public RenderFragment? Header { get; set; }
     [Parameter] public RenderFragment? Footer { get; set; }
-
-    [Parameter] public EventCallback OnClose { get; set; }
-    [Parameter] public EventCallback OnOpen { get; set; }
-
     [Parameter] public string SizeClass { get; set; } = "";
 
     private string _modalDisplay = "none;";
@@ -68,7 +55,6 @@
         _modalDisplay = "block";
         _modalClass = "show";
         _showBackdrop = true;
-        Js.InvokeVoidAsync("hideTooltips");
     }
 
     public void Close()

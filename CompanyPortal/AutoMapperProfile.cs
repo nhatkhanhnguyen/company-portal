@@ -10,8 +10,8 @@ public class AutoMapperProfile : Profile
     public AutoMapperProfile()
     {
         CreateMap<Product, ProductViewModel>()
-            .ForMember(x => x.CategoryName, opt => opt.MapFrom(y => y.Category.Name))
-            .ForMember(x => x.CategoryId, opt => opt.MapFrom(y => y.Category.Id))
+            .ForMember(x => x.CategoryName, opt => opt.MapFrom(y => y.Category!.Name))
+            .ForMember(x => x.CategoryId, opt => opt.MapFrom(y => y.Category!.Id))
             .ForMember(x => x.Images, opt => opt.Ignore())
             .ReverseMap()
             .ForMember(x => x.Images, opt => opt.Ignore())

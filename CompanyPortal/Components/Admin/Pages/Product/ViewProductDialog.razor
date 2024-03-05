@@ -1,0 +1,6 @@
+﻿<ProductView IsEditing="true" Product="Product" />
+
+@code {
+    [CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; } = default!;
+    [Parameter] public ProductViewModel Product { get; set; } = new();
+}

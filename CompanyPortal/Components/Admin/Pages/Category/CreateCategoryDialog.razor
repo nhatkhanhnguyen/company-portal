@@ -1,0 +1,81 @@
+﻿@using Syncfusion.Blazor.Navigations
+@using Syncfusion.Blazor.RichTextEditor
+
+<EditForm Model="Category" OnValidSubmit="InsertOrUpdateAsync" id="FormCategory" class="row g-3">
+    <FluentValidationValidator ValidatorType="typeof(CategoryFormValidator)" />
+    <fieldset disabled="@_isLoading">
+        <div class="col-12 mb-3">
+            <Label For="@(() => Category.Name)" CssClass="form-label"></Label>
+            <InputText class="form-control" @bind-Value="Category.Name" />
+            <ValidationMessage For="@(() => Category.Name)" />
+        </div>
+        <div class="col-12 mb-3">
+            <Label For="@(() => Category.ExternalId)" CssClass="form-label"></Label>
+            <InputText class="form-control" @bind-Value="Category.ExternalId" />
+            <ValidationMessage For="@(() => Category.ExternalId)" />
+        </div>
+        <div class="col-12 mb-3">
+            <Label For="@(() => Category.Description)" CssClass="form-label"></Label>
+            <SfRichTextEditor ID="descriptionEditor" @bind-Value="Category.Description" Height="400" Enabled="!_isLoading">
+                <RichTextEditorToolbarSettings Items="@_descriptionEditorTools" />
+            </SfRichTextEditor>
+            <ValidationMessage For="@(() => Category.Description)" />
+        </div>
+        <div class="col-12">
+            <div class="form-check d-flex">
+                <InputCheckbox @bind-Value="Category.MarkedAsInactive" class="form-check-input align-self-baseline" />
+                <span class="form-check-label ms-2">
+                    <Label For="@(() => Category.MarkedAsInactive)" CssClass="form-label"></Label>
+                </span>
+            </div>
+        </div>
+    </fieldset>
+</EditForm>
+
+<hr />
+<div class="row">
+    <div class="col-12 d-flex justify-content-end">
+        <LoadingButton Type="submit" IconCss="fa-solid fa-floppy-disk" ForForm="FormCategory" ButtonCssClass="btn-primary rounded-pill me-2" IsLoading="_isLoading"
+                       LoadingText="ĐANG LƯU" NormalText="LƯU" OnClick="InsertOrUpdateAsync" />
+        <button type="button" class="btn btn-danger rounded-pill" @onclick="CancelAsync"><i class="fa-solid fa-xmark"></i> HỦY</button>
+    </div>
+</div>
+
+@code {
+    [CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; } = default!;
+    [Parameter] public CategoryViewModel Category { get; set; } = new();
+    private bool _isLoading = false;
+
+    private readonly List<ItemModel> _toolbarItems =
+    [
+        new ItemModel { Text = "Xuất Excel", Id = "sfGridCategory_excelexport", PrefixIcon = "fa-solid fa-file-excel" },
+    new ItemModel { Text = "Xuất PDF", Id = "sfGridCategory_pdfexport", PrefixIcon = "fa-solid fa-file-pdf" }
+    ];
+
+    private readonly List<ToolbarItemModel> _descriptionEditorTools =
+    [
+        new ToolbarItemModel { Command = ToolbarCommand.Bold },
+        new ToolbarItemModel { Command = ToolbarCommand.Italic },
+        new ToolbarItemModel { Command = ToolbarCommand.Underline },
+        new ToolbarItemModel { Command = ToolbarCommand.Separator },
+        new ToolbarItemModel { Command = ToolbarCommand.Formats },
+        new ToolbarItemModel { Command = ToolbarCommand.Alignments },
+        new ToolbarItemModel { Command = ToolbarCommand.UnorderedList },
+        new ToolbarItemModel { Command = ToolbarCommand.Separator },
+        new ToolbarItemModel { Command = ToolbarCommand.CreateLink },
+        new ToolbarItemModel { Command = ToolbarCommand.Image },
+        new ToolbarItemModel { Command = ToolbarCommand.Video },
+        new ToolbarItemModel { Command = ToolbarCommand.CreateTable },
+        new ToolbarItemModel { Command = ToolbarCommand.Separator }
+    ];
+
+    private async Task CancelAsync() => await BlazoredModal.CancelAsync();
+
+    private async Task InsertOrUpdateAsync()
+    {
+        _isLoading = true;
+        Category.IsActive = !Category.MarkedAsInactive;
+        await BlazoredModal.CloseAsync(ModalResult.Ok<CategoryViewModel>(Category));
+        _isLoading = false;
+    }
+}

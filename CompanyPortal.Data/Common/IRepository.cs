@@ -113,6 +113,13 @@ public interface IRepository<TEntity> where TEntity : EntityBase
     Task DeleteByIdAsync(int id, bool forceDelete = false, CancellationToken cancellationToken = default);
 
     /// <summary>
+    ///     Deletes entity.
+    /// </summary>
+    /// <param name="entity">The entity to be deleted</param>
+    /// <param name="forceDelete">Completely remove entity if set to true, otherwise set IsActive = false</param>
+    void Delete(TEntity? entity, bool forceDelete = false);
+    
+    /// <summary>
     ///     Deletes many entities by function.
     ///     Notice that: All entities fits to given predicate are retrieved and deleted.
     ///     This may cause major performance problems if there are too many entities with

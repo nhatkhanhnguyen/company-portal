@@ -340,10 +340,10 @@
 
     private async Task DeleteArticleImagesAsync(List<ResourceViewModel> images, bool forceDelete = false)
     {
-        var result = await Mediator.Send(new DeleteResourcesCommand(images.Select(x => x.Id), forceDelete));
+        var result = await Mediator.Send(new DeleteResourcesCommand(images.Select(x => x.Id).ToList(), forceDelete));
         if (result && forceDelete)
         {
-            await Mediator.Send(new DeleteFromStorageCommand(images.Select(x => x.BlobName)));
+            await Mediator.Send(new DeleteFromStorageCommand(images.Select(x => x.BlobName).ToList()));
         }
     }
 

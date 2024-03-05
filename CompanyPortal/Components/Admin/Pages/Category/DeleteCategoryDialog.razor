@@ -1,0 +1,32 @@
+﻿@using MediatR
+@using CompanyPortal.CQRS.Categories.Commands
+
+@inject IMediator Mediator
+
+<p>Bạn có chắc là muốn xóa danh mục <b>@Category.Name</b> với mã danh mục <b>@Category.ExternalId</b>.</p>
+<p>Mặc định, danh mục sẽ bị <b>ẨN</b> khỏi trang sản phẩm của người dùng và có thể <b>HIỆN</b> lại bằng cách vào hộp thoại CHỈNH SỬA</p>
+<p>Nếu bạn muốn xóa danh mục ra khỏi hệ thống, hãy chọn ô bên dưới.</p>
+<InputCheckbox @bind-Value="_forceDelete" /> Xóa ra khỏi hệ thống (không thể phục hồi).
+
+<hr />
+<div class="row">
+    <div class="col-12 d-flex justify-content-end">
+        <LoadingButton IconCss="fa-solid fa-trash" ButtonCssClass="btn-danger rounded-pill me-2" IsLoading="_isLoading" LoadingText="ĐANG XÓA" NormalText="CHẮC CHẮN" @onclick="() => DeleteAsync(_forceDelete)" />
+        <button class="btn btn-info rounded-pill" @onclick="() => BlazoredModal.CancelAsync()"><i class="fa-solid fa-xmark"></i> KHÔNG</button>
+    </div>
+</div>
+
+@code {
+    [CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; } = default!;
+    [Parameter] public CategoryViewModel Category { get; set; } = new();
+
+    private bool _isLoading;
+    private bool _forceDelete;
+
+    private async Task DeleteAsync(bool forceDelete)
+    {
+        _isLoading = true;
+        await BlazoredModal.CloseAsync(ModalResult.Ok(forceDelete));
+        _isLoading = false;
+    }
+}

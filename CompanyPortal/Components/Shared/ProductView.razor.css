@@ -70,15 +70,6 @@
     line-height: 1.5em;
 }
 
-@media screen and (min-width: 997px) {
-    .wrapper {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-    }
-}
-
 .details {
     display: -webkit-box;
     display: -webkit-flex;

@@ -27,5 +27,6 @@ public class ResourceViewModel : ViewModelBase
 public enum UploadFileStatus
 {
     Old,
-    New
+    New,
+    Removed
 }

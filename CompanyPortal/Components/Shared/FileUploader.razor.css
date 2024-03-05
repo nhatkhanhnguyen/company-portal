@@ -1,3 +1,8 @@
 ﻿.file-uploader-table-container {
-    max-height: 40vh;
+    max-height: 50vh;
+}
+
+.file-uploader-preview-cell {
+    max-width: 20vw !important;
+    padding-left: 0 !important;
 }

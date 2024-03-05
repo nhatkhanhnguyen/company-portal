@@ -1,3 +1,6 @@
+using System.Reflection;
+using Blazored.Modal;
+
 using CompanyPortal.Components;
 using CompanyPortal.Components.Account;
 using CompanyPortal.Components.Admin.Validators;
@@ -36,6 +39,7 @@ Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense(builder.Configura
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 builder.Services.AddSyncfusionBlazor();
+builder.Services.AddBlazoredModal();
 
 builder.Services.AddAutoMapper(typeof(Program).Assembly);
 
@@ -69,6 +73,7 @@ builder.Services.AddMediatR(cfg =>
     cfg.RegisterServicesFromAssembly(typeof(Program).Assembly);
     cfg.AddOpenBehavior(typeof(QueryCachingPipelineBehavior<,>));
 });
+
 
 builder.Services.AddScoped<IdentityUserAccessor>();
 builder.Services.AddScoped<IdentityRedirectManager>();

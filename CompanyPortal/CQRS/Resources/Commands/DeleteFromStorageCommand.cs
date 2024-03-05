@@ -4,7 +4,7 @@ using MediatR;
 
 namespace CompanyPortal.CQRS.Resources.Commands;
 
-public record DeleteFromStorageCommand(IEnumerable<string> BlobNames) : IRequest
+public record DeleteFromStorageCommand(List<string> BlobNames) : IRequest
 {
     public class Handler(BlobServiceClient blobServiceClient, ILogger<Handler> logger)
         : IRequestHandler<DeleteFromStorageCommand>
