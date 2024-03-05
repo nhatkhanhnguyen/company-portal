@@ -11,7 +11,7 @@ namespace CompanyPortal.Data.Database.Entities;
 [Index(nameof(ExternalId), IsUnique = true)]
 public class Product : EntityBase
 {
-    [MaxLength(50)]
+    [MaxLength(20)]
     public string ExternalId { get; set; } = string.Empty;
 
     [MaxLength(100)]

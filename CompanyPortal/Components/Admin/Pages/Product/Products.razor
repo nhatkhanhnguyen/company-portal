@@ -101,13 +101,6 @@
         font-size: .875em;
         color: red;
     }
-
-    .modal-xxl {
-        width: 70vw;
-        max-width: none;
-        height: 70vh;
-    }
-
 </style>
 
 @code {
@@ -119,7 +112,7 @@
     private readonly List<ItemModel> _toolbarItems =
     [
         new ItemModel { Text = "Xuất Excel", Id = "sfGridProduct_excelexport", PrefixIcon = "fa-solid fa-file-excel" },
-    new ItemModel { Text = "Xuất PDF", Id = "sfGridProduct_pdfexport", PrefixIcon = "fa-solid fa-file-pdf" }
+        new ItemModel { Text = "Xuất PDF", Id = "sfGridProduct_pdfexport", PrefixIcon = "fa-solid fa-file-pdf" }
     ];
 
     protected override async Task OnInitializedAsync()
@@ -143,7 +136,7 @@
         var options = new ModalOptions
             {
                 Size = ModalSize.Custom,
-                SizeCustomClass = "modal-xxl",
+                SizeCustomClass = "blazored-modal-fixed-size-xlarge",
                 HideCloseButton = true
             };
         var modalResult = await Modal.Show<CreateProductDialog>(
@@ -159,7 +152,7 @@
             }
             else
             {
-                Modal.Show<ErrorDialog>("Có lỗi xảy ra!", new ModalParameters().Add("ErrorMessage", "Có lỗi xảy ra khi xóa sản phẩm. Vui lòng thử lại sau!"));
+                Modal.Show<ErrorDialog>("CÓ LỖI XẢY RA!", new ModalParameters().Add("ErrorMessage", "Có lỗi xảy ra khi lưu sản phẩm. Vui lòng thử lại sau!"));
             }
         }
     }
@@ -171,18 +164,16 @@
         var options = new ModalOptions
             {
                 Size = ModalSize.Custom,
-                SizeCustomClass = "modal-xxl",
-                HideHeader = true,
-                AnimationType = ModalAnimationType.PopInOut
+                SizeCustomClass = "blazored-modal-fixed-size-xlarge"
             };
         var parameters = new ModalParameters().Add("Product", selectedProduct);
-        Modal.Show<ViewProductDialog>(parameters, options);
+        Modal.Show<ViewProductDialog>("THÔNG TIN SẢN PHẨM", parameters, options);
     }
 
     private async Task ShowDeleteDialogAsync(ProductViewModel selectedProduct)
     {
         var parameters = new ModalParameters().Add("Product", selectedProduct);
-        var modalResult = await Modal.Show<DeleteProductDialog>("Xóa sản phẩm", parameters).Result;
+        var modalResult = await Modal.Show<DeleteProductDialog>("XÓA SẢN PHẨM", parameters).Result;
         if (modalResult.Confirmed)
         {
             var data = (bool)modalResult.Data!;
@@ -190,6 +181,10 @@
             if (result)
             {
                 await Mediator.Send(new DeleteProductResourcesCommand(selectedProduct.Id, data));
+            }
+            else
+            {
+                Modal.Show<ErrorDialog>("CÓ LỖI XẢY RA!", new ModalParameters().Add("ErrorMessage", "Có lỗi xảy ra khi xóa sản phẩm. Vui lòng thử lại sau!"));
             }
         }
         _listProduct = await Mediator.Send(new GetAllProductsQuery(true));

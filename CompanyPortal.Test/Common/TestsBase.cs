@@ -3,6 +3,9 @@ using CompanyPortal.Core.Common;
 using CompanyPortal.Core.Providers;
 using CompanyPortal.Data.Common;
 using MediatR;
+
+using Microsoft.Extensions.Logging;
+
 using Moq;
 
 namespace CompanyPortal.Test.Common;
@@ -18,8 +21,7 @@ public abstract class TestsBase<TEntity> where TEntity : EntityBase
 
     protected TestsBase()
     {
-        _mapper = new MapperConfiguration(cfg => cfg.AddProfile(new AutoMapperProfile()))
-            .CreateMapper();
+        _mapper = new MapperConfiguration(cfg => cfg.AddProfile(new AutoMapperProfile())).CreateMapper();
         _mockPrincipal.Setup(x => x.GetCurrentUserId()).Returns(UserId);
     }
 }

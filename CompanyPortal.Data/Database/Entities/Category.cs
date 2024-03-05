@@ -14,7 +14,7 @@ public class Category : EntityBase
     [MaxLength(500)]
     public string Description { get; set; } = string.Empty;
 
-    [MaxLength(5)]
+    [MaxLength(20)]
     public string ExternalId { get; set; } = string.Empty;
 
     public virtual ICollection<Product> Products { get; set; } = [];

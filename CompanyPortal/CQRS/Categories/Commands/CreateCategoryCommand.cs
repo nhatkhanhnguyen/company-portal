@@ -17,7 +17,7 @@ public record CreateCategoryCommand(CategoryViewModel Category) : IRequest<Resul
     {
         public async Task<Result> Handle(CreateCategoryCommand request, CancellationToken cancellationToken)
         {
-             try 
+            try
             {
                 var entity = mapper.Map<Category>(request.Category);
                 await repository.InsertAsync(entity, cancellationToken);

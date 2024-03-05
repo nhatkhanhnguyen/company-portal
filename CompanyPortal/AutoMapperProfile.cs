@@ -16,7 +16,10 @@ public class AutoMapperProfile : Profile
             .ReverseMap()
             .ForMember(x => x.Images, opt => opt.Ignore())
             .ForMember(x => x.Category, opt => opt.Ignore());
-        CreateMap<Category, CategoryViewModel>().ReverseMap();
+        CreateMap<Category, CategoryViewModel>()
+            .ForMember(x => x.Products, opt => opt.Ignore())
+            .ReverseMap()
+            .ForMember(x => x.Products, opt => opt.Ignore());
         CreateMap<Article, ArticleViewModel>().ReverseMap();
         CreateMap<Order, OrderViewModel>().ReverseMap();
         CreateMap<Resource, ResourceViewModel>().ReverseMap();

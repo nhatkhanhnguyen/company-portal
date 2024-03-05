@@ -6,17 +6,17 @@
     <fieldset disabled="@_isLoading">
         <div class="col-12 mb-3">
             <Label For="@(() => Category.Name)" CssClass="form-label"></Label>
-            <InputText class="form-control" @bind-Value="Category.Name" />
+            <InputText class="form-control" maxlength="100" @bind-Value="Category.Name" />
             <ValidationMessage For="@(() => Category.Name)" />
         </div>
         <div class="col-12 mb-3">
             <Label For="@(() => Category.ExternalId)" CssClass="form-label"></Label>
-            <InputText class="form-control" @bind-Value="Category.ExternalId" />
+            <InputText class="form-control" maxlength="20" @bind-Value="Category.ExternalId" />
             <ValidationMessage For="@(() => Category.ExternalId)" />
         </div>
         <div class="col-12 mb-3">
             <Label For="@(() => Category.Description)" CssClass="form-label"></Label>
-            <SfRichTextEditor ID="descriptionEditor" @bind-Value="Category.Description" Height="400" Enabled="!_isLoading">
+            <SfRichTextEditor ID="descriptionEditor" MaxLength="500" @bind-Value="Category.Description" Height="400" Enabled="!_isLoading">
                 <RichTextEditorToolbarSettings Items="@_descriptionEditorTools" />
             </SfRichTextEditor>
             <ValidationMessage For="@(() => Category.Description)" />
@@ -73,9 +73,7 @@
 
     private async Task InsertOrUpdateAsync()
     {
-        _isLoading = true;
         Category.IsActive = !Category.MarkedAsInactive;
         await BlazoredModal.CloseAsync(ModalResult.Ok<CategoryViewModel>(Category));
-        _isLoading = false;
     }
 }

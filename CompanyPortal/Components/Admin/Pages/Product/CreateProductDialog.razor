@@ -11,7 +11,7 @@
         <div class="row">
             <div class="col-12 mb-3">
                 <Label For="@(() => Product.Name)" CssClass="form-label"></Label>
-                <InputText class="form-control" @bind-Value="Product.Name" />
+                <InputText class="form-control" maxlength="100" @bind-Value="Product.Name" />
                 <ValidationMessage For="@(() => Product.Name)" />
             </div>
             <div class="col-6 mb-3">
@@ -24,7 +24,7 @@
             <div class="col-6 mb-3">
                 <Label For="@(() => Product.ExternalId)" CssClass="form-label"></Label>
                 <div class="input-group mb-3">
-                    <InputText class="form-control" @bind-Value="Product.ExternalId" disabled="@(_isLoading || Product.AutoGenerateExternalId)" />
+                    <InputText class="form-control" maxlength="20" @bind-Value="Product.ExternalId" disabled="@(_isLoading || Product.AutoGenerateExternalId)" />
                     <div class="input-group-text">
                         <InputCheckbox class="form-check-input me-2" @bind-Value="Product.AutoGenerateExternalId" />
                         <Label For="@(() => Product.AutoGenerateExternalId)" CssClass="form-check-label"></Label>
@@ -34,11 +34,11 @@
             </div>
             <div class="col-12 mb-3">
                 <Label For="@(() => Product.Tags)" CssClass="form-label"></Label>
-                <InputText type="text" @bind-Value="Product.Tags" class="form-control" placeholder="airplane car ..." />
+                <InputText type="text" maxlength="50" @bind-Value="Product.Tags" class="form-control" placeholder="airplane car ..." />
             </div>
             <div class="col-12 mb-3">
                 <Label For="@(() => Product.Description)" CssClass="form-label"></Label>
-                <SfRichTextEditor ID="descriptionEditor" @bind-Value="Product.Description" Height="400" Enabled="!_isLoading">
+                <SfRichTextEditor ID="descriptionEditor" MaxLength="700" @bind-Value="Product.Description" Height="400" Enabled="!_isLoading">
                     <RichTextEditorToolbarSettings Items="@_descriptionEditorTools" />
                 </SfRichTextEditor>
                 <ValidationMessage For="@(() => Product.Description)" />

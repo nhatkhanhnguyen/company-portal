@@ -1,6 +1,6 @@
 ﻿@using CompanyPortal.Components.Account.Shared
 
-<CascadingBlazoredModal Position="ModalPosition.Middle">
+<CascadingBlazoredModal Position="ModalPosition.Middle" AnimationType="ModalAnimationType.PopInOut" ContentScrollable="true">
     <Router AppAssembly="typeof(Program).Assembly">
         <Found Context="routeData">
             <AuthorizeRouteView RouteData="routeData" DefaultLayout="typeof(Layout.MainLayout)">

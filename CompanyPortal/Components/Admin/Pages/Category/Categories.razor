@@ -58,9 +58,9 @@
             <Template>
                 @{
                     var category = context as CategoryViewModel;
-                    <LoadingButton IconCss="fa-solid fa-eye" ButtonCssClass="btn-info rounded-pill" IsLoading="_isLoading" LoadingText="Đang tải" NormalText="XEM" OnClick="() => ShowViewDialog(category!)" />
-                    <LoadingButton IconCss="fa-solid fa-pen-to-square" ButtonCssClass="btn-primary rounded-pill" IsLoading="_isLoading" LoadingText="Đang tải" NormalText="SỬA" OnClick="() => ShowEditDialogAsync(category!)" />
-                    <LoadingButton IconCss="fa-solid fa-trash" ButtonCssClass="btn-danger rounded-pill" IsLoading="_isLoading" LoadingText="Đang tải" NormalText="XÓA" OnClick="() => ShowDeleteDialogAsync(category!)" />
+                    <LoadingButton IconCss="fa-solid fa-eye" ButtonCssClass="btn-info rounded-pill" IsLoading="IsLoading" LoadingText="Đang tải" NormalText="XEM" OnClick="() => ShowViewDialogAsync(category!)" />
+                    <LoadingButton IconCss="fa-solid fa-pen-to-square" ButtonCssClass="btn-primary rounded-pill" IsLoading="IsLoading" LoadingText="Đang tải" NormalText="SỬA" OnClick="async () => await ShowEditDialogAsync(category!)" />
+                    <LoadingButton IconCss="fa-solid fa-trash" ButtonCssClass="btn-danger rounded-pill" IsLoading="IsLoading" LoadingText="Đang tải" NormalText="XÓA" OnClick="async () => await ShowDeleteDialogAsync(category!)" />
                 }
             </Template>
         </GridColumn>
@@ -80,10 +80,7 @@
     private SfGrid<CategoryViewModel> CategoryGrid { get; set; } = default!;
     private List<CategoryViewModel> _listCategory = [];
 
-    private string _errorMessage = "";
-    private bool _forceDelete;
-    private CategoryViewModel _selectedCategory = new();
-    private bool _isLoading;
+    private bool IsLoading = false;
 
     private readonly List<ItemModel> _toolbarItems =
     [
@@ -121,7 +118,8 @@
         var parameters = new ModalParameters().Add("Category", category);
         var options = new ModalOptions
             {
-                Size = ModalSize.ExtraLarge
+                Size = ModalSize.Custom,
+                SizeCustomClass = "blazored-modal-fixed-size-large"
             };
         var modalResult = await Modal.Show<CreateCategoryDialog>(
             selectedCategory == null ? "THÊM DANH MỤC" : "CHỈNH SỬA DANH MỤC",
@@ -137,29 +135,28 @@
             }
             else
             {
-                Modal.Show<ErrorDialog>("", new ModalParameters().Add("ErrorMessage", "Có lỗi xảy ra khi lưu danh mục!"));
+                Modal.Show<ErrorDialog>("CÓ LỖI XẢY RA!", new ModalParameters().Add("ErrorMessage", "Có lỗi xảy ra khi lưu danh mục!"));
             }
         }
     }
 
-    private async Task ShowViewDialog(CategoryViewModel selectedCategory)
+    private async Task ShowViewDialogAsync(CategoryViewModel selectedCategory)
     {
         var products = await Mediator.Send(new GetCategoryProductsByIdQuery(selectedCategory.Id, true));
         selectedCategory.Products = products;
         var options = new ModalOptions
             {
-                Size = ModalSize.ExtraLarge,
-                HideHeader = true,
-                AnimationType = ModalAnimationType.PopInOut
+                Size = ModalSize.Custom,
+                SizeCustomClass = "blazored-modal-fixed-size-large"
             };
         var parameters = new ModalParameters().Add("Category", selectedCategory);
-        Modal.Show<ViewCategoryDialog>(parameters, options);
+        Modal.Show<ViewCategoryDialog>("THÔNG TIN DANH MỤC", parameters, options);
     }
 
     private async Task ShowDeleteDialogAsync(CategoryViewModel selectedCategory)
     {
         var parameters = new ModalParameters().Add("Category", selectedCategory);
-        var modalResult = await Modal.Show<DeleteCategoryDialog>("Xóa danh mục", parameters).Result;
+        var modalResult = await Modal.Show<DeleteCategoryDialog>("XÓA DANH MỤC", parameters).Result;
         if (modalResult.Confirmed)
         {
             var data = (bool)modalResult.Data!;
@@ -170,7 +167,7 @@
             }
             else
             {
-                Modal.Show<ErrorDialog>("Có lỗi xảy ra!", new ModalParameters().Add("ErrorMessage", "Có lỗi xảy ra khi xóa danh mục. Vui lòng thử lại sau!"));
+                Modal.Show<ErrorDialog>("CÓ LỖI XẢY RA!", new ModalParameters().Add("ErrorMessage", "Có lỗi xảy ra khi xóa danh mục. Vui lòng thử lại sau!"));
             }
         }
     }

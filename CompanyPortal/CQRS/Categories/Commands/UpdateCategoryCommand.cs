@@ -12,8 +12,7 @@ namespace CompanyPortal.CQRS.Categories.Commands;
 public record UpdateCategoryCommand(CategoryViewModel Category) : IRequest<Result>
 {
     public class Handler(IRepository<Category> repository, IUnitOfWork uow,
-        IMapper mapper, ILogger<Handler> logger)
-        : IRequestHandler<UpdateCategoryCommand, Result>
+        IMapper mapper, ILogger<Handler> logger) : IRequestHandler<UpdateCategoryCommand, Result>
     {
         public async Task<Result> Handle(UpdateCategoryCommand request, CancellationToken cancellationToken)
         {
