@@ -12,7 +12,14 @@
 @page "/Administration/Articles"
 @inject IMediator Mediator
 
-<h3>Articles</h3>
+<div class="row">
+    <div class="col-12 d-flex justify-content-between">
+        <h3>BÀI VIẾT</h3>
+        <button class="btn btn-primary rounded-pill btn-sm" @onclick="() => ShowEditDialogAsync(null)">
+            <i class="fa-regular fa-square-plus"></i> THÊM
+        </button>
+    </div>
+</div>
 <hr />
 
 <SfGrid DataSource="@_listArticle" @ref="ArticleGrid" ID="sfGridArticle"
@@ -53,13 +60,13 @@
             <Template>
                 @{
                     var article = context as ArticleViewModel;
-                    <button class="btn btn-sm btn-info" @onclick="() => ShowViewDialogAsync(article!.Id)" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Preview">
+                    <button class="btn btn-sm btn-info rounded-pill" @onclick="() => ShowViewDialogAsync(article!)">
                         <i class="fa-solid fa-eye"></i> XEM
                     </button>
-                    <button class="btn btn-sm btn-primary" @onclick="() => ShowEditDialogAsync(article!.Id)" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Edit">
+                    <button class="btn btn-sm btn-primary rounded-pill" @onclick="() => ShowEditDialogAsync(article)">
                         <i class="fa-solid fa-pen-to-square"></i> SỬA
                     </button>
-                    <button class="btn btn-sm btn-danger" @onclick="() => ShowDeleteDialog(article!.Id)" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Delete">
+                    <button class="btn btn-sm btn-danger rounded-pill" @onclick="() => ShowDeleteDialogAsync(article!)">
                         <i class="fa-solid fa-trash"></i> XÓA
                     </button>
                 }
@@ -68,126 +75,11 @@
     </GridColumns>
 </SfGrid>
 
-<div class="row">
-    <div class="col-12 mt-2">
-        <button class="btn btn-primary float-end" @onclick="() => ShowEditDialogAsync()">
-            <i class="fa-solid fa-plus"></i> THÊM SẢN PHẨM
-        </button>
-    </div>
-</div>
-
-<ModalDialog @ref="EditDialog" SizeClass="modal-xl">
-    <Header>
-        <h5 class="modal-title">@(_selectedArticle.Id > 0 ? "Edit" : "Create")</h5>
-        <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close" @onclick="() => EditDialog.Close()"></button>
-    </Header>
-    <Body>
-        <EditForm Model="_selectedArticle" OnValidSubmit="InsertOrUpdateAsync" id="FormArticle" class="row g-3">
-            <FluentValidationValidator ValidatorType="typeof(ArticleFormValidator)" />
-
-            <div class="col-12 mb-3">
-                <Label For="@(() => _selectedArticle.Title)" CssClass="form-label"></Label>
-                <InputText class="form-control" @bind-Value="_selectedArticle.Title" disabled="@_isLoading" />
-                <ValidationMessage For="@(() => _selectedArticle.Title)" />
-            </div>
-            <div class="col-12 mb-3">
-                <Label For="@(() => _selectedArticle.Content)" CssClass="form-label"></Label>
-                <SfRichTextEditor ID="contentEditor" @bind-Value="_selectedArticle.Content" Height="400" Enabled="!_isLoading">
-                    <RichTextEditorToolbarSettings Items="@_contentEditorTools" />
-                </SfRichTextEditor>
-                <ValidationMessage For="@(() => _selectedArticle.Content)" />
-            </div>
-            <div class="col-12 mb-3">
-                <Label For="@(() => _selectedArticle.Tags)" CssClass="form-label"></Label>
-                <InputText class="form-control" @bind-Value="_selectedArticle.Tags" disabled="@_isLoading" />
-                <ValidationMessage For="@(() => _selectedArticle.Tags)" />
-            </div>
-            <div class="col-12">
-                <div class="form-check d-flex">
-                    <InputCheckbox @bind-Value="_selectedArticle.MarkedAsInactive" class="form-check-input align-self-baseline" disabled="@_isLoading" />
-                    <span class="form-check-label ms-2">
-                        <Label For="@(() => _selectedArticle.MarkedAsInactive)" CssClass="form-label"></Label>
-                    </span>
-                </div>
-            </div>
-        </EditForm>
-    </Body>
-    <Footer>
-        <button class="btn btn-danger float-end me-2" @onclick="() => EditDialog.Close()">Close</button>
-        <LoadingButton ButtonCssClass="btn-primary" IsLoading="_isLoading" LoadingText="Saving" NormalText="Save" @onclick="InsertOrUpdateAsync" />
-    </Footer>
-</ModalDialog>
-
-<ModalDialog @ref="@ViewDialog" SizeClass="modal-xl">
-    <Header>
-        <h5 class="modal-title">Preview</h5>
-        <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close" @onclick="() => ViewDialog.Close()"></button>
-    </Header>
-    <Body>
-        <ArticleView IsEditing="true" Article="@_selectedArticle" />
-    </Body>
-</ModalDialog>
-
-<ModalDialog @ref="@DeleteDialog">
-    <Header>
-        <h1 class="modal-title fs-5">
-            <i class="fa-solid fa-triangle-exclamation"></i> Delete @_selectedArticle.Title!
-        </h1>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" @onclick="() => DeleteDialog.Close()"></button>
-    </Header>
-    <Body>
-        <p>Are you sure you want to delete @_selectedArticle.Title. This action can't be un-done.</p>
-        <InputCheckbox @bind-Value="_forceDelete" /> Delete permanently
-    </Body>
-    <Footer>
-        <LoadingButton ButtonCssClass="btn-primary" IsLoading="_isLoading" LoadingText="Deleting" NormalText="Yes" @onclick="() => DeleteAsync(_forceDelete)" />
-        <button class="btn btn-primary float-end me-2" @onclick="() => DeleteDialog.Close()">No</button>
-    </Footer>
-</ModalDialog>
-
-<ModalDialog @ref="@ErrorDialog">
-    <Header>
-        <h1 class="modal-title fs-5">
-            <i class="fa-solid fa-circle-exclamation"></i> Error occured
-        </h1>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" @onclick="() => ErrorDialog.Close()"></button>
-    </Header>
-    <Body>
-        <p>@_errorMessage</p>
-    </Body>
-    <Footer>
-        <button class="btn btn-primary float-middle" @onclick="() => ErrorDialog.Close()">OK</button>
-    </Footer>
-</ModalDialog>
-
-<script>
-    function addTooltips() {
-        const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
-        const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
-    }
-</script>
-
-<style>
-    .validation-message {
-        font-size: .875em;
-        color: red;
-    }
-</style>
-
 @code {
-    private ModalDialog EditDialog { get; set; } = default!;
-    private ModalDialog ViewDialog { get; set; } = default!;
-    private ModalDialog DeleteDialog { get; set; } = default!;
-    private ModalDialog ErrorDialog { get; set; } = default!;
-    private FileUploader ImageUploader { get; set; } = default!;
+    [CascadingParameter] public IModalService Modal { get; set; } = default!;
 
     private SfGrid<ArticleViewModel> ArticleGrid { get; set; } = default!;
-
     private List<ArticleViewModel> _listArticle = [];
-    private string _errorMessage = "";
-    private bool _forceDelete;
-    private ArticleViewModel _selectedArticle = new();
-    private List<ResourceViewModel> _originalArticleImages = [];
     private bool _isLoading;
 
     private readonly List<ItemModel> _toolbarItems = 
@@ -215,74 +107,124 @@
 
     protected override async Task OnInitializedAsync()
     {
-        _isLoading = false;
         _listArticle = await Mediator.Send(new GetAllArticlesQuery(true));
     }
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
+    private async Task ShowEditDialogAsync(ArticleViewModel? selectedArticle)
     {
-        await Js.InvokeVoidAsync("addTooltips");
-    }
+        var article = selectedArticle != null ? selectedArticle.Clone() : new ArticleViewModel();
+        var categories = await Mediator.Send(new GetAllArticlesQuery());
+        // if (selectedArticle != null)
+        // {
+        //     var images = await Mediator.Send(new GetProductImagesByIdQuery(article.Id, true));
+        //     article.Images = [.. images];
+        // }
 
-    private async Task ShowEditDialogAsync(int? id = null)
-    {
-        _selectedArticle = id != null ? _listArticle.First(x => x.Id == id).Clone() : new ArticleViewModel();
-        _selectedArticle.Images = [];
-        if (id != null)
+        var parameters = new ModalParameters()
+            .Add("article", article)
+            .Add("categories", categories);
+        var options = new ModalOptions
+            {
+                Size = ModalSize.Custom,
+                SizeCustomClass = "blazored-modal-fixed-size-xlarge",
+                HideCloseButton = true
+            };
+        var modalResult = await Modal.Show<EditArticleDialog>(
+            selectedArticle == null ? "THÊM SẢN PHẨM" : "CHỈNH SỬA SẢN PHẨM",
+            parameters,
+            options).Result;
+        if (modalResult.Confirmed)
         {
-            var images = await Mediator.Send(new GetArticleImagesByIdQuery(id.Value, true));
-            _selectedArticle.Images = [.. images];
-            _originalArticleImages = images;
+            var result = selectedArticle != null ? await UpdateArticleAsync((ArticleViewModel)modalResult.Data!) : await CreateArticleAsync((ArticleViewModel)modalResult.Data!);
+            if (result)
+            {
+                _listArticle = await Mediator.Send(new GetAllArticlesQuery(true));
+            }
+            else
+            {
+                Modal.Show<ErrorDialog>("CÓ LỖI XẢY RA!", new ModalParameters().Add("ErrorMessage", "Có lỗi xảy ra khi lưu bài viết. Vui lòng thử lại sau!"));
+            }
         }
-        EditDialog.Open();
     }
 
-    private async Task ShowViewDialogAsync(int id)
+    private async Task ShowViewDialogAsync(ArticleViewModel selectedArticle)
     {
-        _selectedArticle = _listArticle.First(x => x.Id == id);
-        var images = await Mediator.Send(new GetArticleImagesByIdQuery(id, true));
-        _selectedArticle.Images = images;
-        ViewDialog.Open();
+        var images = await Mediator.Send(new GetArticleImagesByIdQuery(selectedArticle!.Id, true));
+        selectedArticle.Images = images;
+        var options = new ModalOptions
+            {
+                Size = ModalSize.Custom,
+                SizeCustomClass = "blazored-modal-fixed-size-xlarge"
+            };
+        var parameters = new ModalParameters().Add("Product", selectedArticle);
+        Modal.Show<ViewArticleDialog>("THÔNG TIN SẢN PHẨM", parameters, options);
     }
 
-    private void ShowDeleteDialog(int id)
+    private async Task ShowDeleteDialogAsync(ArticleViewModel selectedArticle)
     {
-        _selectedArticle = _listArticle.First(x => x.Id == id);
-        DeleteDialog.Open();
+        var parameters = new ModalParameters().Add("Product", selectedArticle);
+        var modalResult = await Modal.Show<DeleteArticleDialog>("XÓA SẢN PHẨM", parameters).Result;
+        if (modalResult.Confirmed)
+        {
+            var data = (bool)modalResult.Data!;
+            var result = await Mediator.Send(new DeleteArticleCommand(selectedArticle.Id, data));
+            if (result)
+            {
+                await Mediator.Send(new DeleteProductResourcesCommand(selectedArticle.Id, data));
+            }
+            else
+            {
+                Modal.Show<ErrorDialog>("CÓ LỖI XẢY RA!", new ModalParameters().Add("ErrorMessage", "Có lỗi xảy ra khi xóa sản phẩm. Vui lòng thử lại sau!"));
+            }
+        }
+        _listArticle = await Mediator.Send(new GetAllArticlesQuery(true));
     }
 
     // Data
 
-    private async Task InsertOrUpdateAsync()
+    private async Task<bool> UpdateArticleAsync(ArticleViewModel article)
     {
-        _isLoading = true;
-        var product = _selectedArticle.Clone();
-        product.IsActive = !_selectedArticle.MarkedAsInactive;
-        var articleId = _selectedArticle.Id > 0 ? await UpdateArticleAsync(product) : await CreateArticleAsync(product);
-
-        if (articleId <= 0)
+        var result = await Mediator.Send(new UpdateArticleCommand(article));
+        if (result.IsSuccess)
         {
-            var request = _selectedArticle.Id > 0 ? "updating" : "creating";
-            _errorMessage = $"There is a problem while {request} article {_selectedArticle.Title}.";
-            ErrorDialog.Open();
+            await DeleteArticleImagesAsync(article.Images.Where(x => x.Status == UploadFileStatus.Removed).ToList(), true);
+            await CreateArticleImagesAsync((int)result.Data!, article.Images.Where(x => x.Status == UploadFileStatus.New).ToList());
         }
-        EditDialog.Close();
-        _listArticle = await Mediator.Send(new GetAllArticlesQuery(true));
-        _isLoading = false;
+
+        return result.IsSuccess;
     }
 
-    private async Task DeleteAsync(bool forceDelete)
+    private async Task<bool> CreateArticleAsync(ArticleViewModel article)
     {
-        _isLoading = true;
-        var result = await Mediator.Send(new DeleteArticleCommand(_selectedArticle.Id, forceDelete));
-        if (!result)
+        var result = await Mediator.Send(new CreateArticleCommand(article));
+        if (result.IsSuccess)
         {
-            _errorMessage = $"There is a problem while deleting product {_selectedArticle.Title}.";
-            ErrorDialog.Open();
+            await CreateArticleImagesAsync((int)result.Data!, article.Images);
         }
-        _listArticle = await Mediator.Send(new GetAllArticlesQuery(true));
-        DeleteDialog.Close();
-        _isLoading = false;
+
+        return result.IsSuccess;
+    }
+
+    private async Task CreateArticleImagesAsync(int articleId, List<ResourceViewModel> newImages)
+    {
+        foreach (var image in newImages)
+        {
+            var imageUploadResult = await Mediator.Send(new UploadToStorageCommand(image));
+            image.Url = imageUploadResult.Url;
+            image.BlobName = imageUploadResult.BlobName;
+            image.ProductId = articleId;
+            image.ResourceType = ResourceType.Image;
+            await Mediator.Send(new CreateResourceCommand(image));
+        }
+    }
+
+    private async Task DeleteArticleImagesAsync(List<ResourceViewModel> images, bool forceDelete = false)
+    {
+        var result = await Mediator.Send(new DeleteResourcesCommand(images.Select(x => x.Id).ToList(), forceDelete));
+        if (result && forceDelete)
+        {
+            await Mediator.Send(new DeleteFromStorageCommand(images.Select(x => x.BlobName).ToList()));
+        }
     }
 
     // Events
@@ -299,56 +241,5 @@
                 await ArticleGrid.ExportToPdfAsync();
                 break;
         }
-    }
-
-    private async Task<int> UpdateArticleAsync(ArticleViewModel article)
-    {
-        var articleId = await Mediator.Send(new UpdateArticleCommand(article));
-        if (articleId > 0)
-        {
-            var removedOldImages = GetRemovedOldImages(_originalArticleImages, article.Images.Where(x => x.Status == UploadFileStatus.Old));
-            await DeleteArticleImagesAsync(removedOldImages, true);
-            await CreateArticleImagesAsync(articleId, article.Images.Where(x => x.Status == UploadFileStatus.New));
-        }
-
-        return articleId;
-    }
-
-    private async Task<int> CreateArticleAsync(ArticleViewModel article)
-    {
-        var articleId = await Mediator.Send(new CreateArticleCommand(article));
-        if (articleId > 0)
-        {
-            await CreateArticleImagesAsync(articleId, article.Images);
-        }
-
-        return articleId;
-    }
-
-    private async Task CreateArticleImagesAsync(int articleId, IEnumerable<ResourceViewModel> newImages)
-    {
-        foreach (var image in newImages)
-        {
-            var imageUploadResult = await Mediator.Send(new UploadToStorageCommand(image));
-            image.Url = imageUploadResult.Url;
-            image.BlobName = imageUploadResult.BlobName;
-            image.ArticleId = articleId;
-            image.ResourceType = ResourceType.Image;
-            await Mediator.Send(new CreateResourceCommand(image));
-        }
-    }
-
-    private async Task DeleteArticleImagesAsync(List<ResourceViewModel> images, bool forceDelete = false)
-    {
-        var result = await Mediator.Send(new DeleteResourcesCommand(images.Select(x => x.Id).ToList(), forceDelete));
-        if (result && forceDelete)
-        {
-            await Mediator.Send(new DeleteFromStorageCommand(images.Select(x => x.BlobName).ToList()));
-        }
-    }
-
-    private List<ResourceViewModel> GetRemovedOldImages(IEnumerable<ResourceViewModel> originalOldImages, IEnumerable<ResourceViewModel> newOldImages)
-    {
-        return originalOldImages.Where(p => newOldImages.All(p2 => p2.Id != p.Id)).ToList();
     }
 }

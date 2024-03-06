@@ -9,14 +9,16 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CompanyPortal.CQRS.Articles.Commands;
 
-public record DeleteArticleCommand(int ArticleId, bool ForceDelete = false) : IRequest<bool>
+public record DeleteArticleCommand(int ArticleId, bool ForceDelete) : IRequest<bool>
 {
-    public class Handler(IRepository<Article> articleRepository, IRepository<Resource> resourceRepository, BlobServiceClient blobServiceClient, IUnitOfWork uow) : IRequestHandler<DeleteArticleCommand, bool>
+    public class Handler(IRepository<Article> articleRepository, IRepository<Resource> resourceRepository, BlobServiceClient blobServiceClient, IUnitOfWork uow)
+        : IRequestHandler<DeleteArticleCommand, bool>
     {
         public async Task<bool> Handle(DeleteArticleCommand request, CancellationToken cancellationToken)
         {
             var blobNames = new List<string>();
-            if (request.ForceDelete) {
+            if (request.ForceDelete)
+            {
                 blobNames = await resourceRepository
                     .Query(x => x.ArticleId == request.ArticleId)
                     .Select(x => x.BlobName)
@@ -25,7 +27,6 @@ public record DeleteArticleCommand(int ArticleId, bool ForceDelete = false) : IR
 
             articleRepository.Delete(x => x.Id == request.ArticleId, request.ForceDelete);
             resourceRepository.Delete(x => x.ArticleId == request.ArticleId, request.ForceDelete);
-
             var result = await uow.SaveChangesAsync(cancellationToken);
             if (result && request.ForceDelete)
             {
@@ -37,7 +38,7 @@ public record DeleteArticleCommand(int ArticleId, bool ForceDelete = false) : IR
 
         private async Task DeleteFromStorageAsync(IEnumerable<string> blobNames, CancellationToken cancellationToken = default)
         {
-            var containerClient = blobServiceClient.GetBlobContainerClient("product-image");
+            var containerClient = blobServiceClient.GetBlobContainerClient("article-image");
             foreach (var blobClient in blobNames.Select(blobName => containerClient.GetBlobClient(blobName)))
             {
                 await blobClient.DeleteAsync(cancellationToken: cancellationToken);

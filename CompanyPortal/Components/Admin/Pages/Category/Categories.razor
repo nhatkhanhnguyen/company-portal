@@ -67,13 +67,6 @@
     </GridColumns>
 </SfGrid>
 
-<style>
-    .validation-message {
-        font-size: .875em;
-        color: red;
-    }
-</style>
-
 @code {
     [CascadingParameter] public IModalService Modal { get; set; } = default!;
 
@@ -121,7 +114,7 @@
                 Size = ModalSize.Custom,
                 SizeCustomClass = "blazored-modal-fixed-size-large"
             };
-        var modalResult = await Modal.Show<CreateCategoryDialog>(
+        var modalResult = await Modal.Show<EditCategoryDialog>(
             selectedCategory == null ? "THÊM DANH MỤC" : "CHỈNH SỬA DANH MỤC",
             parameters,
             options).Result;

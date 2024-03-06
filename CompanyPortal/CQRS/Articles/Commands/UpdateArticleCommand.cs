@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 
+using CompanyPortal.Core.Common;
 using CompanyPortal.Data.Common;
 using CompanyPortal.Data.Database.Entities;
 using CompanyPortal.ViewModels;
@@ -8,33 +9,42 @@ using MediatR;
 
 namespace CompanyPortal.CQRS.Articles.Commands;
 
-public record UpdateArticleCommand(ArticleViewModel Article) : IRequest<int>
+public record UpdateArticleCommand(ArticleViewModel Article) : IRequest<Result>
 {
-    public class Handler(IMapper mapper, IRepository<Article> repository, IRepository<Resource> resourceRepository, IUnitOfWork uow)
-        : IRequestHandler<UpdateArticleCommand, int>
+    public class Handler(
+        IRepository<Article> articleRepository, IRepository<Resource> resourceRepository, IUnitOfWork uow,
+        IMapper mapper, ILogger<Handler> logger) : IRequestHandler<UpdateArticleCommand, Result>
     {
-        public async Task<int> Handle(UpdateArticleCommand request, CancellationToken cancellationToken)
+        public async Task<Result> Handle(UpdateArticleCommand request, CancellationToken cancellationToken)
         {
-            var article = await repository.GetAsync(request.Article.Id, cancellationToken);
+            var article = await articleRepository.GetAsync(request.Article.Id, cancellationToken);
             if (article == null)
             {
-                return 0;
+                logger.LogError("Article with {Id} not found.", request.Article.Id);
+                return Result.Error($"Bài viết có ID = {request.Article.Id} không tồn tại khi đang tiến hành lưu vào CSDL.");
             }
 
-            mapper.Map(request.Article, article);
-
-            if (article.IsActive)
+            try
             {
-                resourceRepository.Undelete(x => x.ArticleId == request.Article.Id);
-            }
-            else
-            {
-                resourceRepository.Delete(x => x.ArticleId == request.Article.Id);
-            }
+                mapper.Map(request.Article, article);
+                articleRepository.Update(article);
+                if (article.IsActive)
+                {
+                    resourceRepository.Undelete(x => x.ArticleId == request.Article.Id);
+                }
+                else
+                {
+                    resourceRepository.Delete(x => x.ArticleId == request.Article.Id);
+                }
 
-            repository.Update(article);
-            await uow.SaveChangesAsync(cancellationToken);
-            return article.Id;
+                await uow.SaveChangesAsync(cancellationToken);
+                return Result.Ok(article.Id);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, ex.Message);
+                return Result.Error<string>("Có lỗi xảy ra khi đang lưu bài viết vào CSDL.");
+            }
         }
     }
 }

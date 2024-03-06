@@ -8,14 +8,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Remove="Components\Admin\Pages\Order\OrderDetailView.razor" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Include="Components\Admin\Pages\Order\OrderDetailView.razor" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="AutoMapper" Version="13.0.1" />
     <PackageReference Include="Azure.Storage.Blobs" Version="12.19.1" />
     <PackageReference Include="Azure.Storage.Files.Shares" Version="12.17.1" />

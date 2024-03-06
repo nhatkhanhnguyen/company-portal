@@ -95,14 +95,6 @@
     </GridColumns>
 </SfGrid>
 
-
-<style>
-    .validation-message {
-        font-size: .875em;
-        color: red;
-    }
-</style>
-
 @code {
     [CascadingParameter] public IModalService Modal { get; set; } = default!;
 
@@ -139,7 +131,7 @@
                 SizeCustomClass = "blazored-modal-fixed-size-xlarge",
                 HideCloseButton = true
             };
-        var modalResult = await Modal.Show<CreateProductDialog>(
+        var modalResult = await Modal.Show<EditProductDialog>(
             selectedProduct == null ? "THÊM SẢN PHẨM" : "CHỈNH SỬA SẢN PHẨM",
             parameters,
             options).Result;
