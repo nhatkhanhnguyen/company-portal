@@ -10,10 +10,13 @@ namespace CompanyPortal.Data.Database.Entities;
 [Index(nameof(Title))]
 public class Article : EntityBase
 {
-    [MaxLength(200)]
+    [MaxLength(128)]
     public string Title { get; set; } = string.Empty;
 
-    [MaxLength(1000)]
+    [MaxLength(300)]
+    public string Description { get; set; } = string.Empty;
+
+    [MaxLength(2000)]
     public string Content { get; set; } = string.Empty;
 
     public int? CoverImageId { get; set; }
@@ -25,6 +28,4 @@ public class Article : EntityBase
 
     [MaxLength(100)]
     public string Tags { get; set; } = string.Empty;
-
-    public virtual ICollection<Product> RelatedProducts { get; set; } = [];
 }

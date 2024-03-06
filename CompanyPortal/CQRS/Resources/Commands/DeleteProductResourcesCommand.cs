@@ -10,12 +10,12 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CompanyPortal.CQRS.Resources.Commands;
 
-public record DeleteProductResourcesCommand(int ProductId, bool ForceDelete) : IRequest<Result>
+public record DeleteReferencingResourcesCommand(int ProductId, bool ForceDelete) : IRequest<Result>
 {
     public class Handler(IRepository<Resource> repository, IUnitOfWork uow,
-        BlobServiceClient blobServiceClient, ILogger<Handler> logger) : IRequestHandler<DeleteProductResourcesCommand, Result>
+        BlobServiceClient blobServiceClient, ILogger<Handler> logger) : IRequestHandler<DeleteReferencingResourcesCommand, Result>
     {
-        public async Task<Result> Handle(DeleteProductResourcesCommand request, CancellationToken cancellationToken)
+        public async Task<Result> Handle(DeleteReferencingResourcesCommand request, CancellationToken cancellationToken)
         {
             try
             {

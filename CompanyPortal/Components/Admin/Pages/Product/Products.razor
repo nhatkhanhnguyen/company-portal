@@ -4,7 +4,7 @@
 @using CompanyPortal.Core.Extensions
 @using CompanyPortal.CQRS.Products.Commands
 @using CompanyPortal.CQRS.Resources.Commands
-@using CompanyPortal.Core.Enum
+@using CompanyPortal.Core.Enums
 @using CompanyPortal.CQRS.Categories.Queries
 
 @page "/Administration/Products"
@@ -31,29 +31,11 @@
     <GridEvents OnToolbarClick="ToolbarClickHandler" TValue="ProductViewModel">
     </GridEvents>
     <GridColumns>
-        <GridColumn Field="@nameof(ProductViewModel.Id)"
-                    HeaderText="ID"
-                    Width="50">
-        </GridColumn>
-        <GridColumn Field="@nameof(ProductViewModel.ExternalId)"
-                    HeaderText="MÃ"
-                    Width="128">
-        </GridColumn>
-        <GridColumn Field="@nameof(ProductViewModel.Name)"
-                    HeaderText="TÊN"
-                    Width="386"
-                    Type="ColumnType.String">
-        </GridColumn>
-        <GridColumn Field="@nameof(ProductViewModel.CategoryName)"
-                    HeaderText="DANH MỤC"
-                    Width="128"
-                    Type="ColumnType.String">
-        </GridColumn>
-        <GridColumn Field="@nameof(ProductViewModel.Price)" Width="128"
-                    HeaderText="GIÁ"
-                    Format="#,#00đ"
-                    Type="ColumnType.Decimal">
-        </GridColumn>
+        <GridColumn Field="@nameof(ProductViewModel.Id)" HeaderText="ID" Width="50"></GridColumn>
+        <GridColumn Field="@nameof(ProductViewModel.ExternalId)" HeaderText="MÃ" Width="128"></GridColumn>
+        <GridColumn Field="@nameof(ProductViewModel.Name)" HeaderText="TÊN" Width="386" Type="ColumnType.String"></GridColumn>
+        <GridColumn Field="@nameof(ProductViewModel.CategoryName)" HeaderText="DANH MỤC" Width="128" Type="ColumnType.String"></GridColumn>
+        <GridColumn Field="@nameof(ProductViewModel.Price)" Width="128" HeaderText="GIÁ" Format="#,#00đ" Type="ColumnType.Decimal"></GridColumn>
         <GridColumn HeaderText="TAGS">
             <Template>
                 @{
@@ -172,7 +154,7 @@
             var result = await Mediator.Send(new DeleteProductCommand(selectedProduct.Id, data));
             if (result)
             {
-                await Mediator.Send(new DeleteProductResourcesCommand(selectedProduct.Id, data));
+                await Mediator.Send(new DeleteReferencingResourcesCommand(selectedProduct.Id, data));
             }
             else
             {

@@ -1,5 +1,5 @@
 ﻿using CompanyPortal.Core.Common;
-using CompanyPortal.Core.Enum;
+using CompanyPortal.Core.Enums;
 
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;

@@ -5,7 +5,7 @@
 @using Syncfusion.Blazor.Navigations
 @using Syncfusion.Blazor.RichTextEditor
 @using CompanyPortal.Core.Extensions
-@using CompanyPortal.Core.Enum
+@using CompanyPortal.Core.Enums
 
 @inject IJSRuntime Js
 
@@ -33,7 +33,7 @@
     <GridEvents OnToolbarClick="ToolbarClickHandler" TValue="ArticleViewModel"></GridEvents>
     <GridColumns>
         <GridColumn Field="@nameof(ArticleViewModel.Id)" HeaderText="ID" Width="64"></GridColumn>
-        <GridColumn Field="@nameof(ArticleViewModel.Title)" HeaderText="TIÊU ĐỀ" Width="486" Type="ColumnType.String"></GridColumn>
+        <GridColumn Field="@nameof(ArticleViewModel.Title)" HeaderText="TIÊU ĐỀ" Width="512" Type="ColumnType.String"></GridColumn>
         <GridColumn HeaderText="TAGS">
             <Template>
                 @{
@@ -42,6 +42,14 @@
                     {
                         <span class="badge rounded-pill text-bg-info me-1">@tag</span>
                     }
+                }
+            </Template>
+        </GridColumn>
+        <GridColumn HeaderText="LOẠI BÀI VIẾT" Width="200" Type="ColumnType.String">
+            <Template>
+                @{
+                    var article = (ArticleViewModel)context;
+                    <p>@article.Type.GetDescription()</p>
                 }
             </Template>
         </GridColumn>
@@ -76,33 +84,33 @@
 </SfGrid>
 
 @code {
-    [CascadingParameter] public IModalService Modal { get; set; } = default!;
+        [CascadingParameter] public IModalService Modal { get; set; } = default!;
 
     private SfGrid<ArticleViewModel> ArticleGrid { get; set; } = default!;
     private List<ArticleViewModel> _listArticle = [];
     private bool _isLoading;
 
-    private readonly List<ItemModel> _toolbarItems = 
+    private readonly List<ItemModel> _toolbarItems =
     [
         new ItemModel { Text = "Xuất Excel", Id = "sfGridArticle_excelexport", PrefixIcon = "fa-solid fa-file-excel" },
-        new ItemModel { Text = "Xuất PDF", Id = "sfGridArticle_pdfexport", PrefixIcon = "fa-solid fa-file-pdf" }
+    new ItemModel { Text = "Xuất PDF", Id = "sfGridArticle_pdfexport", PrefixIcon = "fa-solid fa-file-pdf" }
     ];
 
     private readonly List<ToolbarItemModel> _contentEditorTools =
     [
         new ToolbarItemModel { Command = ToolbarCommand.Bold },
-        new ToolbarItemModel { Command = ToolbarCommand.Italic },
-        new ToolbarItemModel { Command = ToolbarCommand.Underline },
-        new ToolbarItemModel { Command = ToolbarCommand.Separator },
-        new ToolbarItemModel { Command = ToolbarCommand.Formats },
-        new ToolbarItemModel { Command = ToolbarCommand.Alignments },
-        new ToolbarItemModel { Command = ToolbarCommand.UnorderedList },
-        new ToolbarItemModel { Command = ToolbarCommand.Separator },
-        new ToolbarItemModel { Command = ToolbarCommand.CreateLink },
-        new ToolbarItemModel { Command = ToolbarCommand.Image },
-        new ToolbarItemModel { Command = ToolbarCommand.Video },
-        new ToolbarItemModel { Command = ToolbarCommand.CreateTable },
-        new ToolbarItemModel { Command = ToolbarCommand.Separator }
+    new ToolbarItemModel { Command = ToolbarCommand.Italic },
+    new ToolbarItemModel { Command = ToolbarCommand.Underline },
+    new ToolbarItemModel { Command = ToolbarCommand.Separator },
+    new ToolbarItemModel { Command = ToolbarCommand.Formats },
+    new ToolbarItemModel { Command = ToolbarCommand.Alignments },
+    new ToolbarItemModel { Command = ToolbarCommand.UnorderedList },
+    new ToolbarItemModel { Command = ToolbarCommand.Separator },
+    new ToolbarItemModel { Command = ToolbarCommand.CreateLink },
+    new ToolbarItemModel { Command = ToolbarCommand.Image },
+    new ToolbarItemModel { Command = ToolbarCommand.Video },
+    new ToolbarItemModel { Command = ToolbarCommand.CreateTable },
+    new ToolbarItemModel { Command = ToolbarCommand.Separator }
     ];
 
     protected override async Task OnInitializedAsync()
@@ -113,16 +121,13 @@
     private async Task ShowEditDialogAsync(ArticleViewModel? selectedArticle)
     {
         var article = selectedArticle != null ? selectedArticle.Clone() : new ArticleViewModel();
-        var categories = await Mediator.Send(new GetAllArticlesQuery());
         // if (selectedArticle != null)
         // {
         //     var images = await Mediator.Send(new GetProductImagesByIdQuery(article.Id, true));
         //     article.Images = [.. images];
         // }
 
-        var parameters = new ModalParameters()
-            .Add("article", article)
-            .Add("categories", categories);
+        var parameters = new ModalParameters().Add("article", article);
         var options = new ModalOptions
             {
                 Size = ModalSize.Custom,
@@ -130,7 +135,7 @@
                 HideCloseButton = true
             };
         var modalResult = await Modal.Show<EditArticleDialog>(
-            selectedArticle == null ? "THÊM SẢN PHẨM" : "CHỈNH SỬA SẢN PHẨM",
+            selectedArticle == null ? "THÊM BÀI VIẾT" : "CHỈNH SỬA BÀI VIẾT",
             parameters,
             options).Result;
         if (modalResult.Confirmed)
@@ -150,19 +155,19 @@
     private async Task ShowViewDialogAsync(ArticleViewModel selectedArticle)
     {
         var images = await Mediator.Send(new GetArticleImagesByIdQuery(selectedArticle!.Id, true));
-        selectedArticle.Images = images;
+        selectedArticle.CoverImage = images.FirstOrDefault();
         var options = new ModalOptions
             {
                 Size = ModalSize.Custom,
                 SizeCustomClass = "blazored-modal-fixed-size-xlarge"
             };
-        var parameters = new ModalParameters().Add("Product", selectedArticle);
+        var parameters = new ModalParameters().Add("Article", selectedArticle);
         Modal.Show<ViewArticleDialog>("THÔNG TIN SẢN PHẨM", parameters, options);
     }
 
     private async Task ShowDeleteDialogAsync(ArticleViewModel selectedArticle)
     {
-        var parameters = new ModalParameters().Add("Product", selectedArticle);
+        var parameters = new ModalParameters().Add("Article", selectedArticle);
         var modalResult = await Modal.Show<DeleteArticleDialog>("XÓA SẢN PHẨM", parameters).Result;
         if (modalResult.Confirmed)
         {
@@ -170,7 +175,7 @@
             var result = await Mediator.Send(new DeleteArticleCommand(selectedArticle.Id, data));
             if (result)
             {
-                await Mediator.Send(new DeleteProductResourcesCommand(selectedArticle.Id, data));
+                await Mediator.Send(new DeleteReferencingResourcesCommand(selectedArticle.Id, data));
             }
             else
             {
@@ -187,8 +192,8 @@
         var result = await Mediator.Send(new UpdateArticleCommand(article));
         if (result.IsSuccess)
         {
-            await DeleteArticleImagesAsync(article.Images.Where(x => x.Status == UploadFileStatus.Removed).ToList(), true);
-            await CreateArticleImagesAsync((int)result.Data!, article.Images.Where(x => x.Status == UploadFileStatus.New).ToList());
+            await DeleteArticleImagesAsync(article.CoverImage, true);
+            await CreateArticleImagesAsync((int)result.Data!, article.CoverImage);
         }
 
         return result.IsSuccess;
@@ -199,31 +204,28 @@
         var result = await Mediator.Send(new CreateArticleCommand(article));
         if (result.IsSuccess)
         {
-            await CreateArticleImagesAsync((int)result.Data!, article.Images);
+            await CreateArticleImagesAsync((int)result.Data!, article.CoverImage);
         }
 
         return result.IsSuccess;
     }
 
-    private async Task CreateArticleImagesAsync(int articleId, List<ResourceViewModel> newImages)
+    private async Task CreateArticleImagesAsync(int articleId, ResourceViewModel image)
     {
-        foreach (var image in newImages)
-        {
-            var imageUploadResult = await Mediator.Send(new UploadToStorageCommand(image));
-            image.Url = imageUploadResult.Url;
-            image.BlobName = imageUploadResult.BlobName;
-            image.ProductId = articleId;
-            image.ResourceType = ResourceType.Image;
-            await Mediator.Send(new CreateResourceCommand(image));
-        }
+        var imageUploadResult = await Mediator.Send(new UploadToStorageCommand(image));
+        image.Url = imageUploadResult.Url;
+        image.BlobName = imageUploadResult.BlobName;
+        image.ProductId = articleId;
+        image.ResourceType = ResourceType.Image;
+        await Mediator.Send(new CreateResourceCommand(image));
     }
 
-    private async Task DeleteArticleImagesAsync(List<ResourceViewModel> images, bool forceDelete = false)
+    private async Task DeleteArticleImagesAsync(ResourceViewModel image, bool forceDelete = false)
     {
-        var result = await Mediator.Send(new DeleteResourcesCommand(images.Select(x => x.Id).ToList(), forceDelete));
+        var result = await Mediator.Send(new DeleteResourcesCommand([image.Id], forceDelete));
         if (result && forceDelete)
         {
-            await Mediator.Send(new DeleteFromStorageCommand(images.Select(x => x.BlobName).ToList()));
+            await Mediator.Send(new DeleteFromStorageCommand([image.BlobName]));
         }
     }
 

@@ -1,4 +1,4 @@
-﻿namespace CompanyPortal.Core.Enum;
+﻿namespace CompanyPortal.Core.Enums;
 
 public enum ResourceType
 {

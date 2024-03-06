@@ -18,11 +18,13 @@
         Toolbar="_toolbarItems"
         AllowExcelExport="true" AllowPdfExport="true">
     <GridPageSettings PageSize="10"></GridPageSettings>
-    <GridSearchSettings Fields="@(new[] { "Title", "Content", "Tags" })"></GridSearchSettings>
+    <GridSearchSettings Fields="@(new[] { "Fullname", "PhoneNumber", "Email", "Address" })"></GridSearchSettings>
     <GridEvents OnToolbarClick="ToolbarClickHandler" TValue="ArticleViewModel"></GridEvents>
     <GridColumns>
-        <GridColumn Field="@nameof(ArticleViewModel.Id)" HeaderText="ID" Width="64"></GridColumn>
-        <GridColumn Field="@nameof(ArticleViewModel.Title)" HeaderText="TIÊU ĐỀ" Width="486" Type="ColumnType.String"></GridColumn>
+        <GridColumn Field="@nameof(OrderViewModel.Fullname)" HeaderText="HỌ TÊN" Width="300" Type="ColumnType.String"></GridColumn>
+        <GridColumn Field="@nameof(OrderViewModel.PhoneNumber)" HeaderText="ĐIỆN THOẠI" Width="100" Type="ColumnType.String"></GridColumn>
+        <GridColumn Field="@nameof(OrderViewModel.Email)" HeaderText="EMAIL" Width="300" Type="ColumnType.String"></GridColumn>
+        <GridColumn Field="@nameof(OrderViewModel.Total)" HeaderText="TỔNG TIỀN" Width="200" Format="#,#00đ" Type="ColumnType.Decimal"></GridColumn>
         <GridColumn TextAlign="TextAlign.Right">
             <Template>
                 @{

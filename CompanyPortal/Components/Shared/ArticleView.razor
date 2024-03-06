@@ -1,7 +1,15 @@
-﻿<h3>Article View</h3>
+﻿<div class="row g-3 g-xl-0">
+    <div class="col-2 col-xl-3">
+        <img class="img-fluid post-thumb object-fit-cover" src="@Article.CoverImage.Url)" alt="image">
+    </div>
+    <div class="col">
+        <h3 class="title mb-1"><a class="text-link" href="blog-post.html">@Article.Title</a></h3>
+        <div class="meta mb-1"><span class="date">Published @Article.DateCreated.Date</span><span class="date">Published @Article.Views</span></div>
+        <div class="intro">@Article.Description</div>
+        <a class="text-link" href="blog-post.html">Read more →</a>
+    </div><!--//col-->
+</div><!--//row-->
 
 @code {
-    [Parameter] public ArticleViewModel? Article { get; set; }
-
-    [Parameter] public bool IsEditing { get; set; } = false;
+    [Parameter] public ArticleViewModel Article { get; set; } = default!;
 }

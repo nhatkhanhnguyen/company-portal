@@ -1,12 +1,25 @@
-﻿@using Syncfusion.Blazor.RichTextEditor
+﻿@using CompanyPortal.Core.Enums
+@using Syncfusion.Blazor.RichTextEditor
+@using CompanyPortal.Core.Extensions
 
 <EditForm Model="Article" OnValidSubmit="InsertOrUpdateAsync" id="FormArticle" class="row g-3">
     <FluentValidationValidator ValidatorType="typeof(ArticleFormValidator)" />
-
-    <div class="col-12 mb-3">
+    <div class="col-6 mb-3">
         <Label For="@(() => Article.Title)" CssClass="form-label"></Label>
         <InputText class="form-control" @bind-Value="Article.Title" />
         <ValidationMessage For="@(() => Article.Title)" />
+    </div>
+    <div class="col-6 mb-3">
+        <Label For="@(() => Article.Type)" CssClass="form-label"></Label>
+        <SfComboBox TValue="ArticleType" TItem="ComboBoxItem" @bind-Value="Article.Type" class="form-control" DataSource="_articleTypes">
+            <ComboBoxFieldSettings Value="Value" Text="Name"></ComboBoxFieldSettings>
+        </SfComboBox>
+        <ValidationMessage For="@(() => Article.Title)" />
+    </div>
+    <div class="col-12 mb-3">
+        <Label For="@(() => Article.Tags)" CssClass="form-label"></Label>
+        <InputText class="form-control" @bind-Value="Article.Tags" />
+        <ValidationMessage For="@(() => Article.Tags)" />
     </div>
     <div class="col-12 mb-3">
         <Label For="@(() => Article.Content)" CssClass="form-label"></Label>
@@ -14,11 +27,6 @@
             <RichTextEditorToolbarSettings Items="@_contentEditorTools" />
         </SfRichTextEditor>
         <ValidationMessage For="@(() => Article.Content)" />
-    </div>
-    <div class="col-12 mb-3">
-        <Label For="@(() => Article.Tags)" CssClass="form-label"></Label>
-        <InputText class="form-control" @bind-Value="Article.Tags" />
-        <ValidationMessage For="@(() => Article.Tags)" />
     </div>
     <div class="col-12">
         <div class="form-check d-flex">
@@ -44,6 +52,7 @@
     [Parameter] public ArticleViewModel Article { get; set; } = new();
     [Parameter] public List<CategoryViewModel> Categories { get; set; } = [];
 
+    private List<ComboBoxItem> _articleTypes = Enum.GetValues<ArticleType>().Select(e => new ComboBoxItem(e.GetDescription(), e)).ToList();
     private readonly List<ToolbarItemModel> _contentEditorTools =
     [
         new ToolbarItemModel { Command = ToolbarCommand.Bold },
@@ -69,4 +78,6 @@
         Article.IsActive = !Article.MarkedAsInactive;
         await BlazoredModal.CloseAsync(ModalResult.Ok<ArticleViewModel>(Article));
     }
+
+    record ComboBoxItem(string Name, ArticleType Value);
 }

@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
 using CompanyPortal.Core.Common;
-using CompanyPortal.Core.Enum;
+using CompanyPortal.Core.Enums;
 
 namespace CompanyPortal.Data.Database.Entities;
 
