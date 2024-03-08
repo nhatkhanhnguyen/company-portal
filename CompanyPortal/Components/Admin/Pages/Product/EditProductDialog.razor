@@ -37,11 +37,16 @@
                 <InputText type="text" maxlength="50" @bind-Value="Product.Tags" class="form-control" placeholder="airplane car ..." />
             </div>
             <div class="col-12 mb-3">
-                <Label For="@(() => Product.Description)" CssClass="form-label"></Label>
-                <SfRichTextEditor ID="descriptionEditor" MaxLength="700" @bind-Value="Product.Description" Height="400" Enabled="!_isLoading">
+                <Label For="@(() => Product.ShortDescription)" CssClass="form-label"></Label>
+                <InputTextArea type="text" maxlength="300" @bind-Value="Product.ShortDescription" class="form-control" placeholder="airplane car ..." />
+                <ValidationMessage For="@(() => Product.ShortDescription)" />
+            </div>
+            <div class="col-12 mb-3">
+                <Label For="@(() => Product.FullDescription)" CssClass="form-label"></Label>
+                <SfRichTextEditor ID="descriptionEditor" MaxLength="700" @bind-Value="Product.FullDescription" Height="400" Enabled="!_isLoading">
                     <RichTextEditorToolbarSettings Items="@_descriptionEditorTools" />
                 </SfRichTextEditor>
-                <ValidationMessage For="@(() => Product.Description)" />
+                <ValidationMessage For="@(() => Product.FullDescription)" />
             </div>
             <div class="col-12 mb-3">
                 <Label For="@(() => Product.Price)" CssClass="form-label"></Label>
@@ -97,9 +102,7 @@
     
     private async Task InsertOrUpdateAsync()
     {
-        _isLoading = true;
         Product.IsActive = !Product.MarkedAsInactive;
         await BlazoredModal.CloseAsync(ModalResult.Ok<ProductViewModel>(Product));
-        _isLoading = false;
     }
 }

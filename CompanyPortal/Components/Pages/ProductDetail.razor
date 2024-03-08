@@ -1,13 +1,18 @@
-﻿@page "/products"
+﻿@using CompanyPortal.CQRS.Products.Queries
+@using MediatR
 
-<div class="container">
-    <div class="row">
-        <div class="col-12 py-3">
-            <ProductView />
-        </div>
-    </div>
-</div>
+@inject IMediator Mediator
+
+@page "/product/{productId:int}"
+
+<ProductDetailView Product="Product" />
 
 @code {
+    [Parameter] public int ProductId { get; set; }
+    private ProductViewModel Product = default!;
 
+    protected override async Task OnInitializedAsync()
+    {
+        Product = await Mediator.Send(new GetProductByIdQuery(ProductId));
+    }
 }

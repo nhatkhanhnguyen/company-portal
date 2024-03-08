@@ -1,4 +1,4 @@
-﻿<button class="btn @ButtonCssClass" form="@ForForm" type="@Type" disabled="@IsLoading" @onclick="Trigger">
+﻿<button class="btn @ButtonCssClass" form="@ForForm" type="@Type" disabled="@IsLoading" @onclick="OnClick">
     @if (IsLoading)
     {
         <span class="spinner-border spinner-border-sm text-light" aria-hidden="true"></span>
@@ -26,9 +26,4 @@
     [Parameter] public string IconCss { get; set; } = string.Empty;
     [Parameter] public bool IsLoading { get; set; }
     [Parameter] public EventCallback<MouseEventArgs> OnClick { get; set; }
-
-    public async Task Trigger()
-    {
-        await OnClick.InvokeAsync();
-    }
 }

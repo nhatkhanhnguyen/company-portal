@@ -20,8 +20,11 @@ public class Product : EntityBase
     [Column(TypeName = "decimal(11, 0)")]
     public decimal Price { get; set; }
 
+    [MaxLength(300)]
+    public string ShortDescription { get; set; } = string.Empty;
+
     [MaxLength(700)]
-    public string Description { get; set; } = string.Empty;
+    public string FullDescription { get; set; } = string.Empty;
 
     [MaxLength(50)]
     public string Tags { get; set; } = string.Empty;

@@ -1,4 +1,3 @@
-using System.Reflection;
 using Blazored.Modal;
 
 using CompanyPortal.Components;
@@ -36,22 +35,18 @@ Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense(builder.Configura
     throw new InvalidOperationException("Syncfusion license not found"));
 
 // Add services to the container.
-builder.Services.AddRazorComponents()
-    .AddInteractiveServerComponents();
+builder.Services.AddRazorComponents().AddInteractiveServerComponents();
 builder.Services.AddSyncfusionBlazor();
 builder.Services.AddBlazoredModal();
 
-builder.Services.AddAutoMapper(typeof(Program).Assembly);
-
 builder.Services.AddCascadingAuthenticationState();
-
 builder.Services.AddAuthentication(options =>
-    {
-        options.DefaultScheme = IdentityConstants.ApplicationScheme;
-        options.DefaultSignInScheme = IdentityConstants.ExternalScheme;
-    })
-    .AddIdentityCookies();
+{
+    options.DefaultScheme = IdentityConstants.ApplicationScheme;
+    options.DefaultSignInScheme = IdentityConstants.ExternalScheme;
+}).AddIdentityCookies();
 
+builder.Services.AddAutoMapper(typeof(Program).Assembly);
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
@@ -73,7 +68,6 @@ builder.Services.AddMediatR(cfg =>
     cfg.RegisterServicesFromAssembly(typeof(Program).Assembly);
     cfg.AddOpenBehavior(typeof(QueryCachingPipelineBehavior<,>));
 });
-
 
 builder.Services.AddScoped<IdentityUserAccessor>();
 builder.Services.AddScoped<IdentityRedirectManager>();

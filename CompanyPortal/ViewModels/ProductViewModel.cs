@@ -14,7 +14,10 @@ public class ProductViewModel : ViewModelBase
     public string Name { get; set; } = string.Empty;
 
     [DisplayName("Mô tả ngắn")]
-    public string Description { get; set; } = string.Empty;
+    public string ShortDescription { get; set; } = string.Empty;
+
+    [DisplayName("Mô tả đầy đủ")]
+    public string FullDescription { get; set; } = string.Empty;
 
     [DisplayName("Giá")]
     [Column(TypeName = "decimal(11, 0)")]
@@ -34,6 +37,8 @@ public class ProductViewModel : ViewModelBase
 
     [DisplayName("Danh mục")]
     public int CategoryId { get; set; }
+
+    public int ReviewCount { get; set; }
 
     [DisplayName("Các tùy chọn")]
     public List<ProductVariantViewModel> Variants { get; set; } = [];

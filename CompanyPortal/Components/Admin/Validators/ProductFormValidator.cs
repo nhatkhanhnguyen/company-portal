@@ -9,7 +9,8 @@ public class ProductFormValidator : AbstractValidator<ProductViewModel>
     public ProductFormValidator()
     {
         RuleFor(x => x.Name).NotEmpty().WithMessage("Tên sản phẩm không được bỏ trống.");
-        RuleFor(x => x.Description).NotEmpty().WithMessage("Mô tả ngắn của sản phẩm không được bỏ trống.");
+        RuleFor(x => x.ShortDescription).NotEmpty().WithMessage("Mô tả ngắn của sản phẩm không được bỏ trống.");
+        RuleFor(x => x.FullDescription).NotEmpty().WithMessage("Mô tả đầy đủ của sản phẩm không được bỏ trống.");
         RuleFor(x => x.CategoryId).GreaterThan(0).WithMessage("Danh mục cần được chọn.");
         RuleFor(x => x.Price).GreaterThan(0).WithMessage("Bạn có chắc là sản phẩm này có giá là 0 đồng?.");
     }

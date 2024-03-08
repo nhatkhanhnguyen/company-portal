@@ -27,7 +27,7 @@
         Toolbar="_toolbarItems"
         AllowExcelExport="true" AllowPdfExport="true">
     <GridPageSettings PageSize="10"></GridPageSettings>
-    <GridSearchSettings Fields="@(new[] { "Name", "Description", "Price", "Tags" })"></GridSearchSettings>
+    <GridSearchSettings Fields="@(new[] { "Name", "ShortDescription", "Price", "Tags" })"></GridSearchSettings>
     <GridEvents OnToolbarClick="ToolbarClickHandler" TValue="ProductViewModel">
     </GridEvents>
     <GridColumns>
