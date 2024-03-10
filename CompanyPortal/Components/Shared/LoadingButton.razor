@@ -1,4 +1,4 @@
-﻿<button class="btn @ButtonCssClass" form="@ForForm" type="@Type" disabled="@IsLoading" @onclick="OnClick">
+﻿<button class="btn @ButtonCssClass" form="@ForForm" type="@Type" disabled="@IsLoading" @onclick="Click">
     @if (IsLoading)
     {
         <span class="spinner-border spinner-border-sm text-light" aria-hidden="true"></span>
@@ -24,6 +24,7 @@
     [Parameter] public string ForForm { get; set; } = string.Empty;
     [Parameter] public string Type { get; set; } = "button";
     [Parameter] public string IconCss { get; set; } = string.Empty;
-    [Parameter] public bool IsLoading { get; set; }
-    [Parameter] public EventCallback<MouseEventArgs> OnClick { get; set; }
+    [Parameter] public EventCallback<MouseEventArgs> Click { get; set; }
+
+    private bool IsLoading { get; set; }
 }

@@ -1,4 +1,5 @@
 ﻿using CompanyPortal.Core.Common;
+using CompanyPortal.Core.Enums;
 
 using System.ComponentModel;
 
@@ -8,6 +9,9 @@ public class OrderViewModel : ViewModelBase
 {
     [DisplayName("Họ và tên")]
     public string Fullname { get; set; } = string.Empty;
+
+    [DisplayName("Mã đơn hàng")]
+    public string ExternalId { get; set; } = string.Empty;
 
     [DisplayName("Số điện thoại")]
     public string PhoneNumber { get; set; } = string.Empty;
@@ -23,4 +27,11 @@ public class OrderViewModel : ViewModelBase
 
     [DisplayName("Chi tiết")]
     public List<OrderDetailViewModel> OrderDetails { get; set; } = [];
+
+    [DisplayName("Đánh dấu đơn hàng đã hủy")]
+    public bool MarkedAsInactive { get; set; } = false;
+
+    public OrderStatus Status { get; set; } = OrderStatus.Ordered;
+
+    public string Progress => $"{(float)Status}%";
 }

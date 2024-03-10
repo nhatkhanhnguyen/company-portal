@@ -1,5 +1,6 @@
-﻿<div id="@Id" class="modal fade @_modalClass" tabindex="-1" style="display:@_modalDisplay; overflow-y: auto;">
-    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable @SizeClass" role="document">
+﻿<div id="@Id" class="modal show d-block" tabindex="-1" role="dialog" @onmouseup:stopPropagation="true" @onmousedown:stopPropagation="true">
+    <div class="modal-backdrop show"></div>
+    <div class="modal-dialog animate__animated animate__@Animation animate__faster modal-dialog-centered modal-dialog-scrollable @SizeClass" style="z-index: 1050" role="document">
         <div class="modal-content">
             @if (Header is not null)
             {
@@ -23,21 +24,6 @@
     </div>
 </div>
 
-@if (_showBackdrop)
-{
-    <div class="modal-backdrop fade show"></div>
-}
-
-<style>
-    .modal-xxl {
-        width: 70vw;
-        max-width: none;
-        height: 70vh;
-        margin-right: auto;
-        margin-left: auto;
-    }
-</style>
-
 @code {
     [Parameter] public string Title { get; set; } = string.Empty;
     [Parameter] public string Id { get; set; } = string.Empty;
@@ -45,22 +31,5 @@
     [Parameter] public RenderFragment? Header { get; set; }
     [Parameter] public RenderFragment? Footer { get; set; }
     [Parameter] public string SizeClass { get; set; } = "";
-
-    private string _modalDisplay = "none;";
-    private string _modalClass = string.Empty;
-    private bool _showBackdrop = false;
-
-    public void Open()
-    {
-        _modalDisplay = "block";
-        _modalClass = "show";
-        _showBackdrop = true;
-    }
-
-    public void Close()
-    {
-        _modalDisplay = "none";
-        _modalClass = string.Empty;
-        _showBackdrop = false;
-    }
+    [Parameter] public string Animation { get; set; } = "zoomInDown";
 }

@@ -1,61 +1,92 @@
-﻿@using MediatR
+﻿@using CompanyPortal.CQRS.Categories.Queries
+@using MediatR
 @using CompanyPortal.CQRS.Products.Queries
 @using CompanyPortal.CQRS.Categories.Commands
 
 @inject IMediator Mediator
 
-<div class="row">
-    <div class="col-12">
-        <h3>@Category.Name</h3>
+<ModalDialog SizeClass="modal-lg">
+    <Header>
+        <h5 class="modal-title">THÔNG TIN DANH MỤC</h5>
+        <button type="button" class="btn-close" aria-label="Close" @onclick="CancelAsync"></button>
+    </Header>
+    <Body>
+        <div class="row">
+            <div class="col-12">
+                <h3>@Category.Name</h3>
 
-        @((MarkupString)Category.Description)
-        <div class="table-responsive mt-2">
-            <table class="table table-hover table-striped">
-                <thead>
-                    <tr>
-                        <th>Mã sản phẩm</th>
-                        <th>Tên sản phẩm</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var product in Category.Products)
+                @((MarkupString)Category.Description)
+                <div class="table-responsive mt-2">
+                    @if (_isLoading)
                     {
-                        <tr>
-                            <td>@product.ExternalId</td>
-                            <td>@product.Name</td>
-                            <td>
-                                <LoadingButton IconCss="fa-solid fa-trash" ButtonCssClass="btn-danger" IsLoading="_isLoading" LoadingText="Đang tải" NormalText="Xóa" OnClick="() => ShowRemoveProductDialogAsync(product)" />
-                            </td>
-                        </tr>
+                        <Spinner></Spinner>
                     }
-                </tbody>
-            </table>
+                    else
+                    {
+                        <table class="table table-hover table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Mã sản phẩm</th>
+                                    <th>Tên sản phẩm</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (Category.Products.Count() > 0)
+                                {
+                                    foreach (var product in Category.Products)
+                                    {
+                                        <tr>
+                                            <td>@product.ExternalId</td>
+                                            <td><a href="/product/@product.Id" target="_blank">@product.Name</a></td>
+                                            <td align="right">
+                                                <LoadingButton IconCss="fa-solid fa-trash" ButtonCssClass="btn-danger btn-sm rounded-pill" LoadingText="ĐANG XÓA" NormalText="Xóa" Click="() => ShowRemoveProductDialogAsync(product)" />
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="3" class="text-center">KHÔNG CÓ SẢN PHẨM</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+                </div>
+            </div>
         </div>
-    </div>
-</div>
-
+    </Body>
+</ModalDialog>
 
 @code {
     [CascadingParameter] IModalService Modal { get; set; } = default!;
     [CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; } = default!;
     [Parameter] public CategoryViewModel Category { get; set; } = default!;
+    private bool _isLoading;
 
     private string _errorMessage = string.Empty;
-    private bool _isLoading;
+
+    private async Task CancelAsync() => await BlazoredModal.CancelAsync();
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (Category != null)
+        {
+            _isLoading = true;
+            Category.Products = await Mediator.Send(new GetCategoryProductsByIdQuery(Category.Id, true));
+            _isLoading = false;
+        }
+    }
 
     private async Task ShowRemoveProductDialogAsync(ProductViewModel product)
     {
         var parameters = new ModalParameters().Add("Product", product);
-        var options = new ModalOptions
-            {
-                Size = ModalSize.Custom,
-                SizeCustomClass = "blazored-modal-fixed-size-large",
-            };
-        var modalResult = await Modal.Show<RemoveProductDialog>("Gỡ sản phẩm", parameters).Result;
+        var modalResult = await Modal.Show<RemoveProductDialog>(parameters, new() { UseCustomLayout = true }).Result;
         if (modalResult.Confirmed)
         {
             var result = await Mediator.Send(new UncategoriseProductCommand(product.Id));
-            if (result.IsError)
+            if (!result.IsError)
             {
                 Category.Products.Remove(product);
             }

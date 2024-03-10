@@ -1,8 +1,9 @@
-﻿@using CompanyPortal.Core.Enums
+﻿@using CompanyPortal.Core.Common
+@using CompanyPortal.Core.Enums
 @using Syncfusion.Blazor.RichTextEditor
 @using CompanyPortal.Core.Extensions
 
-<EditForm Model="Article" OnValidSubmit="InsertOrUpdateAsync" id="FormArticle" class="row g-3">
+<EditForm Model="Article" OnValidSubmit="Submit" id="FormArticle" class="row g-3">
     <FluentValidationValidator ValidatorType="typeof(ArticleFormValidator)" />
     <div class="col-6 mb-3">
         <Label For="@(() => Article.Title)" CssClass="form-label"></Label>
@@ -11,8 +12,8 @@
     </div>
     <div class="col-6 mb-3">
         <Label For="@(() => Article.Type)" CssClass="form-label"></Label>
-        <SfComboBox TValue="ArticleType" TItem="ComboBoxItem" @bind-Value="Article.Type" class="form-control" DataSource="_articleTypes">
-            <ComboBoxFieldSettings Value="Value" Text="Name"></ComboBoxFieldSettings>
+        <SfComboBox TValue="ArticleType" TItem="EnumToRecord<ArticleType>" @bind-Value="Article.Type" class="form-control" DataSource="_articleTypes">
+            <ComboBoxFieldSettings Value="Value" Text="DisplayName"></ComboBoxFieldSettings>
         </SfComboBox>
         <ValidationMessage For="@(() => Article.Title)" />
     </div>
@@ -42,8 +43,8 @@
 <div class="row">
     <div class="col-12 d-flex justify-content-end">
         <LoadingButton Type="submit" IconCss="fa-solid fa-floppy-disk" ForForm="FormProduct" ButtonCssClass="btn-primary rounded-pill me-2"
-                       LoadingText="ĐANG LƯU" NormalText="LƯU" OnClick="InsertOrUpdateAsync" />
-        <button type="button" class="btn btn-danger rounded-pill" @onclick="CancelAsync"><i class="fa-solid fa-xmark"></i> HỦY</button>
+                       LoadingText="ĐANG LƯU" NormalText="LƯU" />
+        <button type="button" class="btn btn-danger rounded-pill" @onclick="Cancel"><i class="fa-solid fa-xmark"></i> HỦY</button>
     </div>
 </div>
 
@@ -52,32 +53,17 @@
     [Parameter] public ArticleViewModel Article { get; set; } = new();
     [Parameter] public List<CategoryViewModel> Categories { get; set; } = [];
 
-    private List<ComboBoxItem> _articleTypes = Enum.GetValues<ArticleType>().Select(e => new ComboBoxItem(e.GetDescription(), e)).ToList();
-    private readonly List<ToolbarItemModel> _contentEditorTools =
-    [
-        new ToolbarItemModel { Command = ToolbarCommand.Bold },
-    new ToolbarItemModel { Command = ToolbarCommand.Italic },
-    new ToolbarItemModel { Command = ToolbarCommand.Underline },
-    new ToolbarItemModel { Command = ToolbarCommand.Separator },
-    new ToolbarItemModel { Command = ToolbarCommand.Formats },
-    new ToolbarItemModel { Command = ToolbarCommand.Alignments },
-    new ToolbarItemModel { Command = ToolbarCommand.UnorderedList },
-    new ToolbarItemModel { Command = ToolbarCommand.Separator },
-    new ToolbarItemModel { Command = ToolbarCommand.CreateLink },
-    new ToolbarItemModel { Command = ToolbarCommand.Image },
-    new ToolbarItemModel { Command = ToolbarCommand.Video },
-    new ToolbarItemModel { Command = ToolbarCommand.CreateTable },
-    new ToolbarItemModel { Command = ToolbarCommand.Separator }
-    ];
+    private List<EnumToRecord<ArticleType>> _articleTypes =
+        Enum.GetValues<ArticleType>()
+            .Select(e => new EnumToRecord<ArticleType>(e.GetDescription(), e))
+            .ToList();
+    private readonly List<ToolbarItemModel> _contentEditorTools = DataGrid.ContentEditorTools;
 
+    private void Cancel() => BlazoredModal.CancelAsync();
 
-    private async Task CancelAsync() => await BlazoredModal.CancelAsync();
-
-    private async Task InsertOrUpdateAsync()
+    private void Submit()
     {
         Article.IsActive = !Article.MarkedAsInactive;
-        await BlazoredModal.CloseAsync(ModalResult.Ok<ArticleViewModel>(Article));
+        BlazoredModal.CloseAsync(ModalResult.Ok<ArticleViewModel>(Article));
     }
-
-    record ComboBoxItem(string Name, ArticleType Value);
 }

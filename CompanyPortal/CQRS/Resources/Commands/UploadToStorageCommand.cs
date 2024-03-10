@@ -22,7 +22,7 @@ public record UploadToStorageCommand(ResourceViewModel Resource) : IRequest<(str
             await blobClient.UploadAsync(stream, true, cancellationToken);
             stream.Close();
 
-            return (blobClient.GenerateSasUri(BlobSasPermissions.Read, DateTimeOffset.UtcNow.AddDays(1)).ToString(),
+            return (blobClient.GenerateSasUri(BlobSasPermissions.Read, DateTimeOffset.UtcNow.AddDays(99999)).ToString(),
                 blobName);
         }
     }

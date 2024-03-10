@@ -31,6 +31,7 @@
     <PackageReference Include="Syncfusion.Blazor.Layouts" Version="24.2.6" />
     <PackageReference Include="Syncfusion.Blazor.Navigations" Version="24.2.6" />
     <PackageReference Include="Syncfusion.Blazor.RichTextEditor" Version="24.2.6" />
+    <PackageReference Include="Syncfusion.Blazor.SplitButtons" Version="24.2.6" />
     <PackageReference Include="Syncfusion.Blazor.Themes" Version="24.2.6" />
     <PackageReference Include="Syncfusion.Licensing" Version="24.2.6" />
   </ItemGroup>

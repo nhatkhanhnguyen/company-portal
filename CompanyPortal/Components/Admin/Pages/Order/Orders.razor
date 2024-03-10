@@ -1,83 +1,170 @@
-﻿@using CompanyPortal.CQRS.Orders.Queries
+﻿@using CompanyPortal.CQRS.Orders.Commands
+@using CompanyPortal.CQRS.Orders.Queries
+@using CompanyPortal.Core.Enums
+@using CompanyPortal.Core.Extensions
 @using Syncfusion.Blazor.Navigations
 @using Syncfusion.Blazor.RichTextEditor
 @using MediatR
+
+@page "/Administration/Orders"
 @inject IMediator Mediator
 
 <div class="row">
     <div class="col-12 d-flex justify-content-between">
-        <h3>ĐƠN HÀNG</h3>
+        <h2>ĐƠN HÀNG</h2>
+        <button class="btn btn-lg btn-primary rounded-pill" @onclick="() => ShowEditDialogAsync(null)">
+            <i class="fa-solid fa-circle-plus"></i> TẠO ĐƠN
+        </button>
     </div>
 </div>
 <hr />
-
-<SfGrid DataSource="@_listOrder" @ref="OrderGrid" ID="sfGridArticle"
-        AllowPaging="true" AllowSelection="true"
-        AllowSorting="true" AllowResizing="true"
-        EnableStickyHeader="true" EnableHover="true"
-        Toolbar="_toolbarItems"
-        AllowExcelExport="true" AllowPdfExport="true">
-    <GridPageSettings PageSize="10"></GridPageSettings>
-    <GridSearchSettings Fields="@(new[] { "Fullname", "PhoneNumber", "Email", "Address" })"></GridSearchSettings>
-    <GridEvents OnToolbarClick="ToolbarClickHandler" TValue="ArticleViewModel"></GridEvents>
-    <GridColumns>
-        <GridColumn Field="@nameof(OrderViewModel.Fullname)" HeaderText="HỌ TÊN" Width="300" Type="ColumnType.String"></GridColumn>
-        <GridColumn Field="@nameof(OrderViewModel.PhoneNumber)" HeaderText="ĐIỆN THOẠI" Width="100" Type="ColumnType.String"></GridColumn>
-        <GridColumn Field="@nameof(OrderViewModel.Email)" HeaderText="EMAIL" Width="300" Type="ColumnType.String"></GridColumn>
-        <GridColumn Field="@nameof(OrderViewModel.Total)" HeaderText="TỔNG TIỀN" Width="200" Format="#,#00đ" Type="ColumnType.Decimal"></GridColumn>
-        <GridColumn TextAlign="TextAlign.Right">
-            <Template>
-                @{
-                    var order = context as OrderViewModel;
-                    <button class="btn btn-sm btn-info rounded-pill" @onclick="() => ShowViewDialogAsync(order!)">
-                        <i class="fa-solid fa-eye"></i> XEM
-                    </button>
-                }
-            </Template>
-        </GridColumn>
-    </GridColumns>
-</SfGrid>
+@if (_listOrder.Count == 0 || _isLoading)
+{
+    <Spinner></Spinner>
+}
+else
+{
+    <SfGrid DataSource="@_listOrder" @ref="OrderGrid" ID="sfGridOrder"
+            AllowPaging="true" AllowSelection="true"
+            AllowSorting="true" AllowResizing="true"
+            EnableStickyHeader="true" EnableHover="true"
+            Toolbar="_toolbarItems"
+            AllowExcelExport="true" AllowPdfExport="true">
+        <GridPageSettings PageSize="10"></GridPageSettings>
+        <GridSearchSettings Fields="@(new[] { "Id", "ExternalId", "Fullname", "PhoneNumber", "Email", "Address", "Status", "DateCreated" })"></GridSearchSettings>
+        <GridEvents OnToolbarClick="ToolbarClickHandler" TValue="OrderViewModel"></GridEvents>
+        <GridColumns>
+            <GridColumn Field="@nameof(OrderViewModel.ExternalId)" HeaderText="MÃ ĐƠN" Width="128" Type="ColumnType.String"></GridColumn>
+            <GridColumn Field="@nameof(OrderViewModel.Fullname)" HeaderText="HỌ TÊN" Width="200" Type="ColumnType.String"></GridColumn>
+            <GridColumn Field="@nameof(OrderViewModel.PhoneNumber)" HeaderText="ĐIỆN THOẠI" Width="128" Type="ColumnType.String"></GridColumn>
+            <GridColumn Field="@nameof(OrderViewModel.DateCreated)" HeaderText="NGÀY ĐẶT" Width="156" Type="ColumnType.DateTime" Format="dd/MM/yyyy HH:mm"></GridColumn>
+            <GridColumn Field="@nameof(OrderViewModel.Total)" HeaderText="TỔNG TIỀN" Width="200" Format="#,#00đ" Type="ColumnType.Decimal"></GridColumn>
+            <GridColumn HeaderText="TRẠNG THÁI" Width="128">
+                <Template>
+                    @{
+                        var order = context as OrderViewModel;
+                        <span>@order.Status.GetDescription()</span>
+                    }
+                </Template>
+            </GridColumn>
+            <GridColumn TextAlign="TextAlign.Right">
+                <Template>
+                    @{
+                        var order = context as OrderViewModel;
+                        <button class="btn btn-sm btn-info rounded-pill" @onclick="() => ShowViewDialog(order!)">
+                            <i class="fa-solid fa-eye"></i> XEM
+                        </button>
+                    }
+                </Template>
+            </GridColumn>
+        </GridColumns>
+    </SfGrid>
+}
 
 @code {
     [CascadingParameter] public IModalService Modal { get; set; } = default!;
+    private SfGrid<OrderViewModel> OrderGrid { get; set; } = default!;
+    private List<OrderViewModel> _listOrder = [];
+    private readonly List<ItemModel> _toolbarItems = DataGrid.ToolbarItems("sfGridOrder");
+    private bool _isLoading;
 
-    private SfGrid<ArticleViewModel> OrderGrid { get; set; } = default!;
-    private List<ArticleViewModel> _listOrder = [];
-
-    private readonly List<ItemModel> _toolbarItems =
-    [
-        new ItemModel { Text = "Xuất Excel", Id = "sfGridArticle_excelexport", PrefixIcon = "fa-solid fa-file-excel" },
-        new ItemModel { Text = "Xuất PDF", Id = "sfGridArticle_pdfexport", PrefixIcon = "fa-solid fa-file-pdf" }
-    ];
-
-    private readonly List<ToolbarItemModel> _contentEditorTools =
-    [
-        new ToolbarItemModel { Command = ToolbarCommand.Bold },
-        new ToolbarItemModel { Command = ToolbarCommand.Italic },
-        new ToolbarItemModel { Command = ToolbarCommand.Underline },
-        new ToolbarItemModel { Command = ToolbarCommand.Separator },
-        new ToolbarItemModel { Command = ToolbarCommand.Formats },
-        new ToolbarItemModel { Command = ToolbarCommand.Alignments },
-        new ToolbarItemModel { Command = ToolbarCommand.UnorderedList },
-        new ToolbarItemModel { Command = ToolbarCommand.Separator },
-        new ToolbarItemModel { Command = ToolbarCommand.CreateLink },
-        new ToolbarItemModel { Command = ToolbarCommand.Image },
-        new ToolbarItemModel { Command = ToolbarCommand.Video },
-        new ToolbarItemModel { Command = ToolbarCommand.CreateTable },
-        new ToolbarItemModel { Command = ToolbarCommand.Separator }
-    ];
-
-    private async Task ShowViewDialogAsync(OrderViewModel selectedOrder)
+    protected override void OnInitialized()
     {
-        var orderDetails = await Mediator.Send(new GetOrderDetailByIdQuery(selectedOrder!.Id, true));
-        selectedOrder.OrderDetails = orderDetails;
-        var options = new ModalOptions
+        _listOrder = new List<OrderViewModel>
+        {
+            new()
             {
-                Size = ModalSize.Custom,
-                SizeCustomClass = "blazored-modal-fixed-size-xlarge"
-            };
+                Fullname = "Galvin Nguyen",
+                PhoneNumber = "1092381209",
+                Address = "askdhjakjshdkjahsd",
+                DateCreated = DateTimeOffset.Now,
+                Email = "test@gmail.com",
+                ExternalId = "ORDER-123",
+                Id = 1,
+                OrderDetails = new List<OrderDetailViewModel>
+                {
+                    new(1, "TEST 1", "https://img.freepik.com/free-photo/top-view-cosmetic-orders_23-2148549123.jpg", 10, 1000),
+                    new(2, "TEST 2", "https://img.freepik.com/free-photo/cosmetic-containers-with-orange_23-2148549144.jpg", 100, 10000),
+                },
+                Status = OrderStatus.Ordered,
+                Total = 123123
+            }
+        };
+    }
+
+    private void ShowViewDialog(OrderViewModel selectedOrder)
+    {
         var parameters = new ModalParameters().Add("Order", selectedOrder);
-        Modal.Show<ViewOrderDialog>("THÔNG TIN ĐẶT HÀNG", parameters, options);
+        Modal.Show<ViewOrderDialog>("THÔNG TIN ĐẶT HÀNG", new ModalOptions { UseCustomLayout = true });
+    }
+
+    private async Task ShowEditDialogAsync(OrderViewModel? selectedOrder)
+    {
+        var order = selectedOrder != null ? selectedOrder.Clone()! : new OrderViewModel();
+        var parameters = new ModalParameters().Add("order", order);
+        var modalResult = await Modal.Show<EditOrderDialog>(parameters, new() { UseCustomLayout = true }).Result;
+
+        if (modalResult.Confirmed)
+        {
+            _isLoading = true;
+            var result = selectedOrder != null
+                ? await UpdateOrderAsync((OrderViewModel)modalResult.Data!)
+                : await CreateOrderAsync((OrderViewModel)modalResult.Data!);
+            if (result)
+            {
+                _listOrder = await Mediator.Send(new GetAllOrdersQuery(true));
+            }
+            else
+            {
+                Modal.Show<ErrorDialog>("CÓ LỖI XẢY RA!", new ModalParameters().Add("ErrorMessage", "Có lỗi xảy ra khi lưu sản phẩm. Vui lòng thử lại sau!"));
+            }
+            _isLoading = false;
+        }
+    }
+
+    private async Task<bool> UpdateOrderAsync(OrderViewModel order)
+    {
+        var result = await Mediator.Send(new UpdateOrderCommand(order));
+        if (result.IsSuccess)
+        {
+            await DeleteOrderDetailsAsync(order.OrderDetails.Where(x => x.Status == OrderDetailStatus.Removed).ToList(), true);
+            await CreateOrderDetailsAsync((int)result.Data!, order.OrderDetails.Where(x => x.Status == OrderDetailStatus.New).ToList());
+            await UpdateOrderDetailsAsync(order.OrderDetails.Where(x => x.Status == OrderDetailStatus.Modified).ToList());
+        }
+
+        return result.IsSuccess;
+    }
+
+    private async Task<bool> CreateOrderAsync(OrderViewModel order)
+    {
+        var result = await Mediator.Send(new CreateOrderCommand(order));
+        if (result.IsSuccess)
+        {
+            await CreateOrderDetailsAsync((int)result.Data!, order.OrderDetails);
+        }
+
+        return result.IsSuccess;
+    }
+
+    private async Task CreateOrderDetailsAsync(int orderId, List<OrderDetailViewModel> orderDetails)
+    {
+        foreach (var orderDetail in orderDetails)
+        {
+
+        }
+    }
+
+    private async Task DeleteOrderDetailsAsync(List<OrderDetailViewModel> orderDetails, bool forceDelete = false)
+    {
+        await Mediator.Send(new DeleteOrderDetailsCommand(orderDetails.Select(x => x.Id).ToList(), forceDelete));
+    }
+
+    private async Task UpdateOrderDetailsAsync(List<OrderDetailViewModel> orderDetails)
+    {
+        foreach (var orderDetail in orderDetails)
+        {
+            await Mediator.Send(new UpdateOrderDetailCommand(orderDetail));
+        }
     }
 
     // Events

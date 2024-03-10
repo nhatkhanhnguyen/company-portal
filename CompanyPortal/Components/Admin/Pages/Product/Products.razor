@@ -12,114 +12,104 @@
 
 <div class="row">
     <div class="col-12 d-flex justify-content-between">
-        <h3>SẢN PHẨM</h3>
-        <button class="btn btn-primary rounded-pill btn-sm" @onclick="() => ShowEditDialogAsync(null)">
-            <i class="fa-regular fa-square-plus"></i> THÊM
+        <h2>SẢN PHẨM</h2>
+        <button class="btn btn-lg btn-primary rounded-pill" @onclick="() => ShowEditDialogAsync(null)">
+            <i class="fa-solid fa-circle-plus"></i> THÊM
         </button>
     </div>
 </div>
 <hr />
-
-<SfGrid DataSource="@_listProduct" @ref="ProductGrid" ID="sfGridProduct"
-        AllowPaging="true" AllowSelection="true"
-        AllowSorting="true" AllowResizing="true"
-        EnableStickyHeader="true" EnableHover="true"
-        Toolbar="_toolbarItems"
-        AllowExcelExport="true" AllowPdfExport="true">
-    <GridPageSettings PageSize="10"></GridPageSettings>
-    <GridSearchSettings Fields="@(new[] { "Name", "ShortDescription", "Price", "Tags" })"></GridSearchSettings>
-    <GridEvents OnToolbarClick="ToolbarClickHandler" TValue="ProductViewModel">
-    </GridEvents>
-    <GridColumns>
-        <GridColumn Field="@nameof(ProductViewModel.Id)" HeaderText="ID" Width="50"></GridColumn>
-        <GridColumn Field="@nameof(ProductViewModel.ExternalId)" HeaderText="MÃ" Width="128"></GridColumn>
-        <GridColumn Field="@nameof(ProductViewModel.Name)" HeaderText="TÊN" Width="386" Type="ColumnType.String"></GridColumn>
-        <GridColumn Field="@nameof(ProductViewModel.CategoryName)" HeaderText="DANH MỤC" Width="128" Type="ColumnType.String"></GridColumn>
-        <GridColumn Field="@nameof(ProductViewModel.Price)" Width="128" HeaderText="GIÁ" Format="#,#00đ" Type="ColumnType.Decimal"></GridColumn>
-        <GridColumn HeaderText="TAGS">
-            <Template>
-                @{
-                    var product = context as ProductViewModel;
-                    foreach (var tag in product!.Tags.Split(' '))
-                    {
-                        <span class="badge rounded-pill text-bg-info me-1">@tag</span>
+@if (_isLoading)
+{
+    <Spinner></Spinner>
+}
+else
+{
+    <SfGrid DataSource="@_listProduct" @ref="ProductGrid" ID="sfGridProduct"
+            AllowPaging="true" AllowSelection="true"
+            AllowSorting="true" AllowResizing="true"
+            EnableAltRow="true"
+            EnableStickyHeader="true" EnableHover="true"
+            Toolbar="_toolbarItems"
+            AllowExcelExport="true" AllowPdfExport="true">
+        <GridPageSettings PageSize="10"></GridPageSettings>
+        <GridSearchSettings Fields="@(new[] { "Id", "ExternalId", "Name", "ShortDescription", "Price", "Tags" })"></GridSearchSettings>
+        <GridEvents OnToolbarClick="ToolbarClickHandler" TValue="ProductViewModel">
+        </GridEvents>
+        <GridColumns>
+            <GridColumn Field="@nameof(ProductViewModel.Id)" HeaderText="ID" Width="50"></GridColumn>
+            <GridColumn Field="@nameof(ProductViewModel.ExternalId)" HeaderText="MÃ" Width="128"></GridColumn>
+            <GridColumn Field="@nameof(ProductViewModel.Name)" HeaderText="TÊN" Width="386" Type="ColumnType.String"></GridColumn>
+            <GridColumn Field="@nameof(ProductViewModel.CategoryName)" HeaderText="DANH MỤC" Width="128" Type="ColumnType.String"></GridColumn>
+            <GridColumn Field="@nameof(ProductViewModel.Price)" Width="128" HeaderText="GIÁ" Format="#,#00đ" Type="ColumnType.Decimal"></GridColumn>
+            <GridColumn HeaderText="TAGS">
+                <Template>
+                    @{
+                        var product = context as ProductViewModel;
+                        foreach (var tag in product!.Tags.Split(' '))
+                        {
+                            <span class="badge rounded-pill text-bg-info me-1">@tag</span>
+                        }
                     }
-                }
-            </Template>
-        </GridColumn>
-        <GridColumn HeaderText="ẨN" TextAlign="TextAlign.Center" Width="50">
-            <Template>
-                @{
-                    var product = context as ProductViewModel;
-                    if (!product!.IsActive)
-                    {
-                        <i class="fa-solid fa-check" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Hiện"></i>
+                </Template>
+            </GridColumn>
+            <GridColumn HeaderText="ẨN" TextAlign="TextAlign.Center" Width="50">
+                <Template>
+                    @{
+                        var product = context as ProductViewModel;
+                        if (!product!.IsActive)
+                        {
+                            <i class="fa-solid fa-check" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Hiện"></i>
+                        }
                     }
-                }
-            </Template>
-        </GridColumn>
-        <GridColumn TextAlign="TextAlign.Right">
-            <Template>
-                @{
-                    var product = context as ProductViewModel;
-                    <button class="btn btn-sm btn-info rounded-pill" @onclick="() => ShowViewDialogAsync(product!)">
-                        <i class="fa-solid fa-eye"></i> XEM
-                    </button>
-                    <button class="btn btn-sm btn-primary rounded-pill" @onclick="() => ShowEditDialogAsync(product)">
-                        <i class="fa-solid fa-pen-to-square"></i> SỬA
-                    </button>
-                    <button class="btn btn-sm btn-danger rounded-pill" @onclick="() => ShowDeleteDialogAsync(product!)">
-                        <i class="fa-solid fa-trash"></i> XÓA
-                    </button>
-                }
-            </Template>
-        </GridColumn>
-    </GridColumns>
-</SfGrid>
+                </Template>
+            </GridColumn>
+            <GridColumn TextAlign="TextAlign.Right">
+                <Template>
+                    @{
+                        var product = context as ProductViewModel;
+                        <button class="btn btn-sm btn-info rounded-pill" @onclick="() => ShowViewDialogAsync(product!)">
+                            <i class="fa-solid fa-eye"></i> XEM
+                        </button>
+                        <button class="btn btn-sm btn-primary rounded-pill" @onclick="() => ShowEditDialogAsync(product)">
+                            <i class="fa-solid fa-pen-to-square"></i> SỬA
+                        </button>
+                        <button class="btn btn-sm btn-danger rounded-pill" @onclick="() => ShowDeleteDialogAsync(product!)">
+                            <i class="fa-solid fa-trash"></i> XÓA
+                        </button>
+                    }
+                </Template>
+            </GridColumn>
+        </GridColumns>
+    </SfGrid>
+}
 
 @code {
     [CascadingParameter] public IModalService Modal { get; set; } = default!;
-
     private SfGrid<ProductViewModel> ProductGrid { get; set; } = default!;
     private List<ProductViewModel> _listProduct = [];
-
-    private readonly List<ItemModel> _toolbarItems =
-    [
-        new ItemModel { Text = "Xuất Excel", Id = "sfGridProduct_excelexport", PrefixIcon = "fa-solid fa-file-excel" },
-        new ItemModel { Text = "Xuất PDF", Id = "sfGridProduct_pdfexport", PrefixIcon = "fa-solid fa-file-pdf" }
-    ];
+    private readonly List<ItemModel> _toolbarItems = DataGrid.ToolbarItems("sfGridProduct");
+    private bool _isLoading;
 
     protected override async Task OnInitializedAsync()
     {
+        _isLoading = true;
         _listProduct = await Mediator.Send(new GetAllProductsQuery(true));
+        _isLoading = false;
     }
 
     private async Task ShowEditDialogAsync(ProductViewModel? selectedProduct)
     {
-        var product = selectedProduct != null ? selectedProduct.Clone() : new ProductViewModel();
-        var categories = await Mediator.Send(new GetAllCategoriesQuery());
-        if (selectedProduct != null)
-        {
-            var images = await Mediator.Send(new GetProductImagesByIdQuery(product.Id, true));
-            product.Images = [.. images];
-        }
+        var product = selectedProduct != null ? selectedProduct.Clone()! : new ProductViewModel();
+        var parameters = new ModalParameters().Add("product", product);
+        var modalResult = await Modal.Show<EditProductDialog>(parameters, new() { UseCustomLayout = true }).Result;
 
-        var parameters = new ModalParameters()
-            .Add("product", product)
-            .Add("categories", categories);
-        var options = new ModalOptions
-            {
-                Size = ModalSize.Custom,
-                SizeCustomClass = "blazored-modal-fixed-size-xlarge",
-                HideCloseButton = true
-            };
-        var modalResult = await Modal.Show<EditProductDialog>(
-            selectedProduct == null ? "THÊM SẢN PHẨM" : "CHỈNH SỬA SẢN PHẨM",
-            parameters,
-            options).Result;
         if (modalResult.Confirmed)
         {
-            var result = selectedProduct != null ? await UpdateProductAsync((ProductViewModel)modalResult.Data!) : await CreateProductAsync((ProductViewModel)modalResult.Data!);
+            _isLoading = true;
+            var result = selectedProduct != null
+                ? await UpdateProductAsync((ProductViewModel)modalResult.Data!)
+                : await CreateProductAsync((ProductViewModel)modalResult.Data!);
             if (result)
             {
                 _listProduct = await Mediator.Send(new GetAllProductsQuery(true));
@@ -128,6 +118,7 @@
             {
                 Modal.Show<ErrorDialog>("CÓ LỖI XẢY RA!", new ModalParameters().Add("ErrorMessage", "Có lỗi xảy ra khi lưu sản phẩm. Vui lòng thử lại sau!"));
             }
+            _isLoading = false;
         }
     }
 
@@ -135,19 +126,14 @@
     {
         var images = await Mediator.Send(new GetProductImagesByIdQuery(selectedProduct!.Id, true));
         selectedProduct.Images = images;
-        var options = new ModalOptions
-            {
-                Size = ModalSize.Custom,
-                SizeCustomClass = "blazored-modal-fixed-size-xlarge"
-            };
         var parameters = new ModalParameters().Add("Product", selectedProduct);
-        Modal.Show<ViewProductDialog>("THÔNG TIN SẢN PHẨM", parameters, options);
+        Modal.Show<ViewProductDialog>("THÔNG TIN SẢN PHẨM", parameters, new() { UseCustomLayout = true });
     }
 
     private async Task ShowDeleteDialogAsync(ProductViewModel selectedProduct)
     {
         var parameters = new ModalParameters().Add("Product", selectedProduct);
-        var modalResult = await Modal.Show<DeleteProductDialog>("XÓA SẢN PHẨM", parameters).Result;
+        var modalResult = await Modal.Show<DeleteProductDialog>("XÓA SẢN PHẨM", parameters, new() { UseCustomLayout = true }).Result;
         if (modalResult.Confirmed)
         {
             var data = (bool)modalResult.Data!;
@@ -160,15 +146,16 @@
             {
                 Modal.Show<ErrorDialog>("CÓ LỖI XẢY RA!", new ModalParameters().Add("ErrorMessage", "Có lỗi xảy ra khi xóa sản phẩm. Vui lòng thử lại sau!"));
             }
+            _isLoading = true;
+            _listProduct = await Mediator.Send(new GetAllProductsQuery(true));
+            _isLoading = false;
         }
-        _listProduct = await Mediator.Send(new GetAllProductsQuery(true));
     }
 
     private async Task ToolbarClickHandler(ClickEventArgs args)
     {
         switch (args.Item.Id)
         {
-            // ProductId is combination of Grid's ID and itemname
             case "sfGridProduct_excelexport":
                 await ProductGrid.ExportToExcelAsync();
                 break;

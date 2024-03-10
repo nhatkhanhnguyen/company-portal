@@ -14,5 +14,7 @@
     protected override async Task OnInitializedAsync()
     {
         Product = await Mediator.Send(new GetProductByIdQuery(ProductId));
+        var images = await Mediator.Send(new GetProductImagesByIdQuery(ProductId));
+        Product.Images = images;
     }
 }

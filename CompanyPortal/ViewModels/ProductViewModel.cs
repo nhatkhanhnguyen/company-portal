@@ -23,7 +23,7 @@ public class ProductViewModel : ViewModelBase
     [Column(TypeName = "decimal(11, 0)")]
     public decimal Price { get; set; }
 
-    [DisplayName("Tags, cách nhau bằng dấu phẩy")]
+    [DisplayName("Tags, cách nhau bằng khoảng trắng")]
     public string Tags { get; set; } = string.Empty;
 
     [DisplayName("Ảnh sản phẩm")]

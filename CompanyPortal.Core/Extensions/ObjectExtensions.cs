@@ -12,14 +12,14 @@ public static class ObjectExtensions
         return JsonConvert.DeserializeObject<T>(JsonConvert.SerializeObject(obj));
     }
 
-    public static string? GetDescription(this Enum value)
+    public static string GetDescription(this Enum value)
     {
-        FieldInfo fieldInfo = value.GetType().GetField(value.ToString());
+        var fieldInfo = value.GetType().GetField(value.ToString());
         if (fieldInfo == null)
         {
-            return null;
+            return string.Empty;
         }
-        var attribute = (DescriptionAttribute)fieldInfo.GetCustomAttribute(typeof(DescriptionAttribute));
-        return attribute.Description;
+        var attribute = fieldInfo.GetCustomAttribute(typeof(DescriptionAttribute)) as DescriptionAttribute;
+        return attribute?.Description ?? string.Empty;
     }
 }

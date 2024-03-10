@@ -1,12 +1,8 @@
-.blazored-modal-fixed-size-large {
-    width: 800px;
-}
-
-.blazored-modal-fixed-size-xlarge {
-    width: 1200px;
-}
-
 .validation-message {
     font-size: .875em;
     color: red;
+}
+
+.fs-10 {
+    font-size: 10pt;
 }

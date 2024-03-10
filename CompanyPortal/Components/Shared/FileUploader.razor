@@ -47,9 +47,9 @@
                                 </td>
                             }
                             <td class="@TableRowCss">
-                                <b>Tên file: @(file.Name.Length > 32 ? file.Name[..32] : file.Name) ...</b>
+                                <span class="fw-semibold">Tên file: @(file.Name.Length > 32 ? file.Name[..32] : file.Name) ...</span>
                                 <br />
-                                <i>Kích thước: @Math.Round(file.Size / 1024, 2) KB</i>
+                                <i class="fs-10">Kích thước: @Math.Round(file.Size / 1024, 2) KB</i>
                             </td>
                             <td class="@TableRowCss">
                                 <button type="button" class="btn btn-danger btn-sm" @onclick="() => file.Status = UploadFileStatus.Removed">

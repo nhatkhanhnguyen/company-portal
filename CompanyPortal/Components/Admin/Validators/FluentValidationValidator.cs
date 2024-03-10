@@ -8,16 +8,16 @@ namespace CompanyPortal.Components.Admin.Validators;
 public class FluentValidationValidator : ComponentBase
 {
     [CascadingParameter]
-    private EditContext EditContext { get; set; }
+    private EditContext? EditContext { get; set; }
 
     [Parameter]
-    public Type ValidatorType { get; set; }
+    public required Type ValidatorType { get; set; }
 
-    private IValidator Validator;
-    private ValidationMessageStore ValidationMessageStore;
+    private IValidator? Validator;
+    private ValidationMessageStore? ValidationMessageStore;
 
     [Inject]
-    private IServiceProvider ServiceProvider { get; set; }
+    private IServiceProvider? ServiceProvider { get; set; }
 
     public override async Task SetParametersAsync(ParameterView parameters)
     {
@@ -49,7 +49,7 @@ public class FluentValidationValidator : ComponentBase
 
     private async void ValidationRequested(object sender, ValidationRequestedEventArgs args)
     {
-        ValidationMessageStore.Clear();
+        ValidationMessageStore?.Clear();
         var validationContext =
             new ValidationContext<object>(EditContext.Model);
         var result =
@@ -60,7 +60,7 @@ public class FluentValidationValidator : ComponentBase
     private async void FieldChanged(object sender, FieldChangedEventArgs args)
     {
         var fieldIdentifier = args.FieldIdentifier;
-        ValidationMessageStore.Clear(fieldIdentifier);
+        ValidationMessageStore?.Clear(fieldIdentifier);
 
         var propertiesToValidate = new[] { fieldIdentifier.FieldName };
         var fluentValidationContext =

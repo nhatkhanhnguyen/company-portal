@@ -1,4 +1,5 @@
 ﻿using CompanyPortal.Core.Common;
+using CompanyPortal.Core.Enums;
 
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -22,5 +23,7 @@ public class Order : EntityBase
     public virtual ICollection<OrderDetail> OrderDetails { get; set; } = [];
 
     [Column(TypeName = "decimal(11, 0)")]
-    public decimal Total { get; set; }
+    public decimal Total =>  OrderDetails.Sum(x => x.Quantity * x.Price);
+
+    public OrderStatus Status { get; set; } = OrderStatus.Ordered;
 }

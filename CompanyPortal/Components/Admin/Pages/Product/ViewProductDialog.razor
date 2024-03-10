@@ -1,6 +1,16 @@
-﻿<ProductDetailView IsEditing="true" Product="Product" />
+﻿<ModalDialog SizeClass="modal-xl">
+    <Header>
+        <h5 class="modal-title">THÔNG TIN SẢN PHẨM</h5>
+        <button type="button" class="btn-close" aria-label="Close" @onclick="Cancel"></button>
+    </Header>
+    <Body>
+        <ProductDetailView IsEditing="true" Product="Product" />
+    </Body>
+</ModalDialog>
 
 @code {
     [CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; } = default!;
     [Parameter] public ProductViewModel Product { get; set; } = new();
+
+    private void Cancel() => BlazoredModal.CancelAsync();
 }
