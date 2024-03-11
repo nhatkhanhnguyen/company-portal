@@ -20,8 +20,13 @@ public class AutoMapperProfile : Profile
             .ForMember(x => x.Products, opt => opt.Ignore())
             .ReverseMap()
             .ForMember(x => x.Products, opt => opt.Ignore());
-        CreateMap<Article, ArticleViewModel>().ReverseMap();
-        CreateMap<Order, OrderViewModel>().ReverseMap();
+        CreateMap<Article, ArticleViewModel>()
+            .ReverseMap();
+        CreateMap<Order, OrderViewModel>()
+            .ForMember(x => x.Total, opt => opt.MapFrom(y => y.OrderDetails.Sum(z => z.Price * z.Quantity)))
+            .ReverseMap()
+            .ForMember(x => x.OrderDetails, opt => opt.Ignore());
+        CreateMap<OrderDetail, OrderDetailViewModel>().ReverseMap();
         CreateMap<Resource, ResourceViewModel>().ReverseMap();
         CreateMap<ContactRequest, ContactRequestViewModel>().ReverseMap();
     }

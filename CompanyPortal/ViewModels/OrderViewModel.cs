@@ -1,5 +1,6 @@
 ﻿using CompanyPortal.Core.Common;
 using CompanyPortal.Core.Enums;
+using CompanyPortal.Core.Extensions;
 
 using System.ComponentModel;
 
@@ -31,7 +32,10 @@ public class OrderViewModel : ViewModelBase
     [DisplayName("Đánh dấu đơn hàng đã hủy")]
     public bool MarkedAsInactive { get; set; } = false;
 
+    [DisplayName("Trạng thái đơn hàng")]
     public OrderStatus Status { get; set; } = OrderStatus.Ordered;
 
-    public string Progress => $"{(float)Status}%";
+    public OrderStatus NextStatus => ObjectExtensions.GetNextEnumValueInOrder<OrderStatus>(Status);
+
+    public string Progress => $"{Status.GetCustomValue()}%";
 }

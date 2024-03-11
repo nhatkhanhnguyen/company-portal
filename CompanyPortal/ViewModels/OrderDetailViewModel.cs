@@ -33,6 +33,11 @@ public class OrderDetailViewModel : ViewModelBase
         Quantity = quantity;
         Price = price;
     }
+
+    public OrderDetailViewModel()
+    {
+        
+    }
 }
 
 public enum OrderDetailStatus

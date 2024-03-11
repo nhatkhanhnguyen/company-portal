@@ -21,7 +21,7 @@ public record DeleteOrderDetailsCommand(List<int> OrderDetailIds, bool ForceDele
 			catch (Exception ex)
 			{
                 logger.LogError(ex, ex.Message);
-                return Result.Error<string>("Có lỗi xảy ra khi đang lưu chi tiết đặt hàng vào CSDL.");
+                return Result.Error<string>("Có lỗi xảy ra khi xóa lưu chi tiết đặt hàng khỏi CSDL.");
             }
         }
     }

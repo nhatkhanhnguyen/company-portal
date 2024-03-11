@@ -75,10 +75,12 @@ builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuth
 builder.Services.AddScoped<IUserPrincipalsProvider, UserPrincipalsProvider>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped(typeof(IRepository<>), typeof(RepositoryBase<>));
+builder.Services.AddScoped<PreloadService>();
 
 builder.Services.AddScoped<ProductFormValidator>();
 builder.Services.AddScoped<CategoryFormValidator>();
 builder.Services.AddScoped<ArticleFormValidator>();
+builder.Services.AddScoped<OrderFormValidator>();
 
 builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
 builder.Services.AddAzureClients(clientBuilder =>

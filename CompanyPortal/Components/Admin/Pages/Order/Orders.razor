@@ -1,5 +1,6 @@
 ﻿@using CompanyPortal.CQRS.Orders.Commands
 @using CompanyPortal.CQRS.Orders.Queries
+@using CompanyPortal.Core.Common
 @using CompanyPortal.Core.Enums
 @using CompanyPortal.Core.Extensions
 @using Syncfusion.Blazor.Navigations
@@ -18,7 +19,7 @@
     </div>
 </div>
 <hr />
-@if (_listOrder.Count == 0 || _isLoading)
+@if (_isLoading)
 {
     <Spinner></Spinner>
 }
@@ -43,7 +44,17 @@ else
                 <Template>
                     @{
                         var order = context as OrderViewModel;
-                        <span>@order.Status.GetDescription()</span>
+                        <span>@order!.Status.GetEnumDescription()</span>
+                    }
+                </Template>
+            </GridColumn>
+            <GridColumn TextAlign="TextAlign.Right">
+                <Template>
+                    @{
+                        var order = context as OrderViewModel;
+                        <button class="btn btn-success btn-sm rounded-pill" type="button">
+                            @order!.Status.GetEnumDescription() <i class="fa-solid fa-arrow-right"></i> @order.NextStatus.GetEnumDescription()
+                        </button>
                     }
                 </Template>
             </GridColumn>
@@ -53,6 +64,12 @@ else
                         var order = context as OrderViewModel;
                         <button class="btn btn-sm btn-info rounded-pill" @onclick="() => ShowViewDialog(order!)">
                             <i class="fa-solid fa-eye"></i> XEM
+                        </button>
+                        <button class="btn btn-sm btn-primary rounded-pill" @onclick="() => ShowEditDialogAsync(order)">
+                            <i class="fa-solid fa-pen-to-square"></i> SỬA
+                        </button>
+                        <button class="btn btn-sm btn-danger rounded-pill" @onclick="() => ShowDeleteDialogAsync(order!)">
+                            <i class="fa-solid fa-trash"></i> XÓA
                         </button>
                     }
                 </Template>
@@ -66,36 +83,19 @@ else
     private SfGrid<OrderViewModel> OrderGrid { get; set; } = default!;
     private List<OrderViewModel> _listOrder = [];
     private readonly List<ItemModel> _toolbarItems = DataGrid.ToolbarItems("sfGridOrder");
-    private bool _isLoading;
+    private List<EnumToRecord<OrderStatus>> _orderStatuses = ObjectExtensions.GetEnumToRecords<OrderStatus>();
+    private bool _isLoading = true;
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        _listOrder = new List<OrderViewModel>
-        {
-            new()
-            {
-                Fullname = "Galvin Nguyen",
-                PhoneNumber = "1092381209",
-                Address = "askdhjakjshdkjahsd",
-                DateCreated = DateTimeOffset.Now,
-                Email = "test@gmail.com",
-                ExternalId = "ORDER-123",
-                Id = 1,
-                OrderDetails = new List<OrderDetailViewModel>
-                {
-                    new(1, "TEST 1", "https://img.freepik.com/free-photo/top-view-cosmetic-orders_23-2148549123.jpg", 10, 1000),
-                    new(2, "TEST 2", "https://img.freepik.com/free-photo/cosmetic-containers-with-orange_23-2148549144.jpg", 100, 10000),
-                },
-                Status = OrderStatus.Ordered,
-                Total = 123123
-            }
-        };
+        _listOrder = await Mediator.Send(new GetAllOrdersQuery(true));
+        _isLoading = false;
     }
 
     private void ShowViewDialog(OrderViewModel selectedOrder)
     {
         var parameters = new ModalParameters().Add("Order", selectedOrder);
-        Modal.Show<ViewOrderDialog>("THÔNG TIN ĐẶT HÀNG", new ModalOptions { UseCustomLayout = true });
+        Modal.Show<ViewOrderDialog>(parameters, new ModalOptions { UseCustomLayout = true });
     }
 
     private async Task ShowEditDialogAsync(OrderViewModel? selectedOrder)
@@ -116,8 +116,30 @@ else
             }
             else
             {
-                Modal.Show<ErrorDialog>("CÓ LỖI XẢY RA!", new ModalParameters().Add("ErrorMessage", "Có lỗi xảy ra khi lưu sản phẩm. Vui lòng thử lại sau!"));
+                Modal.Show<ErrorDialog>("CÓ LỖI XẢY RA!", new ModalParameters().Add("ErrorMessage", "Có lỗi xảy ra khi lưu đơn hàng. Vui lòng thử lại sau!"));
             }
+            _isLoading = false;
+        }
+    }
+
+    private async Task ShowDeleteDialogAsync(OrderViewModel selectedOrder)
+    {
+        var parameters = new ModalParameters().Add("Order", selectedOrder);
+        var modalResult = await Modal.Show<DeleteOrderDialog>(parameters, new() { UseCustomLayout = true }).Result;
+        if (modalResult.Confirmed)
+        {
+            var data = (bool)modalResult.Data!;
+            var result = await Mediator.Send(new DeleteOrderCommand(selectedOrder.Id, data));
+            if (result)
+            {
+                await Mediator.Send(new DeleteReferencingOrderDetailsCommand(selectedOrder.Id, data));
+            }
+            else
+            {
+                Modal.Show<ErrorDialog>("CÓ LỖI XẢY RA!", new ModalParameters().Add("ErrorMessage", "Có lỗi xảy ra khi xóa đơn hàng. Vui lòng thử lại sau!"));
+            }
+            _isLoading = true;
+            _listOrder = await Mediator.Send(new GetAllOrdersQuery(true));
             _isLoading = false;
         }
     }
@@ -150,7 +172,7 @@ else
     {
         foreach (var orderDetail in orderDetails)
         {
-
+            await Mediator.Send(new CreateOrderDetailCommand(orderDetail));
         }
     }
 
@@ -165,6 +187,12 @@ else
         {
             await Mediator.Send(new UpdateOrderDetailCommand(orderDetail));
         }
+    }
+
+    private async Task<bool> UpdateOrderStatusAsync(int orderId, OrderStatus status)
+    {
+        var result = await Mediator.Send(new UpdateOrderStatusCommand(orderId, status));
+        return result.IsSuccess;
     }
 
     // Events

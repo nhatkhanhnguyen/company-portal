@@ -1,13 +1,22 @@
 ﻿using CompanyPortal.Core.Common;
 using CompanyPortal.Core.Enums;
 
+using Microsoft.EntityFrameworkCore;
+
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace CompanyPortal.Data.Database.Entities;
 
+[Index(nameof(ExternalId))]
+[Index(nameof(Fullname))]
+[Index(nameof(Email))]
+[Index(nameof(PhoneNumber))]
 public class Order : EntityBase
 {
+    [MaxLength(20)]
+    public string ExternalId { get; set; } = string.Empty;
+
     [MaxLength(100)]
     public string Fullname { get; set; } = string.Empty;
 

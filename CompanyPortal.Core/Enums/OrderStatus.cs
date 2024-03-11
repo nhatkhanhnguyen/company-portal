@@ -1,24 +1,38 @@
-﻿using System.ComponentModel;
+﻿using CompanyPortal.Core.Attributes;
+
+using System.ComponentModel;
 
 namespace CompanyPortal.Core.Enums;
 
 public enum OrderStatus
 {
     [Description("Đã đặt hàng")]
-    Ordered = 100/6,
+    [CustomValue(100 / 6)]
+    [Icon("fa-solid fa-check-to-slot")]
+    Ordered = 0,
 
     [Description("Đã xác nhận")]
-    Confirmed = 200/6,
+    [CustomValue(200 / 6)]
+    [Icon("fa-solid fa-thumbs-up")]
+    Confirmed = 1,
 
     [Description("Đang xử lý")]
-    Processing = 300/6,
+    [CustomValue(300 / 6)]
+    [Icon("fa-solid fa-person-running")]
+    Processing = 2,
 
     [Description("Đang giao")]
-    Delivering = 400/6,
+    [CustomValue(400 / 6)]
+    [Icon("fa-solid fa-truck-fast")]
+    Delivering = 3,
 
     [Description("Đã giao")]
-    Delivered = 500/6,
-    
-    [Description("Hoàn thành")]    
-    Completed = 600/6
+    [CustomValue(500 / 6)]
+    [Icon("fa-solid fa-truck-ramp-box")]
+    Delivered = 4,
+
+    [Description("Hoàn thành")]
+    [CustomValue(600 / 6)]
+    [Icon("fa-solid fa-check-double")]
+    Completed = 5
 }

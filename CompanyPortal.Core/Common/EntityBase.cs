@@ -15,13 +15,11 @@ public abstract class EntityBase
 
     public string CreatedBy { get; set; } = string.Empty;
 
-    public string DeletedBy { get; set; } = string.Empty;
+    public string? DeletedBy { get; set; }
 
     public string? ModidifedBy { get; set; }
 
     public bool IsActive { get; set; } = true;
-
-    [Timestamp] public byte[]? Version { get; set; }
 
     public virtual bool IsTransient()
     {

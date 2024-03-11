@@ -4,7 +4,7 @@
 @using System.Globalization
 <ModalDialog SizeClass="modal-xl">
     <Header>
-        <h5 class="modal-title">CHỈNH SỬA ĐƠN HÀNG</h5>
+        <h5 class="modal-title">@(Order.Id > 0 ? "CHỈNH SỬA ĐƠN HÀNG" : "TẠO ĐƠN HÀNG")</h5>
         <button type="button" class="btn-close" aria-label="Close" @onclick="Cancel"></button>
     </Header>
     <Body>
@@ -15,8 +15,8 @@
         else
         {
             <EditForm Model="Order" OnValidSubmit="Submit" id="FormOrder" class="row g-3">
-                <fieldset class="col-lg-6 col-sm-12">
-                    <FluentValidationValidator ValidatorType="typeof(ProductFormValidator)" />
+                <fieldset class="col-12">
+                    <FluentValidationValidator ValidatorType="typeof(OrderFormValidator)" />
                     <div class="row">
                         <div class="col-lg-6 col-sm-12 mb-3">
                             <Label For="@(() => Order.ExternalId)" CssClass="form-label"></Label>
@@ -30,36 +30,27 @@
                             </SfComboBox>
                             <ValidationMessage For="@(() => Order.Status)" />
                         </div>
-                        <div class="col-12 mb-3">
+                        <div class="col-sm-12 col-md-6 mb-3">
                             <Label For="@(() => Order.Fullname)" CssClass="form-label"></Label>
                             <InputText class="form-control" maxlength="100" @bind-Value="Order.Fullname" />
                             <ValidationMessage For="@(() => Order.Fullname)" />
-                        </div>                        
-                        <div class="col-12 mb-3">
-                            <Label For="@(() => Order.Address)" CssClass="form-label"></Label>
-                            <InputText class="form-control" maxlength="100" @bind-Value="Order.Fullname" />
-                            <ValidationMessage For="@(() => Order.Fullname)" />
-                        </div>                        
-                        <div class="col-12 mb-3">
+                        </div>
+                        <div class="col-sm-12 col-md-6 mb-3">
                             <Label For="@(() => Order.PhoneNumber)" CssClass="form-label"></Label>
-                            <InputText class="form-control" maxlength="100" @bind-Value="Order.Fullname" />
+                            <InputText class="form-control" maxlength="100" @bind-Value="Order.PhoneNumber" />
                             <ValidationMessage For="@(() => Order.Fullname)" />
                         </div>
                         <div class="col-12 mb-3">
                             <Label For="@(() => Order.Email)" CssClass="form-label"></Label>
-                            <InputText class="form-control" maxlength="100" @bind-Value="Order.Fullname" />
+                            <InputText class="form-control" maxlength="100" @bind-Value="Order.Email" />
                             <ValidationMessage For="@(() => Order.Fullname)" />
                         </div>
-                        
-                        <div class="col-12">
-                            <div class="form-check d-flex">
-                                <InputCheckbox @bind-Value="Order.MarkedAsInactive" class="form-check-input align-self-baseline" />
-                                <span class="form-check-label ms-2">
-                                    <Label For="@(() => Order.MarkedAsInactive)" CssClass="form-label"></Label>
-                                </span>
-                            </div>
+                        <div class="col-12 mb-3">
+                            <Label For="@(() => Order.Address)" CssClass="form-label"></Label>
+                            <InputText class="form-control" maxlength="100" @bind-Value="Order.Address" />
+                            <ValidationMessage For="@(() => Order.Fullname)" />
                         </div>
-                        <div class="col-12 table-responsive">
+                        <div class="col-12 table-responsive mb-3">
                             <table class="table table-striped table-hover align-middle">
                                 <tbody>
                                     @foreach (var orderDetail in Order.OrderDetails)
@@ -72,7 +63,10 @@
                                                 <b>@orderDetail.ProductName</b>
                                             </td>
                                             <td>
-                                                Số lượng: <InputNumber @bind-Value="orderDetail.Quantity" class="form-control" min="1" />
+                                                <div class="input-group">
+                                                    <span class="input-group-text" id="inputGroup-sizing-default">Số lượng:</span>
+                                                    <InputNumber @bind-Value="orderDetail.Quantity" class="form-control" min="1" />
+                                                </div>
                                             </td>
                                             <td>
                                                 Tổng: <b>@orderDetail.Total.ToString("C", CultureInfo.GetCultureInfo("vi-vn"))</b>
@@ -85,6 +79,14 @@
                                 </tbody>
                             </table>
                         </div>
+                        <div class="col-12 mb-3 d-flex justify-content-end">
+                            <div class="form-check d-flex ">
+                                <InputCheckbox @bind-Value="Order.MarkedAsInactive" class="form-check-input align-self-baseline" />
+                                <span class="form-check-label ms-2">
+                                    <Label For="@(() => Order.MarkedAsInactive)" CssClass="form-label"></Label>
+                                </span>
+                            </div>
+                        </div>
                     </div>
                 </fieldset>
             </EditForm>
@@ -95,7 +97,7 @@
             <div class="col-12">
                 <LoadingButton Type="submit" IconCss="fa-solid fa-floppy-disk" ForForm="FormProduct" ButtonCssClass="btn-primary rounded-pill me-2"
                                LoadingText="ĐANG LƯU" NormalText="LƯU" />
-                <button type="button" class="btn btn-danger rounded-pill" @onclick="Cancel"><i class="fa-solid fa-xmark"></i> HỦY</button>
+                <button type="button" class="btn btn-success rounded-pill" @onclick="Cancel"><i class="fa-solid fa-xmark"></i> ĐÓNG</button>
             </div>
         </div>
     </Footer>
@@ -104,7 +106,7 @@
 @code {
     [CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; } = default!;
     [Parameter] public OrderViewModel Order { get; set; } = new();
-    private List<EnumToRecord<OrderStatus>> _orderStatus = Enum.GetValues<OrderStatus>().Select(e => new EnumToRecord<OrderStatus>(e.GetDescription(), e)).ToList();
+    private List<EnumToRecord<OrderStatus>> _orderStatus = ObjectExtensions.GetEnumToRecords<OrderStatus>();
     private bool _isLoading;
 
     private void Cancel() => BlazoredModal.CancelAsync();
@@ -117,6 +119,6 @@
 
     private void RemoveOrderDetail(OrderDetailViewModel orderDetail)
     {
-        
+
     }
 }

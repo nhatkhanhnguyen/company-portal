@@ -25,6 +25,5 @@
     [Parameter] public string Type { get; set; } = "button";
     [Parameter] public string IconCss { get; set; } = string.Empty;
     [Parameter] public EventCallback<MouseEventArgs> Click { get; set; }
-
-    private bool IsLoading { get; set; }
+    [Parameter] public bool IsLoading { get; set; }
 }

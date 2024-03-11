@@ -7,17 +7,22 @@ using CompanyPortal.ViewModels;
 
 using MediatR;
 
+using Microsoft.EntityFrameworkCore;
+
 namespace CompanyPortal.CQRS.Orders.Queries;
 
 public record GetAllOrdersQuery(bool ForceRefresh) : ICachedQuery<List<OrderViewModel>>
 {
     public class Handler(IRepository<Order> repository, IMapper mapper)
-        : IRequestHandler<GetAllOrdersQuery, IEnumerable<OrderViewModel>>
+        : IRequestHandler<GetAllOrdersQuery, List<OrderViewModel>>
     {
-        public async Task<IEnumerable<OrderViewModel>> Handle(GetAllOrdersQuery request,
+        public async Task<List<OrderViewModel>> Handle(GetAllOrdersQuery request,
             CancellationToken cancellationToken)
         {
-            var result = await repository.GetAllListAsync(cancellationToken);
+            var result = await repository.GetAll()
+                .Include(x => x.OrderDetails)
+                .Select(x => mapper.Map<OrderViewModel>(x))
+                .ToListAsync(cancellationToken);
             return mapper.Map<List<OrderViewModel>>(result);
         }
     }

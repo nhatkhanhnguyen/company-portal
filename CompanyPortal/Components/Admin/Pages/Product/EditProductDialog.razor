@@ -4,6 +4,7 @@
 @using MediatR
 
 @inject IMediator Mediator
+@inject PreloadService PreloadService
 
 <ModalDialog SizeClass="modal-xl">
     <Header>
@@ -85,10 +86,8 @@
     <Footer>
         <div class="row">
             <div class="col-12">
-                <LoadingButton @ref="SubmitButton" Type="submit" IconCss="fa-solid fa-floppy-disk"
-                               ForForm="FormProduct" ButtonCssClass="btn-primary rounded-pill me-2" 
-                               LoadingText="ĐANG LƯU" NormalText="LƯU" />
-                <button type="button" class="btn btn-danger rounded-pill" @onclick="Cancel"><i class="fa-solid fa-xmark"></i> HỦY</button>
+                <LoadingButton @ref="SubmitButton" Type="submit" IconCss="fa-solid fa-floppy-disk" ForForm="FormProduct" ButtonCssClass="btn-primary rounded-pill me-2" LoadingText="ĐANG LƯU" NormalText="LƯU" />
+                <button type="button" class="btn btn-success rounded-pill" @onclick="Cancel"><i class="fa-solid fa-xmark"></i> ĐÓNG</button>
             </div>
         </div>
     </Footer>
@@ -101,11 +100,10 @@
 
     private LoadingButton SubmitButton { get; set; } = default!;
     private readonly List<ToolbarItemModel> _descriptionEditorTools = DataGrid.ContentEditorTools;
-    private bool _isLoading;
+    private bool _isLoading = true;
 
     protected override async Task OnInitializedAsync()
     {
-        _isLoading = true;
         Categories = await Mediator.Send(new GetAllCategoriesQuery());
         if (Product != null)
         {

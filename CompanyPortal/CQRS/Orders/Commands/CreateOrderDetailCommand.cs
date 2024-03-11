@@ -9,16 +9,16 @@ using MediatR;
 
 namespace CompanyPortal.CQRS.Orders.Commands;
 
-public record CreateOrderCommand(OrderViewModel Order) : IRequest<Result>
+public record CreateOrderDetailCommand(OrderDetailViewModel OrderDetail) : IRequest<Result>
 {
-    public class Handler(IRepository<Order> repository, IUnitOfWork uow,
-        ILogger<Handler> logger, IMapper mapper) : IRequestHandler<CreateOrderCommand, Result>
+    public class Handler(IRepository<OrderDetail> repository, IUnitOfWork uow,
+        ILogger<Handler> logger, IMapper mapper) : IRequestHandler<CreateOrderDetailCommand, Result>
     {
-        public async Task<Result> Handle(CreateOrderCommand request, CancellationToken cancellationToken)
-        { 
+        public async Task<Result> Handle(CreateOrderDetailCommand request, CancellationToken cancellationToken)
+        {
             try
             {
-                var entity = mapper.Map<Order>(request.Order);
+                var entity = mapper.Map<OrderDetail>(request.OrderDetail);
                 await repository.InsertAsync(entity, cancellationToken);
                 await uow.SaveChangesAsync(cancellationToken);
                 return Result.Ok(entity.Id);
@@ -26,7 +26,7 @@ public record CreateOrderCommand(OrderViewModel Order) : IRequest<Result>
             catch (Exception ex)
             {
                 logger.LogError(ex, ex.Message);
-                return Result.Error("Có lỗi xảy ra khi đang lưu đơn hàng vào CSDL.");
+                return Result.Error("Có lỗi xảy ra khi đang lưu chi tiết đơn hàng vào CSDL.");
             }
         }
     }
