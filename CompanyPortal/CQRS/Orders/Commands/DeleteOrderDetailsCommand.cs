@@ -1,4 +1,5 @@
 ﻿using CompanyPortal.Core.Common;
+using CompanyPortal.Core.Constants;
 using CompanyPortal.Data.Common;
 using CompanyPortal.Data.Database.Entities;
 
@@ -21,7 +22,7 @@ public record DeleteOrderDetailsCommand(List<int> OrderDetailIds, bool ForceDele
 			catch (Exception ex)
 			{
                 logger.LogError(ex, ex.Message);
-                return Result.Error<string>("Có lỗi xảy ra khi xóa lưu chi tiết đặt hàng khỏi CSDL.");
+                return Result.Error("Có lỗi xảy ra khi xóa đơn hàng khỏi CSDL. Vui lòng thử lại sau!");
             }
         }
     }

@@ -53,7 +53,7 @@
     [Parameter] public ArticleViewModel Article { get; set; } = new();
     [Parameter] public List<CategoryViewModel> Categories { get; set; } = [];
 
-    private List<EnumToRecord<ArticleType>> _articleTypes = ObjectExtensions.GetEnumToRecords<ArticleType>();
+    private List<EnumToRecord<ArticleType>> _articleTypes = EnumExtensions.GetEnumToRecords<ArticleType>();
     private readonly List<ToolbarItemModel> _contentEditorTools = DataGrid.ContentEditorTools;
 
     private void Cancel() => BlazoredModal.CancelAsync();

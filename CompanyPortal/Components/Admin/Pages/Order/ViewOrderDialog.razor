@@ -136,48 +136,25 @@
 
 @code {
     [CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; } = default!;
-    [Parameter] public OrderViewModel Order { get; set; }
+    [Parameter] public OrderViewModel Order { get; set; } = default!;
 
-    private List<EnumToRecord<OrderStatus>> _orderStatuses = ObjectExtensions.GetEnumToRecords<OrderStatus>();
+    private List<EnumToRecord<OrderStatus>> _orderStatuses = EnumExtensions.GetEnumToRecords<OrderStatus>();
 
-    // = new()
-    //     {
-    //         Address = "askdhjakjshdkjahsd",
-    //         DateCreated = DateTimeOffset.Now,
-    //         Email = "test@gmail.com",
-    //         Fullname = "GALVIN NGUYEN",
-    //         PhoneNumber = "918723987",
-    //         ExternalId = "ORDER-123",
-    //         Id = 1,
-    //         Total = 18273122,
-    //         OrderDetails = new List<OrderDetailViewModel>
-    //     {
-    //         new(1, "TEST 1", "https://img.freepik.com/free-photo/top-view-cosmetic-products_23-2148549123.jpg", 10, 1000),
-    //         new(2, "TEST 2", "https://img.freepik.com/free-photo/cosmetic-containers-with-orange_23-2148549144.jpg", 100, 10000),
-    //     },
-    //         Status = OrderStatus.Confirmed
-    //     };
-    private bool _isLoading;
+    private bool _isLoading = true;
+    private bool _hasChanges;
 
-    private void Cancel() => BlazoredModal.CancelAsync();
+    private void Cancel() => BlazoredModal.CancelAsync(_hasChanges);
 
     private async void ChangeStatus(OrderStatus status)
     {
-        //var result = await Mediator.Send(new UpdateOrderStatusCommand(Order.Id, status));
-        //if (result.IsSuccess)
-        //{
+        _isLoading = true;
+        var result = await Mediator.Send(new UpdateOrderStatusCommand(Order.Id, status));
+        if (result.IsSuccess)
+        {
             Order.Status = status;
-            StateHasChanged();
-        //}
-    }
-
-    protected override async Task OnInitializedAsync()
-    {
-        // if (Order != null)
-        // {
-        //     _isLoading = true;
-        //     Order.OrderDetails = await Mediator.Send(new GetOrderDetailByIdQuery(Order.Id, true));
-        //     _isLoading = false;
-        // }
+            _hasChanges = true;
+        }
+        _isLoading = false;
+        StateHasChanged();
     }
 }

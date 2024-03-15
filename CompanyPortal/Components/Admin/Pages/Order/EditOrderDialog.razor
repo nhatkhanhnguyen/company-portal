@@ -20,7 +20,7 @@
                     <div class="row">
                         <div class="col-lg-6 col-sm-12 mb-3">
                             <Label For="@(() => Order.ExternalId)" CssClass="form-label"></Label>
-                            <InputText class="form-control" maxlength="20" @bind-Value="Order.ExternalId" />
+                            <label class="form-control">@Order.ExternalId</label>
                             <ValidationMessage For="@(() => Order.ExternalId)" />
                         </div>
                         <div class="col-lg-6 col-sm-12 mb-3">
@@ -50,33 +50,63 @@
                             <InputText class="form-control" maxlength="100" @bind-Value="Order.Address" />
                             <ValidationMessage For="@(() => Order.Fullname)" />
                         </div>
+
                         <div class="col-12 table-responsive mb-3">
                             <table class="table table-striped table-hover align-middle">
-                                <tbody>
-                                    @foreach (var orderDetail in Order.OrderDetails)
+                                <thead>
+                                    <tr>
+                                        <th class="text-center" colspan="4">CHI TIẾT ĐƠN HÀNG</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="table-group-divider">
+
+                                    @if (Order.OrderDetails.Count() > 0)
+                                    {
+                                        @foreach (var orderDetail in Order.OrderDetails)
+                                        {
+                                            <tr>
+                                                <td width="150px">
+                                                    <img src="@orderDetail.ProductImageUrl" alt="@orderDetail.ProductName" class="img-fluid" />
+                                                </td>
+                                                <td>
+                                                    <b>@orderDetail.ProductName</b>
+                                                </td>
+                                                <td>
+                                                    <div class="input-group">
+                                                        <span class="input-group-text" id="inputGroup-sizing-default">Số lượng:</span>
+                                                        <InputNumber @bind-Value="orderDetail.Quantity" class="form-control" min="1" />
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    Tổng: <b>@orderDetail.Total.ToString("C", CultureInfo.GetCultureInfo("vi-vn"))</b>
+                                                </td>
+                                                <td>
+                                                    <button class="btn btn-danger btn-sm rounded-pill" @onclick="() => RemoveOrderDetail(orderDetail)"><i class="fa-solid fa-trash"></i> Xóa</button>
+                                                </td>
+                                            </tr>
+                                        }
+                                    }
+                                    else
                                     {
                                         <tr>
-                                            <td width="150px">
-                                                <img src="@orderDetail.ProductImageUrl" alt="@orderDetail.ProductName" class="img-fluid" />
-                                            </td>
-                                            <td>
-                                                <b>@orderDetail.ProductName</b>
-                                            </td>
-                                            <td>
-                                                <div class="input-group">
-                                                    <span class="input-group-text" id="inputGroup-sizing-default">Số lượng:</span>
-                                                    <InputNumber @bind-Value="orderDetail.Quantity" class="form-control" min="1" />
-                                                </div>
-                                            </td>
-                                            <td>
-                                                Tổng: <b>@orderDetail.Total.ToString("C", CultureInfo.GetCultureInfo("vi-vn"))</b>
-                                            </td>
-                                            <td>
-                                                <button class="btn btn-danger btn-sm rounded-pill" @onclick="() => RemoveOrderDetail(orderDetail)"><i class="fa-solid fa-trash"></i> Xóa</button>
-                                            </td>
+                                            <td colspan="3" class="text-center">KHÔNG CÓ SẢN PHẨM</td>
                                         </tr>
                                     }
                                 </tbody>
+                                @if (Order.OrderDetails.Count() > 0)
+                                {
+                                    <tfoot class="table-group-divider">
+                                        <tr>
+                                            <td colspan="2"><b>TỔNG</b></td>
+                                            <td>
+                                                Số lượng: <b>@Order.OrderDetails.Sum(x => x.Quantity)</b>
+                                            </td>
+                                            <td>
+                                                Tổng: <b>@Order.Total.ToString("C", CultureInfo.GetCultureInfo("vi-vn"))</b>
+                                            </td>
+                                        </tr>
+                                    </tfoot>
+                                }
                             </table>
                         </div>
                         <div class="col-12 mb-3 d-flex justify-content-end">
@@ -106,7 +136,7 @@
 @code {
     [CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; } = default!;
     [Parameter] public OrderViewModel Order { get; set; } = new();
-    private List<EnumToRecord<OrderStatus>> _orderStatus = ObjectExtensions.GetEnumToRecords<OrderStatus>();
+    private List<EnumToRecord<OrderStatus>> _orderStatus = EnumExtensions.GetEnumToRecords<OrderStatus>();
     private bool _isLoading;
 
     private void Cancel() => BlazoredModal.CancelAsync();

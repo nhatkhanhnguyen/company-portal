@@ -21,6 +21,8 @@ public record GetAllOrdersQuery(bool ForceRefresh) : ICachedQuery<List<OrderView
         {
             var result = await repository.GetAll()
                 .Include(x => x.OrderDetails)
+                .ThenInclude(x => x.Product)
+                .ThenInclude(x => x.Images)
                 .Select(x => mapper.Map<OrderViewModel>(x))
                 .ToListAsync(cancellationToken);
             return mapper.Map<List<OrderViewModel>>(result);

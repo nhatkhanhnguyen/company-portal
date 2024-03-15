@@ -1,27 +1,25 @@
-﻿<div class="col-xl-4 col-lg-4 col-md-6">
-    <div class="product__all-single">
-        <div class="product__all-img-box">
-            <div class="product__all-img">
-                <img src="@Product.Image.Url" alt="">
-                <span class="product__all-sale">Sale</span>
-                <div class="product__all-img-icon">
-                    <a href="cart.html"><i class="icon-shopping-cart"></i></a>
-                </div>
+﻿<div class="product__all-single">
+    <div class="product__all-img-box">
+        <div class="product__all-img">
+            <img src="@Product.Image.Url" class="img-fluid rounded" alt="">
+            <span class="product__all-sale">Sale</span>
+            <div class="product__all-img-icon">
+                <a href="cart.html"><i class="icon-shopping-cart"></i></a>
             </div>
         </div>
-        <div class="product__all-content">
-            <div class="product__all-review">
-                <i class="fa fa-star"></i>
-                <i class="fa fa-star"></i>
-                <i class="fa fa-star"></i>
-                <i class="fa fa-star"></i>
-                <i class="fa fa-star"></i>
-            </div>
-            <h4 class="product__all-title">
-                <a href="product-details.html">@Product.Name</a>
-            </h4>
-            <p class="product__all-price">@Product.Price</p>
+    </div>
+    <div class="product__all-content">
+        <div class="product__all-review">
+            <i class="fa fa-star"></i>
+            <i class="fa fa-star"></i>
+            <i class="fa fa-star"></i>
+            <i class="fa fa-star"></i>
+            <i class="fa fa-star"></i>
         </div>
+        <h4 class="product__all-title">
+            <a href="product-details.html">@Product.Name</a>
+        </h4>
+        <p class="product__all-price">@Product.Price</p>
     </div>
 </div>
 @code {

@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 
 using CompanyPortal.Core.Common;
+using CompanyPortal.Core.Constants;
 using CompanyPortal.Data.Common;
 using CompanyPortal.Data.Database.Entities;
 using CompanyPortal.ViewModels;
@@ -43,7 +44,7 @@ public record UpdateArticleCommand(ArticleViewModel Article) : IRequest<Result>
             catch (Exception ex)
             {
                 logger.LogError(ex, ex.Message);
-                return Result.Error<string>("Có lỗi xảy ra khi đang lưu bài viết vào CSDL.");
+                return Result.Error("Có lỗi xảy ra khi cập nhật bài viết vào CSDL. Vui lòng thử lại sau!");
             }
         }
     }

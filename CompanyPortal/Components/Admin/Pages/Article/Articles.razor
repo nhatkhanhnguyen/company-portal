@@ -21,6 +21,7 @@
     </div>
 </div>
 <hr />
+
 @if (_listArticle.Count == 0 || _isLoading)
 {
     <Spinner></Spinner>
@@ -156,7 +157,7 @@ else
         {
             var data = (bool)modalResult.Data!;
             var result = await Mediator.Send(new DeleteArticleCommand(selectedArticle.Id, data));
-            if (result)
+            if (result.IsSuccess)
             {
                 await Mediator.Send(new DeleteReferencingResourcesCommand(selectedArticle.Id, data));
             }

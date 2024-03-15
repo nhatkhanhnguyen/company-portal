@@ -12,13 +12,10 @@
 }
 
 .product__all-img {
-    position: relative;
     display: block;
     border: 1px solid #ece9e0;
-    border-radius: var(--agrion-bdr-radius);
     -webkit-transition: all 500ms ease;
     transition: all 500ms ease;
-    overflow: hidden;
 }
 
 .product__all-sale {
@@ -34,8 +31,6 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    color: var(--agrion-white);
-    background-color: var(--agrion-base);
     border-radius: 10px;
 }
 
@@ -61,8 +56,6 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        color: var(--agrion-black);
-        background-color: var(--agrion-primary);
         border-radius: 50%;
         transition: all 500ms ease;
     }
@@ -85,13 +78,11 @@
     font-size: 20px;
     font-weight: 700;
     line-height: 29px;
-    font-family: var(--agrion-font);
     margin-top: 8px;
     margin-bottom: 1px;
 }
 
     .product__all-title a {
-        color: var(--agrion-black);
         -webkit-transition: all 500ms ease;
         transition: all 500ms ease;
     }

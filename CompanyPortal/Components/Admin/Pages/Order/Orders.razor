@@ -1,6 +1,7 @@
 ﻿@using CompanyPortal.CQRS.Orders.Commands
 @using CompanyPortal.CQRS.Orders.Queries
 @using CompanyPortal.Core.Common
+@using CompanyPortal.Core.Constants
 @using CompanyPortal.Core.Enums
 @using CompanyPortal.Core.Extensions
 @using Syncfusion.Blazor.Navigations
@@ -19,13 +20,14 @@
     </div>
 </div>
 <hr />
+
 @if (_isLoading)
 {
     <Spinner></Spinner>
 }
 else
 {
-    <SfGrid DataSource="@_listOrder" @ref="OrderGrid" ID="sfGridOrder"
+    <SfGrid DataSource="@_listOrder" @ref="OrderGrid" ID="sfGridOrder" class="overflow-x-scroll"
             AllowPaging="true" AllowSelection="true"
             AllowSorting="true" AllowResizing="true"
             EnableStickyHeader="true" EnableHover="true"
@@ -34,13 +36,13 @@ else
         <GridPageSettings PageSize="10"></GridPageSettings>
         <GridSearchSettings Fields="@(new[] { "Id", "ExternalId", "Fullname", "PhoneNumber", "Email", "Address", "Status", "DateCreated" })"></GridSearchSettings>
         <GridEvents OnToolbarClick="ToolbarClickHandler" TValue="OrderViewModel"></GridEvents>
-        <GridColumns>
-            <GridColumn Field="@nameof(OrderViewModel.ExternalId)" HeaderText="MÃ ĐƠN" Width="128" Type="ColumnType.String"></GridColumn>
-            <GridColumn Field="@nameof(OrderViewModel.Fullname)" HeaderText="HỌ TÊN" Width="200" Type="ColumnType.String"></GridColumn>
-            <GridColumn Field="@nameof(OrderViewModel.PhoneNumber)" HeaderText="ĐIỆN THOẠI" Width="128" Type="ColumnType.String"></GridColumn>
-            <GridColumn Field="@nameof(OrderViewModel.DateCreated)" HeaderText="NGÀY ĐẶT" Width="156" Type="ColumnType.DateTime" Format="dd/MM/yyyy HH:mm"></GridColumn>
-            <GridColumn Field="@nameof(OrderViewModel.Total)" HeaderText="TỔNG TIỀN" Width="200" Format="#,#00đ" Type="ColumnType.Decimal"></GridColumn>
-            <GridColumn HeaderText="TRẠNG THÁI" Width="128">
+        <GridColumns >
+            <GridColumn AutoFit Field="@nameof(OrderViewModel.ExternalId)" HeaderText="MÃ ĐƠN" Width="128" Type="ColumnType.String"></GridColumn>
+            <GridColumn AutoFit Field="@nameof(OrderViewModel.Fullname)" HeaderText="HỌ TÊN" Width="256" Type="ColumnType.String"></GridColumn>
+            <GridColumn AutoFit Field="@nameof(OrderViewModel.PhoneNumber)" HeaderText="ĐIỆN THOẠI" Width="128" Type="ColumnType.String"></GridColumn>
+            <GridColumn AutoFit Field="@nameof(OrderViewModel.DateCreated)" HeaderText="NGÀY ĐẶT" Width="196" Type="ColumnType.DateTime" Format="dd/MM/yyyy HH:mm"></GridColumn>
+            <GridColumn AutoFit Field="@nameof(OrderViewModel.Total)" HeaderText="TỔNG TIỀN" Width="200" Format="#,#00đ" Type="ColumnType.Decimal"></GridColumn>
+            <GridColumn AutoFit HeaderText="TRẠNG THÁI" Width="196">
                 <Template>
                     @{
                         var order = context as OrderViewModel;
@@ -48,13 +50,22 @@ else
                     }
                 </Template>
             </GridColumn>
-            <GridColumn TextAlign="TextAlign.Right">
+            <GridColumn HeaderText="CHUYỂN TRẠNG THÁI" TextAlign="TextAlign.Right">
                 <Template>
                     @{
                         var order = context as OrderViewModel;
-                        <button class="btn btn-success btn-sm rounded-pill" type="button">
-                            @order!.Status.GetEnumDescription() <i class="fa-solid fa-arrow-right"></i> @order.NextStatus.GetEnumDescription()
-                        </button>
+                        if (order.Status > OrderStatus.Ordered)
+                        {
+                            <button class="btn btn-warning btn-sm rounded-pill me-2" type="button" @onclick="() => UpdateOrderStatusAsync(order.Id, order.PreviousStatus)">
+                                @order!.PreviousStatus.GetEnumDescription() <i class="fa-solid fa-arrow-left"></i> @order.Status.GetEnumDescription()
+                            </button>
+                        }
+                        if (order.Status < OrderStatus.Completed)
+                        {
+                            <button class="btn btn-success btn-sm rounded-pill" type="button" @onclick="() => UpdateOrderStatusAsync(order.Id, order.NextStatus)">
+                                @order!.Status.GetEnumDescription() <i class="fa-solid fa-arrow-right"></i> @order.NextStatus.GetEnumDescription()
+                            </button>
+                        }
                     }
                 </Template>
             </GridColumn>
@@ -69,7 +80,7 @@ else
                             <i class="fa-solid fa-pen-to-square"></i> SỬA
                         </button>
                         <button class="btn btn-sm btn-danger rounded-pill" @onclick="() => ShowDeleteDialogAsync(order!)">
-                            <i class="fa-solid fa-trash"></i> XÓA
+                            <i class="fa-solid fa-trash"></i> HỦY ĐƠN
                         </button>
                     }
                 </Template>
@@ -83,7 +94,7 @@ else
     private SfGrid<OrderViewModel> OrderGrid { get; set; } = default!;
     private List<OrderViewModel> _listOrder = [];
     private readonly List<ItemModel> _toolbarItems = DataGrid.ToolbarItems("sfGridOrder");
-    private List<EnumToRecord<OrderStatus>> _orderStatuses = ObjectExtensions.GetEnumToRecords<OrderStatus>();
+    private List<EnumToRecord<OrderStatus>> _orderStatuses = EnumExtensions.GetEnumToRecords<OrderStatus>();
     private bool _isLoading = true;
 
     protected override async Task OnInitializedAsync()
@@ -92,10 +103,18 @@ else
         _isLoading = false;
     }
 
-    private void ShowViewDialog(OrderViewModel selectedOrder)
+    #region ACTIONS
+    private async void ShowViewDialog(OrderViewModel selectedOrder)
     {
         var parameters = new ModalParameters().Add("Order", selectedOrder);
-        Modal.Show<ViewOrderDialog>(parameters, new ModalOptions { UseCustomLayout = true });
+        var modalResult = await Modal.Show<ViewOrderDialog>(parameters, new ModalOptions { UseCustomLayout = true }).Result;
+
+        if ((modalResult.Cancelled || modalResult.Confirmed) && (bool)modalResult.Data! == true)
+        {
+            _isLoading = true;
+            _listOrder = await Mediator.Send(new GetAllOrdersQuery(true));
+            _isLoading = false;
+        }
     }
 
     private async Task ShowEditDialogAsync(OrderViewModel? selectedOrder)
@@ -126,8 +145,10 @@ else
     {
         var parameters = new ModalParameters().Add("Order", selectedOrder);
         var modalResult = await Modal.Show<DeleteOrderDialog>(parameters, new() { UseCustomLayout = true }).Result;
+
         if (modalResult.Confirmed)
         {
+            _isLoading = true;
             var data = (bool)modalResult.Data!;
             var result = await Mediator.Send(new DeleteOrderCommand(selectedOrder.Id, data));
             if (result)
@@ -138,11 +159,26 @@ else
             {
                 Modal.Show<ErrorDialog>("CÓ LỖI XẢY RA!", new ModalParameters().Add("ErrorMessage", "Có lỗi xảy ra khi xóa đơn hàng. Vui lòng thử lại sau!"));
             }
-            _isLoading = true;
             _listOrder = await Mediator.Send(new GetAllOrdersQuery(true));
             _isLoading = false;
         }
     }
+
+    private async Task UpdateOrderStatusAsync(int orderId, OrderStatus status)
+    {
+        var result = await Mediator.Send(new UpdateOrderStatusCommand(orderId, status));
+        if (result.IsSuccess)
+        {
+            _isLoading = true;
+            _listOrder = await Mediator.Send(new GetAllOrdersQuery(true));
+            _isLoading = false;
+        }
+        else
+        {
+            Modal.Show<ErrorDialog>("CÓ LỖI XẢY RA!", new ModalParameters().Add("ErrorMessage", "Có lỗi xảy ra khi cập nhật trạng thái đơn hàng. Vui lòng thử lại sau!"));
+        }
+    }
+    #endregion
 
     private async Task<bool> UpdateOrderAsync(OrderViewModel order)
     {
@@ -189,13 +225,7 @@ else
         }
     }
 
-    private async Task<bool> UpdateOrderStatusAsync(int orderId, OrderStatus status)
-    {
-        var result = await Mediator.Send(new UpdateOrderStatusCommand(orderId, status));
-        return result.IsSuccess;
-    }
-
-    // Events
+    #region Events
 
     private async Task ToolbarClickHandler(ClickEventArgs args)
     {
@@ -209,4 +239,6 @@ else
                 break;
         }
     }
+
+    #endregion
 }

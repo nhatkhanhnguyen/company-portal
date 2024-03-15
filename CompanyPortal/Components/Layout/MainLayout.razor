@@ -1,35 +1,66 @@
 ﻿@inherits LayoutComponentBase
 
-<div class="py-1 bg-primary">
+<nav class="navbar bg-success-subtle top-info z-3">
     <div class="container">
-        <div class="row no-gutters d-flex align-items-start align-items-center px-md-0">
-            <div class="col-lg-12 d-block">
-                <div class="row d-flex">
-                    <div class="col-md pr-4 d-flex topper align-items-center">
-                        <div class="icon mr-2 d-flex justify-content-center align-items-center">
-                            <span class="icon-phone2"></span>
-                        </div>
-                        <span class="text">+ 1235 2355 98</span>
-                    </div>
-                    <div class="col-md pr-4 d-flex topper align-items-center">
-                        <div class="icon mr-2 d-flex justify-content-center align-items-center">
-                            <span class="icon-paper-plane"></span>
-                        </div>
-                        <span class="text">youremail@email.com</span>
-                    </div>
-                    <div class="col-md-5 pr-4 d-flex topper align-items-center text-lg-right">
-                        <span class="text">3-5 Business days delivery &amp; Free Returns</span>
-                    </div>
-                </div>
+        <div class="col-6 d-flex align-items-center justify-content-start">
+            <span><i class="fa-solid fa-phone pe-3"></i>0963.232.921</span>
+        </div>
+        <div class="col-6 d-flex align-items-center justify-content-end">
+            <i class="fa-brands fa-youtube px-3"></i>
+            <i class="fa-brands fa-facebook px-3"></i>
+            <i class="fa-brands fa-facebook-messenger px-3"></i>
+        </div>
+    </div>
+</nav>
+<nav class="navbar bg-white shadow-sm navbar-expand-md main-nav fixed-top fill z-1" id="mainNav">
+    <div class="container">
+        <a class="navbar-brand" href="#">
+            <img src="/images/logo.png" alt="Logo" class="d-inline-block align-text-top logo">
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbar" aria-controls="offcanvasNavbar" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasNavbar" aria-labelledby="offcanvasNavbarLabel">
+            <div class="offcanvas-header">
+                <h5 class="offcanvas-title" id="offcanvasNavbarLabel">Company Portal</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+            </div>
+            <div class="offcanvas-body">
+                <ul class="navbar-nav justify-content-end flex-grow-1 pe-3">
+                    <li class="nav-item">
+                        <NavLink class="nav-link" ActiveClass="active" Match="NavLinkMatch.All" href="/">TRANG CHỦ</NavLink>
+                    </li>
+                    <li class="nav-item">
+                        <NavLink class="nav-link" ActiveClass="active" Match="NavLinkMatch.All" href="/about">GIỚI THIỆU</NavLink>
+                    </li>
+                    <li class="nav-item">
+                        <NavLink class="nav-link" ActiveClass="active" Match="NavLinkMatch.All" href="/products">SẢN PHẨM</NavLink>
+                    </li>
+                    <li class="nav-item">
+                        <NavLink class="nav-link" ActiveClass="active" Match="NavLinkMatch.All" href="/news">TIN TỨC</NavLink>
+                    </li>
+                    <li class="nav-item">
+                        <NavLink class="nav-link" ActiveClass="active" Match="NavLinkMatch.All" href="/contact">LIÊN HỆ</NavLink>
+                    </li>
+                </ul>
             </div>
         </div>
     </div>
+</nav>
+<div class="main-content">
+    @Body
 </div>
 
-@Body
-
-<div id="blazor-error-ui">
-    An unhandled error has occurred.
-    <a href="" class="reload">Reload</a>
-    <a class="dismiss">🗙</a>
-</div>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        window.addEventListener('scroll', function () {
+            if (window.scrollY > 40) {
+                document.getElementById('mainNav').style.paddingTop = 0;
+                document.getElementById('mainNav').style.height = '100px';
+            } else {
+                document.getElementById('mainNav').style.paddingTop = '40px';
+                document.getElementById('mainNav').style.height = '140px';
+            }
+        });
+    });
+</script>

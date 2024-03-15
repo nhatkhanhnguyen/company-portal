@@ -26,7 +26,9 @@ public class AutoMapperProfile : Profile
             .ForMember(x => x.Total, opt => opt.MapFrom(y => y.OrderDetails.Sum(z => z.Price * z.Quantity)))
             .ReverseMap()
             .ForMember(x => x.OrderDetails, opt => opt.Ignore());
-        CreateMap<OrderDetail, OrderDetailViewModel>().ReverseMap();
+        CreateMap<OrderDetail, OrderDetailViewModel>()
+            .ForMember(x => x.ProductImageUrl, opt => opt.MapFrom(y => y.Product.Images.FirstOrDefault().Url))
+            .ReverseMap();
         CreateMap<Resource, ResourceViewModel>().ReverseMap();
         CreateMap<ContactRequest, ContactRequestViewModel>().ReverseMap();
     }

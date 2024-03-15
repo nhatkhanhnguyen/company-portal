@@ -1,2 +1,127 @@
 ﻿@page "/"
 
+
+<div class="main-container">
+    <SfCarousel AutoPlay CssClass="main-carousel" ShowIndicators="false">
+        <ChildContent>
+            @foreach (var image in _settings.CarouselImages)
+            {
+                <CarouselItem>
+                    <figure class="img-container">
+                        <img src="@image.Url" alt="@image.Name" />
+                    </figure>
+                </CarouselItem>
+            }
+        </ChildContent>
+    </SfCarousel>
+</div>
+
+<div class="container">
+    <div class="row my-5 align-items-end">
+        <div class="col-lg-6 animate__animated animate__fadeInLeft">
+            <div class="row g-2 about">
+                <div class="col-6">
+                    <img class="img-fluid rounded tile" src="images/about/1.jpg">
+                </div>
+                <div class="col-6">
+                    <img class="img-fluid rounded tile" src="images/about/1.jpg">
+                </div>
+                <div class="col-6">
+                    <img class="img-fluid rounded tile" src="images/about/2.jpg">
+                </div>
+                <div class="col-6">
+                    <img class="img-fluid rounded tile" src="images/about/3.jpg">
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6 animate__animated animate__fadeInUp">
+            <div class="d-inline-flex mb-4">
+                <img src="/images/about-section-icon.svg" class="pe-3">
+                <div class="text-uppercase fs-5 fw-bold section-header">Về chúng tôi</div>
+            </div>
+            <h1 class="mb-4">Công ty TNHH SX Màng nông nghiệp Miền Nam</h1>
+            <p class="mb-4">Là công ty chuyên sản xuất và cung ứng sản phẩm màng nông ngư nghiệp cho bà con nông dân, theo công nghệ tiêu chuẩn Châu Âu, với nhiều chuyên gia đầu ngành, nhiều năm kinh nghiệm tạo ra các sản phẩm màng nông ngư nghiệp có độ bền cao, đem lại hiệu quả kinh tế cho bà con nông dân, và các nhà đầu tư trong nông nghiệp.</p>
+
+            <a class="btn btn-primary rounded-pill btn-more float-end py-3 px-5" href="">Tìm hiểu thêm <i class="fa-solid fa-arrow-right"></i></a>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row">
+        <div class="d-inline-flex col-12 mb-4">
+            <img src="/images/product-section-icon.svg" class="pe-2">
+            <div class="text-uppercase fs-5 fw-bold section-header">SẢN PHẨM TIÊU BIỂU</div>
+        </div>
+        @foreach (var product in Products)
+        {
+            <div class="col-md-3 col-sm-6">
+                <ProductCardView Product="product" />
+            </div>
+        }
+    </div>
+</div>
+
+<div class="container">
+    <div class="row my-5 align-items-center">
+        <div class="col-lg-6 animate__animated animate__fadeInUp ">
+            <p class="section-title bg-white text-start text-primary pe-3">Vì sao chọn chúng tôi</p>
+            <h1 class="mb-4">Một số lí do vì sao mọi người chọn chúng tôi!</h1>
+            <p><i class="fa fa-check text-primary me-3"></i>Uy tín trong lĩnh vực</p>
+            <p><i class="fa fa-check text-primary me-3"></i>Tận tâm phục vụ khách hàng</p>
+            <p><i class="fa fa-check text-primary me-3"></i>Chất lượng sản phẩm cao</p>
+            <p><i class="fa fa-check text-primary me-3"></i>Nghiên cứu, tìm hiểu và lắng nghe.</p>
+            <a class="btn btn-secondary rounded-pill py-3 px-5 mt-3" href="">Tìm hiểu thêm</a>
+        </div>
+        <div class="col-lg-6">
+            <div class="rounded-3 overflow-hidden">
+                <div class="row g-0">
+                    <div class="col-sm-6 animate__animated animate__fadeInUp">
+                        <div class="text-center bg-warning py-5 px-4 tile">
+                            <i class="fa fa-medal fa-4x text-white"></i>
+                            <h4 class="mt-4 text-white" data-toggle="counter-up">Nhiều năm kinh nghiệm</h4>
+                        </div>
+                    </div>
+                    <div class="col-sm-6 animate__animated animate__fadeInUp">
+                        <div class="text-center bg-success py-5 px-4 tile">
+                            <i class="fa fa-brain fa-4x text-white"></i>
+                            <h4 class="mt-4 text-white" data-toggle="counter-up">Công nghệ mới</h4>
+                        </div>
+                    </div>
+                    <div class="col-sm-6 animate__animated animate__fadeInUp">
+                        <div class="text-center bg-success py-5 px-4 tile">
+                            <i class="fas fa-city fa-4x text-white"></i>
+                            <h4 class="mt-4 text-white" data-toggle="counter-up">Tiêu chuẩn châu Âu</h4>
+                        </div>
+                    </div>
+                    <div class="col-sm-6 animate__animated animate__fadeInUp">
+                        <div class="text-center bg-warning py-5 px-4 tile">
+                            <i class="far fa-heart fa-4x text-white"></i>
+                            <h4 class="mt-4 text-white" data-toggle="counter-up">Tư vấn tận tình</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private SettingViewModel _settings = new SettingViewModel
+        {
+            CarouselImages =
+                                                    [
+                                                        new ResourceViewModel { Url = "/images/carousel-sample/1.jpg" },
+            new ResourceViewModel { Url = "/images/carousel-sample/2.jpg" },
+            new ResourceViewModel { Url = "/images/carousel-sample/3.jpg" },
+            new ResourceViewModel { Url = "/images/carousel-sample/4.jpg" }
+                                                    ]
+        };
+
+    private List<ProductCardViewModel> Products = [
+        new ProductCardViewModel { Name = "A SD asd as dasd asd", Price = 100000 , Image = new ResourceViewModel { Url = "/images/carousel-sample/1.jpg" }, Rating = 5 },
+    new ProductCardViewModel { Name = "awdasd asd awasd a", Price = 100000 , Image = new ResourceViewModel { Url = "/images/carousel-sample/1.jpg" }, Rating = 5 },
+    new ProductCardViewModel { Name = "trhg dfg hdf gh", Price = 100000 , Image = new ResourceViewModel { Url = "/images/carousel-sample/1.jpg" }, Rating = 5 },
+    new ProductCardViewModel { Name = "sert sdfg sdfg", Price = 100000 , Image = new ResourceViewModel { Url = "/images/carousel-sample/1.jpg" }, Rating = 5 }
+    ];
+}

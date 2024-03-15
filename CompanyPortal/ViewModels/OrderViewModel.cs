@@ -12,7 +12,7 @@ public class OrderViewModel : ViewModelBase
     public string Fullname { get; set; } = string.Empty;
 
     [DisplayName("Mã đơn hàng")]
-    public string ExternalId { get; set; } = string.Empty;
+    public string ExternalId { get; private set; } = $"ORDER-{DateTimeOffset.UtcNow.Ticks}";
 
     [DisplayName("Số điện thoại")]
     public string PhoneNumber { get; set; } = string.Empty;
@@ -35,7 +35,9 @@ public class OrderViewModel : ViewModelBase
     [DisplayName("Trạng thái đơn hàng")]
     public OrderStatus Status { get; set; } = OrderStatus.Ordered;
 
-    public OrderStatus NextStatus => ObjectExtensions.GetNextEnumValueInOrder<OrderStatus>(Status);
+    public OrderStatus NextStatus => EnumExtensions.GetNextEnumValueInOrder(Status);
+
+    public OrderStatus PreviousStatus => EnumExtensions.GetPreviousEnumValueInOrder(Status);
 
     public string Progress => $"{Status.GetCustomValue()}%";
 }
