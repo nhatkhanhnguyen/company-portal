@@ -35,6 +35,10 @@ public class Product : EntityBase
     [ForeignKey(nameof(CategoryId))]
     public Category? Category { get; set; }
 
+    public uint NumberOfRates { get; set; }
+
+    public double Rate { get; set; } = 0;
+
     public virtual ICollection<Resource> Images { get; set; } = [];
 
     public virtual ICollection<ProductVariant> ProductVariants { get; set; } = [];

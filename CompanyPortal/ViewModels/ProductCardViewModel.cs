@@ -1,6 +1,8 @@
-﻿namespace CompanyPortal.ViewModels;
+﻿using CompanyPortal.Core.Common;
 
-public class ProductCardViewModel
+namespace CompanyPortal.ViewModels;
+
+public class ProductCardViewModel : ViewModelBase
 {
     public string Name { get; set; } = string.Empty;
 
@@ -12,5 +14,5 @@ public class ProductCardViewModel
 
     public ResourceViewModel Image { get; set; } = default!;
 
-    public int Rating { get; set; }
+    public double Rate { get; set; }
 }

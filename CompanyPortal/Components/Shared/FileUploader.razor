@@ -127,6 +127,9 @@
         else
         {
             Files.Clear();
+            var stream = new MemoryStream();
+            await files[0].OpenReadStream(maxFileSize).CopyToAsync(stream);
+            var base64 = Convert.ToBase64String(stream.ToArray());
             Files.Add(new ResourceViewModel
             {
                 Base64Content = $"data:{files[0].ContentType};base64,{base64}",

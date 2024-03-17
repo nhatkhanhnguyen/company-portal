@@ -40,4 +40,8 @@
     <ProjectReference Include="..\CompanyPortal.Data\CompanyPortal.Data.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="CQRS\Settings\Commands\" />
+  </ItemGroup>
+
 </Project>

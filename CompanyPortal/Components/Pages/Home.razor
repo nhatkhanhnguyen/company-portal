@@ -1,28 +1,36 @@
-﻿@page "/"
+﻿@using MediatR
+@using CompanyPortal.CQRS.Products.Queries
+@using CompanyPortal.CQRS.Settings.Queries
+
+@page "/"
+
+@inject IMediator Mediator
 
 <HomepageCarousel Images="_settings.CarouselImages" />
 <AboutSection />
-<StarredProductsSection Products="Products" />
+<StarredProductsSection Products="_starredProducts" />
 <WhyUsSection />
 
 
 @code {
-    private SettingViewModel _settings = new SettingViewModel
-    {
-        CarouselImages =
-        [
-            new ResourceViewModel { Url = "/images/carousel-sample/1.jpg" },
-            new ResourceViewModel { Url = "/images/carousel-sample/2.jpg" },
-            new ResourceViewModel { Url = "/images/carousel-sample/3.jpg" },
-            new ResourceViewModel { Url = "/images/carousel-sample/4.jpg" }
-        ]
-    };
+    private List<ProductCardViewModel> _starredProducts = [];
+    private List<SettingViewModel> _settings = [];
 
-    private List<ProductCardViewModel> Products = 
-    [
-        new ProductCardViewModel { Name = "A SD asd as dasd asd", CategoryName = "TEST", ShortDescription = "A SD asd as dasd asd", Price = 100000 , Image = new ResourceViewModel { Url = "/images/carousel-sample/1.jpg" }, Rating = 5 },
-    new ProductCardViewModel { Name = "awdasd asd awasd a", CategoryName = "TEST",ShortDescription = "A SD asd as dasd asd",  Price = 100000 , Image = new ResourceViewModel { Url = "/images/carousel-sample/1.jpg" }, Rating = 5 },
-    new ProductCardViewModel { Name = "trhg dfg hdf gh", CategoryName = "TEST",ShortDescription = "A SD asd as dasd asd",  Price = 100000 , Image = new ResourceViewModel { Url = "/images/carousel-sample/1.jpg" }, Rating = 5 },
-    new ProductCardViewModel { Name = "sert sdfg sdfg", CategoryName = "TEST",ShortDescription = "A SD asd as dasd asd",  Price = 100000 , Image = new ResourceViewModel { Url = "/images/carousel-sample/1.jpg" }, Rating = 5 }
-    ];
+    protected override async Task OnInitializedAsync()
+    {
+        await GetSiteSettings();
+        await GetStarredProducts();
+    }
+
+    private async Task GetSiteSettings()
+    {
+        var result = await Mediator.Send(new GetHomepageSettingsQuery());
+        _settings = result.Data;
+    }
+
+    private async Task GetStarredProducts()
+    {
+        var result = await Mediator.Send(new GetStarredProductsQuery());
+        _starredProducts = result.Data;
+    }
 }
