@@ -8,6 +8,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace CompanyPortal.Data.Database.Entities;
 
 [Index(nameof(Title))]
+[Index(nameof(Description))]
 public class Article : EntityBase
 {
     [MaxLength(128)]

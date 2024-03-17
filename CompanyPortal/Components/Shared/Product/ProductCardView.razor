@@ -1,0 +1,28 @@
+﻿@using System.Globalization
+
+<div class="card border-0 shadow-sm">
+    <div class="row g-0">
+        <div class="col-4">
+            <img src="@Product.Image.Url" class="img-fluid rounded-start" alt="...">
+        </div>
+        <div class="col-5 p-2 d-flex flex-column justify-content-center">
+            <h4 class="product-name">@Product.Name</h4>
+            <p class="product-category mb-1">@Product.CategoryName</p>
+            <p class="product-short-description mb-1">@Product.ShortDescription</p>
+        </div>
+        <div class="col-3 d-flex flex-column align-items-center justify-content-center p-2">
+            <h4 class="product-price">@Product.Price.ToString("C", CultureInfo.GetCultureInfo("vi-vn"))</h4>
+            <div class="product-review">
+                <i class="fa fa-star"></i>
+                <i class="fa fa-star"></i>
+                <i class="fa fa-star"></i>
+                <i class="fa fa-star"></i>
+                <i class="fa fa-star"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public ProductCardViewModel Product { get; set; } = default!;
+}

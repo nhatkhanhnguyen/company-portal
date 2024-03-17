@@ -9,6 +9,7 @@ namespace CompanyPortal.Data.Database.Entities;
 
 [Index(nameof(Name), IsUnique = true)]
 [Index(nameof(ExternalId), IsUnique = true)]
+[Index(nameof(FullDescription))]
 public class Product : EntityBase
 {
     [MaxLength(20)]
@@ -31,7 +32,7 @@ public class Product : EntityBase
 
     public int? CategoryId { get; set; }
 
-    [ForeignKey(nameof(CategoryId))] 
+    [ForeignKey(nameof(CategoryId))]
     public Category? Category { get; set; }
 
     public virtual ICollection<Resource> Images { get; set; } = [];

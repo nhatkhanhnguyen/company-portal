@@ -1,5 +1,27 @@
-﻿<h3>DeleteRequestDialog</h3>
+﻿<ModalDialog>
+    <Header>
+        <h5 class="modal-title">XÓA YÊU CẦU LIÊN HỆ</h5>
+        <button type="button" class="btn-close" aria-label="Close" @onclick="() => BlazoredModal.CancelAsync()"></button>
+    </Header>
+    <Body>
+        <p>Bạn có chắc là muốn xóa yêu cầu liên hệ của <b>@ContactRequest.Fullname</b> này không?</p>
+    </Body>
+    <Footer>
+        <div class="row">
+            <div class="col-12">
+                <LoadingButton IconCss="fa-solid fa-trash" ButtonCssClass="btn-danger rounded-pill me-2" LoadingText="ĐANG XÓA" NormalText="CHẮC CHẮN" Click="DeleteAsync" />
+                <button class="btn btn-info rounded-pill" @onclick="() => BlazoredModal.CancelAsync()"><i class="fa-solid fa-xmark"></i> KHÔNG</button>
+            </div>
+        </div>
+    </Footer>
+</ModalDialog>
 
 @code {
+    [CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; } = default!;
+    [Parameter] public ContactRequestViewModel ContactRequest { get; set; } = new();
 
+    private async Task DeleteAsync()
+    {
+        await BlazoredModal.CloseAsync(ModalResult.Ok(true));
+    }
 }

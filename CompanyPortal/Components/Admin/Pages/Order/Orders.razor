@@ -1,11 +1,7 @@
 ﻿@using CompanyPortal.CQRS.Orders.Commands
 @using CompanyPortal.CQRS.Orders.Queries
-@using CompanyPortal.Core.Common
-@using CompanyPortal.Core.Constants
 @using CompanyPortal.Core.Enums
 @using CompanyPortal.Core.Extensions
-@using Syncfusion.Blazor.Navigations
-@using Syncfusion.Blazor.RichTextEditor
 @using MediatR
 
 @page "/Administration/Orders"
@@ -54,16 +50,16 @@ else
                 <Template>
                     @{
                         var order = context as OrderViewModel;
-                        if (order.Status > OrderStatus.Ordered)
+                        if (order!.Status > OrderStatus.Ordered)
                         {
                             <button class="btn btn-warning btn-sm rounded-pill me-2" type="button" @onclick="() => UpdateOrderStatusAsync(order.Id, order.PreviousStatus)">
-                                @order!.PreviousStatus.GetEnumDescription() <i class="fa-solid fa-arrow-left"></i> @order.Status.GetEnumDescription()
+                                @order.PreviousStatus.GetEnumDescription() <i class="fa-solid fa-arrow-left"></i> @order.Status.GetEnumDescription()
                             </button>
                         }
                         if (order.Status < OrderStatus.Completed)
                         {
                             <button class="btn btn-success btn-sm rounded-pill" type="button" @onclick="() => UpdateOrderStatusAsync(order.Id, order.NextStatus)">
-                                @order!.Status.GetEnumDescription() <i class="fa-solid fa-arrow-right"></i> @order.NextStatus.GetEnumDescription()
+                                @order.Status.GetEnumDescription() <i class="fa-solid fa-arrow-right"></i> @order.NextStatus.GetEnumDescription()
                             </button>
                         }
                     }
@@ -94,7 +90,6 @@ else
     private SfGrid<OrderViewModel> OrderGrid { get; set; } = default!;
     private List<OrderViewModel> _listOrder = [];
     private readonly List<ItemModel> _toolbarItems = DataGrid.ToolbarItems("sfGridOrder");
-    private List<EnumToRecord<OrderStatus>> _orderStatuses = EnumExtensions.GetEnumToRecords<OrderStatus>();
     private bool _isLoading = true;
 
     protected override async Task OnInitializedAsync()
@@ -109,7 +104,7 @@ else
         var parameters = new ModalParameters().Add("Order", selectedOrder);
         var modalResult = await Modal.Show<ViewOrderDialog>(parameters, new ModalOptions { UseCustomLayout = true }).Result;
 
-        if ((modalResult.Cancelled || modalResult.Confirmed) && (bool)modalResult.Data! == true)
+        if ((modalResult.Cancelled || modalResult.Confirmed) && (bool)modalResult.Data!)
         {
             _isLoading = true;
             _listOrder = await Mediator.Send(new GetAllOrdersQuery(true));
@@ -208,6 +203,7 @@ else
     {
         foreach (var orderDetail in orderDetails)
         {
+            orderDetail.OrderId = orderId;
             await Mediator.Send(new CreateOrderDetailCommand(orderDetail));
         }
     }

@@ -9,6 +9,9 @@ public class CategoryViewModel : ViewModelBase
     [DisplayName("Tên danh mục")]
     public string Name { get; set; } = string.Empty;
 
+    [DisplayName("Ảnh mô tả")]
+    public ResourceViewModel Image { get; set; } = new();
+
     [DisplayName("Mô tả ngắn")]
     public string Description { get; set; } = string.Empty;
 

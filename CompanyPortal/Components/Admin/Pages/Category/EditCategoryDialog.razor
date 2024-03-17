@@ -59,6 +59,6 @@
     private void Submit()
     {
         Category.IsActive = !Category.MarkedAsInactive;
-        BlazoredModal.CloseAsync(ModalResult.Ok<CategoryViewModel>(Category));
+        BlazoredModal.CloseAsync(ModalResult.Ok(Category));
     }
 }

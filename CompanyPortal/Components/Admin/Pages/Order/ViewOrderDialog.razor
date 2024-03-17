@@ -43,7 +43,7 @@
                             </thead>
                             <tbody class="table-group-divider">
 
-                                @if (Order.OrderDetails.Count() > 0)
+                                @if (Order.OrderDetails.Any())
                                 {
                                     foreach (var orderDetail in Order.OrderDetails)
                                     {
@@ -70,7 +70,7 @@
                                     </tr>
                                 }
                             </tbody>
-                            @if (Order.OrderDetails.Count() > 0)
+                            @if (Order.OrderDetails.Any())
                             {
                                 <tfoot class="table-group-divider">
                                     <tr>
@@ -138,7 +138,7 @@
     [CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; } = default!;
     [Parameter] public OrderViewModel Order { get; set; } = default!;
 
-    private List<EnumToRecord<OrderStatus>> _orderStatuses = EnumExtensions.GetEnumToRecords<OrderStatus>();
+    private readonly List<EnumToRecord<OrderStatus>> _orderStatuses = EnumExtensions.GetEnumToRecords<OrderStatus>();
 
     private bool _isLoading = true;
     private bool _hasChanges;

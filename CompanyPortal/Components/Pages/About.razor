@@ -1,7 +1,55 @@
 ﻿@page "/about"
 
-<h3>About</h3>
+<div class="container py-5">
+    <div class="row">
+        <div class="col-sm-12 col-md-6 d-flex justify-content-center align-items-center">
+            <img src="/images/logo.png" alt="Company Logo" class="img-fluid" />
+        </div>
+        <div class="col-sm-12 col-md-6">
+            <div class="d-inline-flex mb-4">
+                <img src="/images/about-section-icon.svg" class="pe-3">
+                <div class="text-uppercase fs-5 fw-bold section-header">Về chúng tôi</div>
+            </div>
+            <h2>Công Ty TNHH SX Màng Nông Nghiệp MIỀN NAM</h2>
+            <p>Công Ty TNHH SX Màng Nông Nghiệp MIỀN NAM là công ty chuyên sản xuất và cung ứng sản phẩm màng nông ngư nghiệp cho bà con nông dân, theo công nghệ tiêu chuẩn Châu Âu, với nhiều chuyên gia đầu ngành, nhiều năm kinh nghiệm tạo ra các sản phẩm màng nông ngư nghiệp có độ bền cao, đem lại hiệu quả kinh tế cho bà con nông dân, và các nhà đầu tư trong nông nghiệp.</p>
+            <p>Với phương châm tạo ra sản phẩm tốt nhất giá cả hợp lý nhất hiệu quả cao nhất công ty chúng tôi luôn tập trung nghiên cứu tìm tòi áp dụng những công nghệ mới nhất, những nguyên liệu tốt nhất đưa vào sản phẩm, nhằm tạo ra những sản phẩm ưu việt, đem lại niềm tin cho người sử dụng.</p>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-12 col-md-6">
+            <h4 class="mb-3">Các loại sản phẩm chúng tôi đang kinh doanh</h4>
+            <div class="row">
+                <div class="col-6">
+                    <p><img src="/images/icon-check.svg"> Màng nhà kính</p>
+                    <p><img src="/images/icon-check.svg"> Màng lót hồ nuôi tôm</p>
+                    <p><img src="/images/icon-check.svg"> Màng phủ nông nghiệp</p>
+                    <p><img src="/images/icon-check.svg"> Màng rau màu</p>
+                    <p><img src="/images/icon-check.svg"> Màng HDPE</p>
+                </div>
+                <div class="col-6">
+                    <p><img src="/images/icon-check.svg"> Màng PE trắng trong</p>
+                    <p><img src="/images/icon-check.svg"> Phụ kiện nhà kính</p>
+                    <p><img src="/images/icon-check.svg"> Cánh quạt oxy</p>
+                    <p><img src="/images/icon-check.svg"> Ống nước mềm</p>
+                    <p><img src="/images/icon-check.svg"> Túi trữ nước HDPE</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-12 col-md-6">
+            <SfCarousel ShowIndicators="false">
+                @foreach (var image in CategoryImages)
+                {
+                    <CarouselItem>
+                        <figure class="img-container">
+                            <img src="@image.Url" alt="@image.Name" />
+                        </figure>
+                    </CarouselItem>
+                }
+            </SfCarousel>
+        </div>
+    </div>
+</div>
 
 @code {
-
+    [Parameter] public List<ResourceViewModel> CategoryImages { get; set; } = [];
 }

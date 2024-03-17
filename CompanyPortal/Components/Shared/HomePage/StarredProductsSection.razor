@@ -1,0 +1,31 @@
+﻿<div class="bg-neutral section-wrapper">
+    <div class="container">
+        <div class="row">
+            <div class="d-inline-flex col-12 mb-5">
+                <img src="/images/product-section-icon.svg" class="pe-2" alt="Starred products icon">
+                <div class="text-uppercase fs-5 fw-bold section-header">SẢN PHẨM TIÊU BIỂU</div>
+            </div>
+            <SfCarousel ShowIndicators="false">
+                @for (var i = 0; i < Products.Count; i += 2)
+                {
+                    var i1 = i;
+                    <CarouselItem>
+                        <div class="row">
+                            <div class="col-md-6 col-sm-12 p-2">
+                                <ProductCardView Product="Products[i1]" />
+                            </div>
+                            <div class="col-md-6 col-sm-12 p-2">
+                                <ProductCardView Product="Products[i1+1]" />
+                            </div>
+                        </div>
+                    </CarouselItem>
+                }
+            </SfCarousel>
+
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public List<ProductCardViewModel> Products { get; set; } = [];
+}

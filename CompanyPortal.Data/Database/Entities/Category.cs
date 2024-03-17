@@ -1,11 +1,15 @@
 ﻿using CompanyPortal.Core.Common;
 
-using System.ComponentModel.DataAnnotations;
 using Microsoft.EntityFrameworkCore;
+
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace CompanyPortal.Data.Database.Entities;
 
 [Index(nameof(Name))]
+[Index(nameof(ExternalId))]
+[Index(nameof(Description))]
 public class Category : EntityBase
 {
     [MaxLength(100)]
@@ -16,6 +20,11 @@ public class Category : EntityBase
 
     [MaxLength(20)]
     public string ExternalId { get; set; } = string.Empty;
+
+    public int ImageId { get; set; }
+
+    [ForeignKey(nameof(ImageId))]
+    public Resource? Image { get; set; }
 
     public virtual ICollection<Product> Products { get; set; } = [];
 }

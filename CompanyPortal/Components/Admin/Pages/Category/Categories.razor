@@ -1,8 +1,6 @@
 ﻿@using MediatR
 @using CompanyPortal.CQRS.Categories.Commands
 @using CompanyPortal.CQRS.Categories.Queries
-@using Syncfusion.Blazor.Navigations
-@using Syncfusion.Blazor.RichTextEditor
 @using CompanyPortal.Core.Extensions
 
 @page "/Administration/Categories"
@@ -93,7 +91,7 @@ else
         var category = selectedCategory != null ? selectedCategory.Clone()! : new CategoryViewModel();
 
         var parameters = new ModalParameters().Add("Category", category);
-        var modalResult = await Modal.Show<EditCategoryDialog>(parameters, new() { UseCustomLayout = true }).Result;
+        var modalResult = await Modal.Show<EditCategoryDialog>(parameters, new ModalOptions { UseCustomLayout = true }).Result;
         if (modalResult.Confirmed)
         {
             var data = (CategoryViewModel)modalResult.Data!;
@@ -112,13 +110,13 @@ else
     private void ShowViewDialog(CategoryViewModel selectedCategory)
     {
         var parameters = new ModalParameters().Add("Category", selectedCategory);
-        Modal.Show<ViewCategoryDialog>(parameters, new() { UseCustomLayout = true });
+        Modal.Show<ViewCategoryDialog>(parameters, new ModalOptions { UseCustomLayout = true });
     }
 
     private async Task ShowDeleteDialogAsync(CategoryViewModel selectedCategory)
     {
         var parameters = new ModalParameters().Add("Category", selectedCategory);
-        var modalResult = await Modal.Show<DeleteCategoryDialog>(parameters, new() { UseCustomLayout = true }).Result;
+        var modalResult = await Modal.Show<DeleteCategoryDialog>(parameters, new ModalOptions { UseCustomLayout = true }).Result;
         if (modalResult.Confirmed)
         {
             var data = (bool)modalResult.Data!;

@@ -1,6 +1,5 @@
 ﻿@using CompanyPortal.CQRS.Categories.Queries
 @using MediatR
-@using CompanyPortal.CQRS.Products.Queries
 @using CompanyPortal.CQRS.Categories.Commands
 
 @inject IMediator Mediator
@@ -13,6 +12,7 @@
     <Body>
         <div class="row">
             <div class="col-12">
+                <img class="img-fluid" alt="@Category.Name" src="@Category.Image.Url" />
                 <h3>@Category.Name</h3>
 
                 @((MarkupString)Category.Description)
@@ -25,31 +25,31 @@
                     {
                         <table class="table table-hover table-striped">
                             <thead>
-                                <tr>
-                                    <th>Mã sản phẩm</th>
-                                    <th>Tên sản phẩm</th>
-                                </tr>
+                            <tr>
+                                <th>Mã sản phẩm</th>
+                                <th>Tên sản phẩm</th>
+                            </tr>
                             </thead>
                             <tbody>
-                                @if (Category.Products.Count() > 0)
-                                {
-                                    foreach (var product in Category.Products)
-                                    {
-                                        <tr>
-                                            <td>@product.ExternalId</td>
-                                            <td><a href="/product/@product.Id" target="_blank">@product.Name</a></td>
-                                            <td align="right">
-                                                <LoadingButton IconCss="fa-solid fa-trash" ButtonCssClass="btn-danger btn-sm rounded-pill" LoadingText="ĐANG XÓA" NormalText="Xóa" Click="() => ShowRemoveProductDialogAsync(product)" />
-                                            </td>
-                                        </tr>
-                                    }
-                                }
-                                else
+                            @if (Category.Products.Any())
+                            {
+                                foreach (var product in Category.Products)
                                 {
                                     <tr>
-                                        <td colspan="3" class="text-center">KHÔNG CÓ SẢN PHẨM</td>
+                                        <td>@product.ExternalId</td>
+                                        <td><a href="/product/@product.Id" target="_blank">@product.Name</a></td>
+                                        <td align="right">
+                                            <LoadingButton IconCss="fa-solid fa-trash" ButtonCssClass="btn-danger btn-sm rounded-pill" LoadingText="ĐANG XÓA" NormalText="Xóa" Click="() => ShowRemoveProductDialogAsync(product)"/>
+                                        </td>
                                     </tr>
                                 }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="3" class="text-center">KHÔNG CÓ SẢN PHẨM</td>
+                                </tr>
+                            }
                             </tbody>
                         </table>
                     }
@@ -71,18 +71,15 @@
 
     protected override async Task OnInitializedAsync()
     {
-        if (Category != null)
-        {
-            _isLoading = true;
-            Category.Products = await Mediator.Send(new GetCategoryProductsByIdQuery(Category.Id, true));
-            _isLoading = false;
-        }
+        _isLoading = true;
+        Category.Products = await Mediator.Send(new GetCategoryProductsByIdQuery(Category.Id, true));
+        _isLoading = false;
     }
 
     private async Task ShowRemoveProductDialogAsync(ProductViewModel product)
     {
         var parameters = new ModalParameters().Add("Product", product);
-        var modalResult = await Modal.Show<RemoveProductDialog>(parameters, new() { UseCustomLayout = true }).Result;
+        var modalResult = await Modal.Show<RemoveProductDialog>(parameters, new ModalOptions { UseCustomLayout = true }).Result;
         if (modalResult.Confirmed)
         {
             var result = await Mediator.Send(new UncategoriseProductCommand(product.Id));

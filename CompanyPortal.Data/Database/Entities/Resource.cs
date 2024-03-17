@@ -1,11 +1,17 @@
 ﻿using CompanyPortal.Core.Common;
 using CompanyPortal.Core.Enums;
 
+using Microsoft.EntityFrameworkCore;
+
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace CompanyPortal.Data.Database.Entities;
 
+[Index(nameof(Name))]
+[Index(nameof(BlobName))]
+[Index(nameof(ProductId))]
+[Index(nameof(ArticleId))]
 public class Resource : EntityBase
 {
     [MaxLength(100)]

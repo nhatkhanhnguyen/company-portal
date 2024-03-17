@@ -1,0 +1,25 @@
+﻿<SfCarousel AutoPlay CssClass="main-carousel" ShowIndicators="false">
+    <ChildContent>
+        @foreach (var image in Images)
+        {
+            <CarouselItem>
+                <figure class="img-container">
+                    <img src="@image.Url" alt="@image.Name" />
+                </figure>
+            </CarouselItem>
+        }
+    </ChildContent>
+</SfCarousel>
+
+@code {
+
+    [Parameter]
+    public List<ResourceViewModel> Images { get; set; } =
+    [
+        new ResourceViewModel { Url = "/images/carousel-sample/1.jpg" },
+    new ResourceViewModel { Url = "/images/carousel-sample/2.jpg" },
+    new ResourceViewModel { Url = "/images/carousel-sample/3.jpg" },
+    new ResourceViewModel { Url = "/images/carousel-sample/4.jpg" }
+    ];
+
+}
