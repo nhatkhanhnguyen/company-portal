@@ -1,11 +1,13 @@
-﻿using CompanyPortal.Core.Common;
-
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
+using CompanyPortal.Core.Common;
 
 namespace CompanyPortal.ViewModels;
 
 public class ContactRequestViewModel : ViewModelBase
 {
+    [MaxLength(200)]
+    public string Title { get; set; } = string.Empty;
+
     [MaxLength(100)]
     public string Fullname { get; set; } = string.Empty;
 

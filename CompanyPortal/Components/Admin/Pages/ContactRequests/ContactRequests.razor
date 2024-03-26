@@ -1,8 +1,7 @@
 ﻿@using CompanyPortal.CQRS.ContactRequests.Commands
 @using CompanyPortal.CQRS.ContactRequests.Queries
-@using CompanyPortal.Core.Extensions
+@using CompanyPortal.CQRS.Email
 @using MediatR
-@using Syncfusion.Blazor.Navigations
 
 @page "/Administration/ContactRequests"
 @inject IMediator Mediator
@@ -13,38 +12,43 @@
     </div>
 </div>
 <hr />
-@if (_listRequest.Count == 0 || _isLoading)
+@if (_isLoading)
 {
     <Spinner></Spinner>
 }
 else
 {
     <SfGrid DataSource="@_listRequest" @ref="RequestGrid" ID="sfGridRequest"
-    AllowPaging="true" AllowSelection="true"
-    AllowSorting="true" AllowResizing="true"
-    EnableStickyHeader="true" EnableHover="true"
-    Toolbar="_toolbarItems"
-    AllowExcelExport="true" AllowPdfExport="true">
+            AllowPaging="true" AllowSelection="true"
+            AllowSorting="true" AllowResizing="true"
+            EnableStickyHeader="true" EnableHover="true"
+            Toolbar="_toolbarItems"
+            AllowExcelExport="true" AllowPdfExport="true">
         <GridPageSettings PageSize="10"></GridPageSettings>
         <GridSearchSettings Fields="@(new[] { "Name", "Description", "Price", "Tags" })"></GridSearchSettings>
-        <GridEvents OnToolbarClick="ToolbarClickHandler" TValue="ContactRequestViewModel">
+        <GridEvents OnToolbarClick="ToolbarClickHandlerAsync" TValue="ContactRequestViewModel">
         </GridEvents>
         <GridColumns>
             <GridColumn Field="@nameof(ContactRequestViewModel.Id)"
-            HeaderText="ID"
-            Width="50">
+                        HeaderText="ID"
+                        Width="50">
             </GridColumn>
             <GridColumn Field="@nameof(ContactRequestViewModel.Fullname)"
-            HeaderText="TÊN"
-            Width="386"
-            Type="ColumnType.String">
+                        HeaderText="NGƯỜI GỬI"
+                        Width="386"
+                        Type="ColumnType.String">
             </GridColumn>
             <GridColumn Field="@nameof(ContactRequestViewModel.DateCreated)"
-            HeaderText="NGÀY GỬI"
-            Width="128"
-            Type="ColumnType.DateTime">
+                        HeaderText="NGÀY GỬI"
+                        Width="128"
+                        Type="ColumnType.DateTime">
             </GridColumn>
-            <GridColumn HeaderText="ĐÃ ĐỌC" TextAlign="TextAlign.Center" Width="50">
+            <GridColumn Field="@nameof(ContactRequestViewModel.Title)"
+                        HeaderText="TIÊU ĐỀ"
+                        Width="386"
+                        Type="ColumnType.String">
+            </GridColumn>
+            <GridColumn HeaderText="ĐÃ ĐỌC" TextAlign="TextAlign.Center" Width="100">
                 <Template>
                     @{
                         var request = context as ContactRequestViewModel;
@@ -55,7 +59,7 @@ else
                     }
                 </Template>
             </GridColumn>
-            <GridColumn HeaderText="ĐÃ TRẢ LỜI" TextAlign="TextAlign.Center" Width="50">
+            <GridColumn HeaderText="ĐÃ TRẢ LỜI" TextAlign="TextAlign.Center" Width="100">
                 <Template>
                     @{
                         var request = context as ContactRequestViewModel;
@@ -76,7 +80,7 @@ else
                         <button class="btn btn-sm btn-primary rounded-pill" @onclick="() => MarkAsRead(request!)">
                             <i class="fa-solid fa-pen-to-square"></i> ĐÃ ĐỌC
                         </button>
-                        <button class="btn btn-sm btn-primary rounded-pill" @onclick="() => ShowResponseDialog(request!)">
+                        <button class="btn btn-sm btn-primary rounded-pill" @onclick="() => ShowResponseDialogAsync(request!)">
                             <i class="fa-solid fa-pen-to-square"></i> TRẢ LỜI
                         </button>
                         <button class="btn btn-sm btn-danger rounded-pill" @onclick="() => ShowDeleteDialogAsync(request!)">
@@ -95,44 +99,35 @@ else
     private SfGrid<ContactRequestViewModel> RequestGrid { get; set; } = default!;
     private List<ContactRequestViewModel> _listRequest = [];
     private readonly List<ItemModel> _toolbarItems = DataGrid.ToolbarItems("sfGridRequest");
-    private bool _isLoading;
+    private bool _isLoading = true;
 
     protected override async Task OnInitializedAsync()
     {
         _listRequest = await Mediator.Send(new GetAllContactRequestsQuery(true));
+        _isLoading = false;
     }
 
     private void ShowViewDialog(ContactRequestViewModel selectedRequest)
     {
-        var options = new ModalOptions
-            {
-                Size = ModalSize.Custom,
-                SizeCustomClass = "blazored-modal-fixed-size-xlarge"
-            };
         var parameters = new ModalParameters().Add("Request", selectedRequest);
-        Modal.Show<ViewContactRequestDialog>("THÔNG TIN SẢN PHẨM", parameters, options);
+        Modal.Show<ViewContactRequestDialog>(parameters, new ModalOptions { UseCustomLayout = true });
     }
 
-    private void ShowResponseDialog(ContactRequestViewModel selectedRequest)
+    private async Task ShowResponseDialogAsync(ContactRequestViewModel selectedRequest)
     {
-        var options = new ModalOptions
-            {
-                Size = ModalSize.Custom,
-                SizeCustomClass = "blazored-modal-fixed-size-xlarge"
-            };
         var parameters = new ModalParameters().Add("Request", selectedRequest);
-        Modal.Show<ResponseDialog>("TRẢ LỜI YÊU CẦU", parameters, options);
+        var modalResult = await Modal.Show<ResponseDialog>(parameters, new ModalOptions { UseCustomLayout = true }).Result;
+        if (modalResult.Confirmed)
+        {
+            var result = modalResult.Data as ContactResponseViewModel;
+            await Mediator.Send(new SendEmailCommand("", "", "", result!.ResponseMessage));
+        }
     }
 
     private async void MarkAsRead(ContactRequestViewModel selectedRequest)
     {
-        var options = new ModalOptions
-            {
-                Size = ModalSize.Custom,
-                SizeCustomClass = "blazored-modal-fixed-size-xlarge"
-            };
-        var parameters = new ModalParameters().Add("Request", selectedRequest);
-        var modalResult = await Modal.Show<ViewContactRequestDialog>("CHI TIẾT YÊU CẦU", parameters, options).Result;
+        var parameters = new ModalParameters().Add("Fullname", selectedRequest.Fullname);
+        var modalResult = await Modal.Show<MarkAsReadDialog>(parameters, new ModalOptions { UseCustomLayout = true }).Result;
         if (modalResult.Confirmed)
         {
             var result = await Mediator.Send(new MarkRequestAsReadCommand(selectedRequest.Id));
@@ -142,7 +137,7 @@ else
             }
             else
             {
-                Modal.Show<ErrorDialog>("CÓ LỖI XẢY RA!", new ModalParameters().Add("ErrorMessage", "Có lỗi xảy ra khi lưu danh mục!"));
+                Modal.Show<ErrorDialog>("CÓ LỖI XẢY RA!", new ModalParameters().Add("ErrorMessage", result.Data as string));
             }
         }
     }
@@ -155,15 +150,15 @@ else
         {
             var data = (bool)modalResult.Data!;
             var result = await Mediator.Send(new DeleteContactRequestCommand(selectedRequest.Id, data));
-            if (!result)
+            if (result.IsError)
             {
-                Modal.Show<ErrorDialog>("CÓ LỖI XẢY RA!", new ModalParameters().Add("ErrorMessage", "Có lỗi xảy ra khi xóa yêu cầu. Vui lòng thử lại sau!"));
+                Modal.Show<ErrorDialog>("CÓ LỖI XẢY RA!", new ModalParameters().Add("ErrorMessage", result.Data as string));
             }
         }
         _listRequest = await Mediator.Send(new GetAllContactRequestsQuery(true));
     }
 
-    private async Task ToolbarClickHandler(ClickEventArgs args)
+    private async Task ToolbarClickHandlerAsync(ClickEventArgs args)
     {
         switch (args.Item.Id)
         {

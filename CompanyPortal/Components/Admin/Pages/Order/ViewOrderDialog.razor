@@ -11,7 +11,7 @@
 <ModalDialog SizeClass="modal-xl">
     <Header>
         <h5 class="modal-title">THÔNG TIN ĐƠN HÀNG</h5>
-        <button type="button" class="btn-close" aria-label="Close" @onclick="Cancel"></button>
+        <button type="button" class="btn-close" aria-label="Close" @onclick="() => BlazoredModal.CancelAsync()"></button>
     </Header>
     <Body>
         <div class="row mb-3">
@@ -118,7 +118,7 @@
                         }
                     </ul>
                 </div>
-                <button type="button" class="btn btn-success rounded-pill" @onclick="Cancel"><i class="fa-solid fa-xmark"></i> ĐÓNG</button>
+                <button type="button" class="btn btn-success rounded-pill" @onclick="() => BlazoredModal.CancelAsync()"><i class="fa-solid fa-xmark"></i> ĐÓNG</button>
             </div>
         </div>
     </Footer>
@@ -141,9 +141,7 @@
     private readonly List<EnumToRecord<OrderStatus>> _orderStatuses = EnumExtensions.GetEnumToRecords<OrderStatus>();
 
     private bool _isLoading = true;
-    private bool _hasChanges;
-
-    private void Cancel() => BlazoredModal.CancelAsync(_hasChanges);
+    private bool _hasChanges = false;
 
     private async void ChangeStatus(OrderStatus status)
     {

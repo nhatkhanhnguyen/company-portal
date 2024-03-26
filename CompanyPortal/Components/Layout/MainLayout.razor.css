@@ -1,3 +1,7 @@
 ﻿.main-nav {
     animation-duration: .3s !important;
 }
+
+.main-layout {
+    font-family: "Noto Serif", sans-serif !important;
+}

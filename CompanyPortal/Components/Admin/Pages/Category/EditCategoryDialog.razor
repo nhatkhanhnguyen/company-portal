@@ -1,35 +1,39 @@
-﻿@using Syncfusion.Blazor.Navigations
-@using Syncfusion.Blazor.RichTextEditor
+﻿@using Syncfusion.Blazor.RichTextEditor
 
-<ModalDialog SizeClass="modal-xl">
+<ModalDialog>
     <Header>
         <h5 class="modal-title">@(Category.Id > 0 ? "CHỈNH SỬA DANH MỤC" : "THÊM DANH MỤC") </h5>
-        <button type="button" class="btn-close" aria-label="Close" @onclick="Cancel"></button>
+        <button type="button" class="btn-close" aria-label="Close" @onclick="() => BlazoredModal.CancelAsync()"></button>
     </Header>
     <Body>
-        <EditForm Model="Category" OnValidSubmit="Submit" id="FormCategory" class="row g-3">
+        <EditForm Model="Category" OnValidSubmit="SubmitAsync" id="FormCategory" class="row g-3">
             <FluentValidationValidator ValidatorType="typeof(CategoryFormValidator)" />
             <fieldset>
                 <div class="col-12 mb-3">
+                    <Label For="@(() => Category.Image)" CssClass="form-label"></Label>
+                    <FileUploader @bind-File="Category.Image" ButtonText="Chọn ảnh" Id="fileUploader" AcceptFileExtensions=".jpg,.png" AllowMultiple="false" ShowPreview></FileUploader>
+                    <ValidationMessage For="@(() => Category.Image)" />
+                </div>
+                <div class="col-12 mb-3">
                     <Label For="@(() => Category.Name)" CssClass="form-label"></Label>
-                    <InputText class="form-control" maxlength="100" @bind-Value="Category.Name" />
-                    <ValidationMessage For="@(() => Category.Name)" />
+                    <InputText class="form-control" maxlength="100" @bind-Value="Category.Name"/>
+                    <ValidationMessage For="@(() => Category.Name)"/>
                 </div>
                 <div class="col-12 mb-3">
                     <Label For="@(() => Category.ExternalId)" CssClass="form-label"></Label>
-                    <InputText class="form-control" maxlength="20" @bind-Value="Category.ExternalId" />
-                    <ValidationMessage For="@(() => Category.ExternalId)" />
+                    <InputText class="form-control" maxlength="20" @bind-Value="Category.ExternalId"/>
+                    <ValidationMessage For="@(() => Category.ExternalId)"/>
                 </div>
                 <div class="col-12 mb-3">
                     <Label For="@(() => Category.Description)" CssClass="form-label"></Label>
                     <SfRichTextEditor ID="descriptionEditor" MaxLength="500" @bind-Value="Category.Description" Height="400">
-                        <RichTextEditorToolbarSettings Items="@_descriptionEditorTools" />
+                        <RichTextEditorToolbarSettings Items="@_descriptionEditorTools"/>
                     </SfRichTextEditor>
-                    <ValidationMessage For="@(() => Category.Description)" />
+                    <ValidationMessage For="@(() => Category.Description)"/>
                 </div>
                 <div class="col-12">
                     <div class="form-check d-flex">
-                        <InputCheckbox @bind-Value="Category.MarkedAsInactive" class="form-check-input align-self-baseline" />
+                        <InputCheckbox @bind-Value="Category.MarkedAsInactive" class="form-check-input align-self-baseline"/>
                         <span class="form-check-label ms-2">
                             <Label For="@(() => Category.MarkedAsInactive)" CssClass="form-label"></Label>
                         </span>
@@ -41,9 +45,9 @@
     <Footer>
         <div class="row">
             <div class="col-12">
-                <LoadingButton Type="submit" IconCss="fa-solid fa-floppy-disk" ForForm="FormProduct" ButtonCssClass="btn-primary rounded-pill me-2"
+                <LoadingButton Type="submit" IconCss="fa-solid fa-floppy-disk" ForForm="FormCategory" ButtonCssClass="btn-primary rounded-pill me-2"
                                LoadingText="ĐANG LƯU" NormalText="LƯU" />
-                <button type="button" class="btn btn-danger rounded-pill" @onclick="Cancel"><i class="fa-solid fa-xmark"></i> HỦY</button>
+                <button type="button" class="btn btn-danger rounded-pill" @onclick="() => BlazoredModal.CancelAsync()"><i class="fa-solid fa-xmark"></i> HỦY</button>
             </div>
         </div>
     </Footer>
@@ -51,14 +55,12 @@
 
 @code {
     [CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; } = default!;
-    [Parameter] public CategoryViewModel Category { get; set; } = new();
+    [Parameter] public CategoryViewModel Category { get; set; } = default!;
     private readonly List<ToolbarItemModel> _descriptionEditorTools = DataGrid.ContentEditorTools;
 
-    private void Cancel() => BlazoredModal.CancelAsync();
-
-    private void Submit()
+    private Task SubmitAsync()
     {
         Category.IsActive = !Category.MarkedAsInactive;
-        BlazoredModal.CloseAsync(ModalResult.Ok(Category));
+        return BlazoredModal.CloseAsync(ModalResult.Ok(Category));
     }
 }

@@ -1,8 +1,6 @@
 ﻿using Azure.Storage.Blobs;
 using Azure.Storage.Sas;
-
 using CompanyPortal.ViewModels;
-
 using MediatR;
 
 namespace CompanyPortal.CQRS.Resources.Commands;

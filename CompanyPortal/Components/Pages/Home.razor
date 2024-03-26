@@ -6,31 +6,35 @@
 
 @inject IMediator Mediator
 
-<HomepageCarousel Images="_settings.CarouselImages" />
+<HomepageCarousel />
 <AboutSection />
-<StarredProductsSection Products="_starredProducts" />
+<StarredProductsSection />
 <WhyUsSection />
 
 
 @code {
-    private List<ProductCardViewModel> _starredProducts = [];
-    private List<SettingViewModel> _settings = [];
+    private List<ProductViewModel> _starredProducts = [];
+    private HomePageSettingsViewModel _settings = default!;
 
     protected override async Task OnInitializedAsync()
     {
-        await GetSiteSettings();
-        await GetStarredProducts();
+        await GetSiteSettingsAsync();
+        await GetStarredProductsAsync();
     }
 
-    private async Task GetSiteSettings()
+    private async Task GetSiteSettingsAsync()
     {
         var result = await Mediator.Send(new GetHomepageSettingsQuery());
-        _settings = result.Data;
+        _settings = result.Data as HomePageSettingsViewModel ?? new HomePageSettingsViewModel();
     }
 
-    private async Task GetStarredProducts()
+    private async Task GetStarredProductsAsync()
     {
         var result = await Mediator.Send(new GetStarredProductsQuery());
-        _starredProducts = result.Data;
+        if (result.IsSuccess)
+        {
+
+        }
+        _starredProducts = result.Data as List<ProductViewModel> ?? [];
     }
 }

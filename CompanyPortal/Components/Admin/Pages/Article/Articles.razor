@@ -1,12 +1,12 @@
-﻿@using MediatR
+﻿@using CompanyPortal.Core.Extensions
 @using CompanyPortal.CQRS.Articles.Commands
 @using CompanyPortal.CQRS.Articles.Queries
 @using CompanyPortal.CQRS.Resources.Commands
-@using CompanyPortal.Core.Extensions
 @using CompanyPortal.Core.Enums
+@using MediatR
 
-@page "/Administration/Articles"
 @inject IMediator Mediator
+@page "/Administration/Articles"
 
 <div class="row">
     <div class="col-12 d-flex justify-content-between">
@@ -18,7 +18,7 @@
 </div>
 <hr />
 
-@if (_listArticle.Count == 0 || _isLoading)
+@if (_isLoading)
 {
     <Spinner></Spinner>
 }
@@ -32,7 +32,7 @@ else
             AllowExcelExport="true" AllowPdfExport="true">
         <GridPageSettings PageSize="10"></GridPageSettings>
         <GridSearchSettings Fields="@(new[] { "Title", "Content", "Tags" })"></GridSearchSettings>
-        <GridEvents OnToolbarClick="ToolbarClickHandler" TValue="ArticleViewModel"></GridEvents>
+        <GridEvents OnToolbarClick="ToolbarClickHandlerAsync" TValue="ArticleViewModel"></GridEvents>
         <GridColumns>
             <GridColumn Field="@nameof(ArticleViewModel.Id)" HeaderText="ID" Width="64"></GridColumn>
             <GridColumn Field="@nameof(ArticleViewModel.Title)" HeaderText="TIÊU ĐỀ" Width="512" Type="ColumnType.String"></GridColumn>
@@ -91,75 +91,59 @@ else
     private SfGrid<ArticleViewModel> ArticleGrid { get; set; } = default!;
     private List<ArticleViewModel> _listArticle = [];
     private readonly List<ItemModel> _toolbarItems = DataGrid.ToolbarItems("sfGridArticle");
-    private bool _isLoading;
+    private bool _isLoading = true;
 
     protected override async Task OnInitializedAsync()
     {
         _listArticle = await Mediator.Send(new GetAllArticlesQuery(true));
+        _isLoading = false;
     }
 
     private async Task ShowEditDialogAsync(ArticleViewModel? selectedArticle)
     {
         var article = selectedArticle != null ? selectedArticle.Clone() : new ArticleViewModel();
-        // if (selectedArticle != null)
-        // {
-        //     var images = await Mediator.Send(new GetProductImagesByIdQuery(article.Id, true));
-        //     article.Images = [.. images];
-        // }
-
         var parameters = new ModalParameters().Add("article", article);
-        var options = new ModalOptions
-            {
-                Size = ModalSize.Custom,
-                SizeCustomClass = "blazored-modal-fixed-size-xlarge",
-                HideCloseButton = true
-            };
-        var modalResult = await Modal.Show<EditArticleDialog>(
-            selectedArticle == null ? "THÊM BÀI VIẾT" : "CHỈNH SỬA BÀI VIẾT",
-            parameters,
-            options).Result;
+        var modalResult = await Modal.Show<EditArticleDialog>(parameters, new ModalOptions { UseCustomLayout = true }).Result;
         if (modalResult.Confirmed)
         {
-            var result = selectedArticle != null ? await UpdateArticleAsync((ArticleViewModel)modalResult.Data!) : await CreateArticleAsync((ArticleViewModel)modalResult.Data!);
+            var result = selectedArticle != null 
+                ? await UpdateArticleAsync((ArticleViewModel)modalResult.Data!) 
+                : await CreateArticleAsync((ArticleViewModel)modalResult.Data!);
             if (result)
             {
                 _listArticle = await Mediator.Send(new GetAllArticlesQuery(true));
             }
             else
             {
-                Modal.Show<ErrorDialog>("CÓ LỖI XẢY RA!", new ModalParameters().Add("ErrorMessage", "Có lỗi xảy ra khi lưu bài viết. Vui lòng thử lại sau!"));
+                Modal.Show<ErrorDialog>("CÓ LỖI XẢY RA!", new ModalParameters()
+                    .Add("ErrorMessage", "Có lỗi xảy ra khi lưu bài viết. Vui lòng thử lại sau!"));
             }
         }
     }
 
-    private async Task ShowViewDialogAsync(ArticleViewModel selectedArticle)
+    private Task ShowViewDialogAsync(ArticleViewModel selectedArticle)
     {
-        var images = await Mediator.Send(new GetArticleImagesByIdQuery(selectedArticle!.Id, true));
-        selectedArticle.CoverImage = images.FirstOrDefault();
-        var options = new ModalOptions
-            {
-                Size = ModalSize.Custom,
-                SizeCustomClass = "blazored-modal-fixed-size-xlarge"
-            };
         var parameters = new ModalParameters().Add("Article", selectedArticle);
-        Modal.Show<ViewArticleDialog>("THÔNG TIN SẢN PHẨM", parameters, options);
+        Modal.Show<ViewArticleDialog>(parameters, new ModalOptions { UseCustomLayout = true });
+        return Task.CompletedTask;
     }
 
     private async Task ShowDeleteDialogAsync(ArticleViewModel selectedArticle)
     {
-        var parameters = new ModalParameters().Add("Article", selectedArticle);
-        var modalResult = await Modal.Show<DeleteArticleDialog>("XÓA SẢN PHẨM", parameters).Result;
+        var parameters = new ModalParameters().Add("Title", selectedArticle.Title);
+        var modalResult = await Modal.Show<DeleteArticleDialog>(parameters, new ModalOptions { UseCustomLayout = true }).Result;
         if (modalResult.Confirmed)
         {
-            var data = (bool)modalResult.Data!;
-            var result = await Mediator.Send(new DeleteArticleCommand(selectedArticle.Id, data));
+            var forceDelete = (bool)modalResult.Data!;
+            var result = await Mediator.Send(new DeleteArticleCommand(selectedArticle.Id, forceDelete));
             if (result.IsSuccess)
             {
-                await Mediator.Send(new DeleteReferencingResourcesCommand(selectedArticle.Id, data));
+                await Mediator.Send(new DeleteResourcesByExpressionCommand(x => x.ArticleId == selectedArticle.Id, forceDelete));
             }
             else
             {
-                Modal.Show<ErrorDialog>("CÓ LỖI XẢY RA!", new ModalParameters().Add("ErrorMessage", "Có lỗi xảy ra khi xóa sản phẩm. Vui lòng thử lại sau!"));
+                Modal.Show<ErrorDialog>("CÓ LỖI XẢY RA!", new ModalParameters()
+                    .Add("ErrorMessage", "Có lỗi xảy ra khi xóa sản phẩm. Vui lòng thử lại sau!"));
             }
         }
         _listArticle = await Mediator.Send(new GetAllArticlesQuery(true));
@@ -170,11 +154,12 @@ else
     private async Task<bool> UpdateArticleAsync(ArticleViewModel article)
     {
         var result = await Mediator.Send(new UpdateArticleCommand(article));
-        if (result.IsSuccess)
+        if (!result.IsSuccess)
         {
-            await DeleteArticleImagesAsync(article.CoverImage, true);
-            await CreateArticleImagesAsync((int)result.Data!, article.CoverImage);
+            return result.IsSuccess;
         }
+        await DeleteArticleImagesAsync(article.CoverImage, true);
+        await CreateArticleImagesAsync((int)result.Data!, article.CoverImage);
 
         return result.IsSuccess;
     }
@@ -190,20 +175,17 @@ else
         return result.IsSuccess;
     }
 
-    private async Task CreateArticleImagesAsync(int articleId, ResourceViewModel image)
+    private Task CreateArticleImagesAsync(int articleId, ResourceViewModel image)
     {
-        var imageUploadResult = await Mediator.Send(new UploadToStorageCommand(image));
-        image.Url = imageUploadResult.Url;
-        image.BlobName = imageUploadResult.BlobName;
-        image.ProductId = articleId;
+        image.ArticleId = articleId;
         image.ResourceType = ResourceType.Image;
-        await Mediator.Send(new CreateResourceCommand(image));
+        return Mediator.Send(new CreateResourceCommand(image));
     }
 
     private async Task DeleteArticleImagesAsync(ResourceViewModel image, bool forceDelete = false)
     {
         var result = await Mediator.Send(new DeleteResourcesCommand([image.Id], forceDelete));
-        if (result && forceDelete)
+        if (result.IsSuccess && forceDelete)
         {
             await Mediator.Send(new DeleteFromStorageCommand([image.BlobName]));
         }
@@ -211,7 +193,7 @@ else
 
     // Events
 
-    private async Task ToolbarClickHandler(ClickEventArgs args)
+    private async Task ToolbarClickHandlerAsync(ClickEventArgs args)
     {
         switch (args.Item.Id)
         {

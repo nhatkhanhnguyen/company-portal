@@ -115,7 +115,7 @@ namespace CompanyPortal.Data.Migrations
                         .HasMaxLength(2000)
                         .HasColumnType("nvarchar(2000)");
 
-                    b.Property<int?>("CoverImageId")
+                    b.Property<int>("CoverImageId")
                         .HasColumnType("int");
 
                     b.Property<string>("CreatedBy")
@@ -154,6 +154,9 @@ namespace CompanyPortal.Data.Migrations
                         .IsRequired()
                         .HasMaxLength(128)
                         .HasColumnType("nvarchar(128)");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("int");
 
                     b.Property<long>("Views")
                         .HasColumnType("bigint");
@@ -203,9 +206,6 @@ namespace CompanyPortal.Data.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
-                    b.Property<int>("ImageId")
-                        .HasColumnType("int");
-
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
@@ -222,8 +222,6 @@ namespace CompanyPortal.Data.Migrations
                     b.HasIndex("Description");
 
                     b.HasIndex("ExternalId");
-
-                    b.HasIndex("ImageId");
 
                     b.HasIndex("Name");
 
@@ -290,6 +288,11 @@ namespace CompanyPortal.Data.Migrations
                         .IsRequired()
                         .HasMaxLength(15)
                         .HasColumnType("nvarchar(15)");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.HasKey("Id");
 
@@ -564,6 +567,9 @@ namespace CompanyPortal.Data.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
+                    b.Property<int?>("CategoryId")
+                        .HasColumnType("int");
+
                     b.Property<string>("CreatedBy")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -610,6 +616,8 @@ namespace CompanyPortal.Data.Migrations
                     b.HasIndex("ArticleId");
 
                     b.HasIndex("BlobName");
+
+                    b.HasIndex("CategoryId");
 
                     b.HasIndex("Name");
 
@@ -755,20 +763,11 @@ namespace CompanyPortal.Data.Migrations
                 {
                     b.HasOne("CompanyPortal.Data.Database.Entities.Resource", "CoverImage")
                         .WithMany()
-                        .HasForeignKey("CoverImageId");
-
-                    b.Navigation("CoverImage");
-                });
-
-            modelBuilder.Entity("CompanyPortal.Data.Database.Entities.Category", b =>
-                {
-                    b.HasOne("CompanyPortal.Data.Database.Entities.Resource", "Image")
-                        .WithMany()
-                        .HasForeignKey("ImageId")
+                        .HasForeignKey("CoverImageId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Image");
+                    b.Navigation("CoverImage");
                 });
 
             modelBuilder.Entity("CompanyPortal.Data.Database.Entities.OrderDetail", b =>
@@ -814,11 +813,17 @@ namespace CompanyPortal.Data.Migrations
                         .WithMany()
                         .HasForeignKey("ArticleId");
 
+                    b.HasOne("CompanyPortal.Data.Database.Entities.Category", "Category")
+                        .WithMany("CoverImages")
+                        .HasForeignKey("CategoryId");
+
                     b.HasOne("CompanyPortal.Data.Database.Entities.Product", "Product")
                         .WithMany("Images")
                         .HasForeignKey("ProductId");
 
                     b.Navigation("Article");
+
+                    b.Navigation("Category");
 
                     b.Navigation("Product");
                 });
@@ -876,6 +881,8 @@ namespace CompanyPortal.Data.Migrations
 
             modelBuilder.Entity("CompanyPortal.Data.Database.Entities.Category", b =>
                 {
+                    b.Navigation("CoverImages");
+
                     b.Navigation("Products");
                 });
 

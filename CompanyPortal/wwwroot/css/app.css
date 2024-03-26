@@ -1,31 +1,4 @@
-﻿:root {
-    --bs-primary-rgb: rgb(201, 217, 53) !important;
-    --bs-primary: #C9D935 !important;
-    --bs-secondary-rgb: rgb(51, 155, 118) !important;
-    --bs-secondary: #339b76 !important;
-}
-
-body {
-    font-family: "Noto Serif", sans-serif;
-}
-
-.btn-primary {
-    --bs-btn-color: #fff;
-    --bs-btn-bg: var(--bs-primary) !important;
-    --bs-btn-hover-bg: var(--bs-primary) !important;
-    --bs-btn-border-color: var(--bs-primary) !important;
-    --bs-btn-hover-border-color: var(--bs-primary) !important;
-}
-
-.btn-secondary {
-    --bs-btn-color: #fff;
-    --bs-btn-bg: var(--bs-secondary) !important;
-    --bs-btn-hover-bg: var(--bs-secondary) !important;
-    --bs-btn-border-color: var(--bs-secondary) !important;
-    --bs-btn-hover-border-color: var(--bs-secondary) !important;
-}
-
-.btn-more {
+﻿.btn-more {
     border: 2px solid transparent;
     font-size: 20px;
     font-weight: 600;
@@ -244,6 +217,10 @@ body {
             margin-left: 15px;
             padding-left: 15px;
         }
+}
+
+.e-grid .e-spinner-pane {
+    display: none;
 }
 
 @media (min-width: 768px) {

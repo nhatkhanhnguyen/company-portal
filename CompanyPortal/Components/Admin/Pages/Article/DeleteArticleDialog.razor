@@ -4,7 +4,7 @@
         <button type="button" class="btn-close" aria-label="Close" @onclick="() => BlazoredModal.CancelAsync()"></button>
     </Header>
     <Body>
-        <p>Bạn có chắc là muốn xóa bài viết <b>@Article.Title</b> này không?</p>
+        <p>Bạn có chắc là muốn xóa bài viết <b>@Title</b> này không?</p>
         <p>Mặc định, bài viết sẽ bị <b>ẨN</b> khỏi trang tin tức của người dùng và có thể <b>HIỆN</b> lại bằng cách vào hộp thoại CHỈNH SỬA.</p>
         <p>Nếu bạn muốn xóa vĩnh viễn bài viết ra khỏi hệ thống, hãy chọn ô bên dưới.</p>
 
@@ -23,12 +23,12 @@
 
 @code {
     [CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; } = default!;
-    [Parameter] public ArticleViewModel Article { get; set; } = new();
+    [Parameter] public string Title { get; set; } = string.Empty;
 
     private bool _forceDelete;
 
-    private async Task DeleteAsync(bool forceDelete)
+    private Task DeleteAsync(bool forceDelete)
     {
-        await BlazoredModal.CloseAsync(ModalResult.Ok(forceDelete));
+        return BlazoredModal.CloseAsync(ModalResult.Ok(forceDelete));
     }
 }

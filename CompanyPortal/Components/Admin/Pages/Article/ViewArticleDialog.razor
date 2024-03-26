@@ -1,6 +1,17 @@
-﻿<ArticleView IsEditing="true" Article="Article" />
+﻿<ModalDialog SizeClass="modal-xl">
+    <Header>
+        <h5 class="modal-title">THÔNG TIN BÀI VIẾT</h5>
+        <button type="button" class="btn-close" aria-label="Close" @onclick="Cancel"></button>
+    </Header>
+    <Body>
+        <ArticleView Article="Article" />
+    </Body>
+</ModalDialog>
+
 
 @code {
     [CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; } = default!;
     [Parameter] public ArticleViewModel Article { get; set; } = new();
+
+    private void Cancel() => BlazoredModal.CancelAsync();
 }

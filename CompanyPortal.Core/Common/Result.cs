@@ -1,18 +1,18 @@
 ﻿namespace CompanyPortal.Core.Common;
 
-
-public class Result<T>(T data, bool isError) : Result(data, typeof(T), isError)
-    where T : new()
+public class Result
 {
-    public new T Data { get; } = data;
-}
-
-public class Result(object? data, Type? resultType, bool isError)
-{
-    public object? Data { get; } = data;
-    public Type? DataType { get; } = resultType;
-    public bool IsError { get; } = isError;
+    public object? Data { get; }
+    public Type? DataType { get; }
+    public bool IsError { get; }
     public bool IsSuccess => !IsError;
+
+    private Result(object? data, Type? resultType, bool isError)
+    {
+        Data = data;
+        DataType = resultType;
+        IsError = isError;
+    }
 
     public static Result Ok<T>(T result) => Ok(result, typeof(T));
 

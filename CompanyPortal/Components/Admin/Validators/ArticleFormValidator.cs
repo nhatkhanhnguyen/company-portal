@@ -1,5 +1,4 @@
 ﻿using CompanyPortal.ViewModels;
-
 using FluentValidation;
 
 namespace CompanyPortal.Components.Admin.Validators;

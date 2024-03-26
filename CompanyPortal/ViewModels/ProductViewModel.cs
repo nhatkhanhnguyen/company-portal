@@ -1,5 +1,4 @@
 ﻿using CompanyPortal.Core.Common;
-
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -21,7 +20,9 @@ public class ProductViewModel : ViewModelBase
 
     [DisplayName("Giá")]
     [Column(TypeName = "decimal(11, 0)")]
-    public decimal Price { get; set; }
+    public decimal Price { get; set; }    
+    
+    public double Rate { get; set; }
 
     [DisplayName("Tags, cách nhau bằng khoảng trắng")]
     public string Tags { get; set; } = string.Empty;

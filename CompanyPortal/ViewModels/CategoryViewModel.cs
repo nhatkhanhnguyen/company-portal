@@ -1,6 +1,5 @@
-﻿using CompanyPortal.Core.Common;
-
-using System.ComponentModel;
+﻿using System.ComponentModel;
+using CompanyPortal.Core.Common;
 
 namespace CompanyPortal.ViewModels;
 
@@ -10,7 +9,7 @@ public class CategoryViewModel : ViewModelBase
     public string Name { get; set; } = string.Empty;
 
     [DisplayName("Ảnh mô tả")]
-    public ResourceViewModel Image { get; set; } = new();
+    public ResourceViewModel Image { get; set; } = default!;
 
     [DisplayName("Mô tả ngắn")]
     public string Description { get; set; } = string.Empty;
@@ -23,4 +22,8 @@ public class CategoryViewModel : ViewModelBase
 
     [DisplayName("Danh sách sản phẩm thuộc danh mục")]
     public List<ProductViewModel> Products { get; set; } = [];
+
+    public int ImageId { get; set; }
+
+    public bool IsChecked { get; set; }
 }

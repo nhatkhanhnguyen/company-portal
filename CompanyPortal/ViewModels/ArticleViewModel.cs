@@ -1,7 +1,6 @@
-﻿using CompanyPortal.Core.Common;
+﻿using System.ComponentModel;
+using CompanyPortal.Core.Common;
 using CompanyPortal.Core.Enums;
-
-using System.ComponentModel;
 
 namespace CompanyPortal.ViewModels;
 
@@ -22,7 +21,7 @@ public class ArticleViewModel : ViewModelBase
     [DisplayName("Loại bài viết")]
     public ArticleType Type { get; set; }
 
-    [DisplayName("Ảnh bìa")]
+    [DisplayName("Ảnh bìa")] 
     public ResourceViewModel CoverImage { get; set; } = default!;
 
     [DisplayName("Mô tả ngắn")]

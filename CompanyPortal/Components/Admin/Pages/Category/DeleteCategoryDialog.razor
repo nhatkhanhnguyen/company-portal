@@ -4,7 +4,7 @@
         <button type="button" class="btn-close" aria-label="Close" @onclick="() => BlazoredModal.CancelAsync()"></button>
     </Header>
     <Body>
-        <p>Bạn có chắc là muốn xóa danh mục <b>@Category.Name</b> với mã danh mục <b>@Category.ExternalId</b>.</p>
+        <p>Bạn có chắc là muốn xóa danh mục <b>@Name</b> với mã danh mục <b>@ExternalId</b>.</p>
         <p>Mặc định, danh mục sẽ bị <b>ẨN</b> khỏi trang sản phẩm của người dùng và có thể <b>HIỆN</b> lại bằng cách vào hộp thoại CHỈNH SỬA</p>
         <p>Nếu bạn muốn vĩnh viễn danh mục ra khỏi hệ thống, hãy chọn ô bên dưới.</p>
 
@@ -22,12 +22,13 @@
 
 @code {
     [CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; } = default!;
-    [Parameter] public CategoryViewModel Category { get; set; } = new();
+    [Parameter] public string Name { get; set; } = string.Empty;
+    [Parameter] public string ExternalId { get; set; } = string.Empty;
 
     private bool _forceDelete;
 
-    private async Task DeleteAsync(bool forceDelete)
+    private Task DeleteAsync(bool forceDelete)
     {
-        await BlazoredModal.CloseAsync(ModalResult.Ok(forceDelete));
+        return BlazoredModal.CloseAsync(ModalResult.Ok(forceDelete));
     }
 }

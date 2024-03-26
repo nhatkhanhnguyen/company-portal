@@ -5,7 +5,7 @@
         <div class="input-group custom-file-button">
             <label class="input-group-text" for="@Id">@ButtonText</label>
             <InputFile disable="@Disable"
-                       OnChange="OnInputFileChange"
+                       OnChange="OnInputFileChangeAsync"
                        id="@Id"
                        class="@($"form-control {ChooseFileButtonCss}")"
                        aria-label="Upload"
@@ -15,48 +15,97 @@
         <div class="table-responsive mt-2 file-uploader-table-container">
             <table class="table @TableCss">
                 <tbody class="@TableBodyCss align-middle">
-                    @foreach (var file in Files.Where(x => x.Status != UploadFileStatus.Removed))
+                    @if (AllowMultiple)
                     {
-                        <tr class="@TableRowCss pd-2">
-                            @if (ShowPreview)
-                            {
-                                <td class="@TableRowCss p-2 file-uploader-preview-cell">
-                                    @switch (file.ResourceType)
-                                    {
-                                        case ResourceType.Image:
-                                            <img src="@(file.Status == UploadFileStatus.Old ? file.Url : file.Base64Content)"
-                                                 class="img-fluid rounded w-100 h-auto object-fit-cover file-uploader-preview @PreviewImageCss" alt="Preview @file.Name" />
-                                            break;
-                                        case ResourceType.Word:
-                                            <i class="fa-solid fa-file-word fa-4x"></i>
-                                            break;
-                                        case ResourceType.Excel:
-                                            <i class="fa-solid fa-file-excel fa-4x"></i>
-                                            break;
-                                        case ResourceType.Pdf:
-                                            <i class="fa-solid fa-file-pdf fa-4x"></i>
-                                            break;
-                                        case ResourceType.Video:
-                                            <i class="fa-solid fa-file-video fa-4x"></i>
-                                            break;
-                                        case ResourceType.Other:
-                                        default:
-                                            <i class="fa-solid fa-file fa-4x"></i>
-                                            break;
-                                    }
+                        @foreach (var file in Files.Where(x => x.Status != UploadFileStatus.Removed))
+                        {
+                            <tr class="@TableRowCss pd-2">
+                                @if (ShowPreview)
+                                {
+                                    <td class="@TableRowCss p-2 file-uploader-preview-cell">
+                                        @switch (file.ResourceType)
+                                        {
+                                            case ResourceType.Image:
+                                                <img src="@(file.Status == UploadFileStatus.Old ? file.Url : file.Base64Content)"
+                                                     class="img-fluid rounded w-100 h-auto object-fit-cover file-uploader-preview @PreviewImageCss" alt="Preview @file.Name" />
+                                                break;
+                                            case ResourceType.Word:
+                                                <i class="fa-solid fa-file-word fa-4x"></i>
+                                                break;
+                                            case ResourceType.Excel:
+                                                <i class="fa-solid fa-file-excel fa-4x"></i>
+                                                break;
+                                            case ResourceType.Pdf:
+                                                <i class="fa-solid fa-file-pdf fa-4x"></i>
+                                                break;
+                                            case ResourceType.Video:
+                                                <i class="fa-solid fa-file-video fa-4x"></i>
+                                                break;
+                                            case ResourceType.Other:
+                                            default:
+                                                <i class="fa-solid fa-file fa-4x"></i>
+                                                break;
+                                        }
+                                    </td>
+                                }
+                                <td class="@TableRowCss">
+                                    <span class="fw-semibold">@(file.Name.Length > 32 ? file.Name[..32] : file.Name) ...</span>
+                                    <br />
+                                    <i class="fs-10">Kích thước: @Math.Round(file.Size / 1024, 2) KB</i>
                                 </td>
-                            }
-                            <td class="@TableRowCss">
-                                <span class="fw-semibold">Tên file: @(file.Name.Length > 32 ? file.Name[..32] : file.Name) ...</span>
-                                <br />
-                                <i class="fs-10">Kích thước: @Math.Round(file.Size / 1024, 2) KB</i>
-                            </td>
-                            <td class="@TableRowCss">
-                                <button type="button" class="btn btn-danger btn-sm" @onclick="() => file.Status = UploadFileStatus.Removed">
-                                    <i class="@RemoveIconCss"></i>
-                                </button>
-                            </td>
-                        </tr>
+                                <td class="@TableRowCss">
+                                    <button type="button" class="btn btn-danger btn-sm" @onclick="() => file.Status = UploadFileStatus.Removed">
+                                        <i class="@RemoveIconCss"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        @if (File != null && File.Status != UploadFileStatus.Removed)
+                        {
+                            <tr class="@TableRowCss pd-2">
+                                @if (ShowPreview)
+                                {
+                                    <td class="@TableRowCss p-2 file-uploader-preview-cell">
+                                        @switch (File.ResourceType)
+                                        {
+                                            case ResourceType.Image:
+                                                <img src="@(File.Status == UploadFileStatus.Old ? File.Url : File.Base64Content)"
+                                                     class="img-fluid rounded w-100 h-auto object-fit-cover file-uploader-preview @PreviewImageCss" alt="Preview @File.Name" />
+                                                break;
+                                            case ResourceType.Word:
+                                                <i class="fa-solid fa-file-word fa-4x"></i>
+                                                break;
+                                            case ResourceType.Excel:
+                                                <i class="fa-solid fa-file-excel fa-4x"></i>
+                                                break;
+                                            case ResourceType.Pdf:
+                                                <i class="fa-solid fa-file-pdf fa-4x"></i>
+                                                break;
+                                            case ResourceType.Video:
+                                                <i class="fa-solid fa-file-video fa-4x"></i>
+                                                break;
+                                            case ResourceType.Other:
+                                            default:
+                                                <i class="fa-solid fa-file fa-4x"></i>
+                                                break;
+                                        }
+                                    </td>
+                                }
+                                <td class="@TableRowCss">
+                                    <span class="fw-semibold">@(File.Name.Length > 32 ? File.Name[..32] : File.Name) ...</span>
+                                    <br />
+                                    <i class="fs-10">Kích thước: @Math.Round(File.Size / 1024, 2) KB</i>
+                                </td>
+                                <td class="@TableRowCss">
+                                    <button type="button" class="btn btn-danger btn-sm" @onclick="() => File.Status = UploadFileStatus.Removed">
+                                        <i class="@RemoveIconCss"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        }
                     }
                 </tbody>
             </table>
@@ -88,7 +137,12 @@
     [Parameter] public bool AllowMultiple { get; set; } = true;
     [Parameter] public bool Disable { get; set; }
     [Parameter] public bool ShowPreview { get; set; }
+
     [Parameter] public List<ResourceViewModel> Files { get; set; } = [];
+    [Parameter] public EventCallback<List<ResourceViewModel>> FilesChanged { get; set; }
+
+    [Parameter] public ResourceViewModel? File { get; set; }
+    [Parameter] public EventCallback<ResourceViewModel> FileChanged { get; set; }
 
     // Styling properties
     [Parameter] public string Id { get; set; } = "fileUploader";
@@ -103,60 +157,52 @@
 
     [Parameter] public EventCallback OnFilesSelected { get; set; }
 
-    private async Task OnInputFileChange(InputFileChangeEventArgs e)
+    private async Task OnInputFileChangeAsync(InputFileChangeEventArgs e)
     {
-        const long maxFileSize = 5 * 1024 * 2024;
         var files = e.GetMultipleFiles();
-        if (AllowMultiple)
+        if (!AllowMultiple)
         {
-            foreach (var file in files)
-            {
-                var stream = new MemoryStream();
-                await file.OpenReadStream(maxFileSize).CopyToAsync(stream);
-                var base64 = Convert.ToBase64String(stream.ToArray());
-                Files.Add(new ResourceViewModel
-                {
-                    Base64Content = $"data:{file.ContentType};base64,{base64}",
-                    Name = file.Name,
-                    Size = file.Size,
-                    Status = UploadFileStatus.New,
-                    ResourceType = GetResourceTypeByMimeType(file.ContentType)
-                });
-            }
+            var file = files.First();
+            File = await GenerateResourceFromFileAsync(file);
+            await FileChanged.InvokeAsync(File);
         }
         else
         {
-            Files.Clear();
-            var stream = new MemoryStream();
-            await files[0].OpenReadStream(maxFileSize).CopyToAsync(stream);
-            var base64 = Convert.ToBase64String(stream.ToArray());
-            Files.Add(new ResourceViewModel
+            foreach (var file in files)
             {
-                Base64Content = $"data:{files[0].ContentType};base64,{base64}",
-                Name = files[0].Name,
-                Size = files[0].Size,
-                Status = UploadFileStatus.New,
-                ResourceType = GetResourceTypeByMimeType(files[0].ContentType)
-            });
+                Files.Add(await GenerateResourceFromFileAsync(file));
+            }
+            await FilesChanged.InvokeAsync(Files);
         }
 
         await OnFilesSelected.InvokeAsync();
     }
 
+    private async Task<ResourceViewModel> GenerateResourceFromFileAsync(IBrowserFile file)
+    {
+        const long maxFileSize = 5 * 1024 * 2024;
+        var stream = new MemoryStream();
+        await file.OpenReadStream(maxFileSize).CopyToAsync(stream);
+        var base64 = Convert.ToBase64String(stream.ToArray());
+        return new ResourceViewModel
+        {
+            Base64Content = $"data:{file.ContentType};base64,{base64}",
+            Name = file.Name,
+            Size = file.Size,
+            Status = UploadFileStatus.New,
+            ResourceType = GetResourceTypeByMimeType(file.ContentType)
+        };
+    }
+
     private ResourceType GetResourceTypeByMimeType(string mimeType)
     {
-        switch (mimeType)
+        return mimeType switch
         {
-            case "application/vnd.ms-excel":
-            case "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":
-                return ResourceType.Excel;
-            case "application/msword":
-            case "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
-                return ResourceType.Word;
-            case "application/pdf": return ResourceType.Pdf;
-            case "image/jpeg":
-            case "image/png": return ResourceType.Image;
-            default: return ResourceType.Other;
-        }
+            "application/vnd.ms-excel" or "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" => ResourceType.Excel,
+            "application/msword" or "application/vnd.openxmlformats-officedocument.wordprocessingml.document" => ResourceType.Word,
+            "application/pdf" => ResourceType.Pdf,
+            "image/jpeg" or "image/png" => ResourceType.Image,
+            _ => ResourceType.Other
+        };
     }
 }

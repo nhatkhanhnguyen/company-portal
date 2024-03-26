@@ -3,7 +3,6 @@
 using Microsoft.EntityFrameworkCore;
 
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace CompanyPortal.Data.Database.Entities;
 
@@ -21,10 +20,7 @@ public class Category : EntityBase
     [MaxLength(20)]
     public string ExternalId { get; set; } = string.Empty;
 
-    public int ImageId { get; set; }
-
-    [ForeignKey(nameof(ImageId))]
-    public Resource? Image { get; set; }
+    public virtual ICollection<Resource> CoverImages { get; set; } = [];
 
     public virtual ICollection<Product> Products { get; set; } = [];
 }

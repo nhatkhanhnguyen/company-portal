@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CompanyPortal.CQRS.Products.Queries;
 
-public record GetStarredProductsQuery(bool ForceRefresh = false) : ICachedQuery<Result<List<ProductCardViewModel>>>
+public record GetStarredProductsQuery(bool ForceRefresh = false) : ICachedQuery<Result>
 {
     public class Handler(IRepository<ProductVariant> repository, IMapper mapper, ILogger<Handler> logger) : IRequestHandler<GetStarredProductsQuery, Result>
     {
@@ -21,22 +21,14 @@ public record GetStarredProductsQuery(bool ForceRefresh = false) : ICachedQuery<
             try
             {
                 var result = await repository
-                        .GetAll()
-                        .Include(x => x.Product)
-                        .Include(x => x.Product.Category)
-                        .Include(x => x.Product.Images)
-                        .OrderBy(x => x.Product.Rate)
-                        .Select(x => new ProductCardViewModel
-                        {
-                            Id = x.Id,
-                            CategoryName = x.Product.Category!.Name,
-                            Image = mapper.Map<ResourceViewModel>(x.Product.Images.ElementAtOrDefault(0)),
-                            Name = x.Name,
-                            Price = x.Price,
-                            Rate = x.Product.Rate
-                        })
-                        .Take(4)
-                        .ToListAsync(cancellationToken);
+                    .GetAll()
+                    .Include(x => x.Product)
+                    .Include(x => x.Product.Category)
+                    .Include(x => x.Product.Images)
+                    .OrderBy(x => x.Product.Rate)
+                    .Select(x => mapper.Map<ProductViewModel>(x))
+                    .Take(4)
+                    .ToListAsync(cancellationToken);
                 return Result.Ok(result);
             }
             catch (Exception ex)

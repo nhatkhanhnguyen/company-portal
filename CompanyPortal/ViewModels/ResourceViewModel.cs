@@ -19,6 +19,8 @@ public class ResourceViewModel : ViewModelBase
 
     public int? ArticleId { get; set; }
 
+    public int? CategoryId { get; set; }
+
     public ResourceType ResourceType { get; set; }
 
     public UploadFileStatus Status { get; set; } = UploadFileStatus.Old;

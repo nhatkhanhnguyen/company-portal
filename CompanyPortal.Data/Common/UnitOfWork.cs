@@ -8,6 +8,14 @@ public class UnitOfWork(ApplicationDbContext dbContext, ILogger<UnitOfWork> logg
 {
     public async Task<bool> SaveChangesAsync(CancellationToken cancellationToken)
     {
-        return await dbContext.SaveChangesAsync(cancellationToken) > 0;
+		try
+		{
+			return await dbContext.SaveChangesAsync(cancellationToken) > 0;
+		}
+		catch (Exception ex)
+		{
+			logger.LogError(ex.Message);
+			return false;
+		}
     }
 }

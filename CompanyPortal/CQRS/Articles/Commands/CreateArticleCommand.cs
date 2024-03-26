@@ -5,7 +5,6 @@ using CompanyPortal.Core.Constants;
 using CompanyPortal.Data.Common;
 using CompanyPortal.Data.Database.Entities;
 using CompanyPortal.ViewModels;
-
 using MediatR;
 
 namespace CompanyPortal.CQRS.Articles.Commands;

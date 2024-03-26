@@ -1,7 +1,29 @@
-﻿@page "/products"
+﻿@using CompanyPortal.CQRS.Products.Queries
+@using MediatR
 
-<h3>Products</h3>
+@page "/products"
+@inject IMediator Mediator
+
+<div class="mt-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-3 col-12">
+                <CategoryList></CategoryList>
+            </div>
+            <div class="col-md-9 col-12">
+            </div>
+        </div>
+    </div>
+</div>
+
+
 
 @code {
+    private List<ProductViewModel> ListProduct = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        ListProduct = await Mediator.Send(new GetAllProductsQuery());
+    }
 
 }

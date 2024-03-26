@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using CompanyPortal.Core.Enums;
 
 namespace CompanyPortal.Data.Database.Entities;
 
@@ -20,13 +21,15 @@ public class Article : EntityBase
     [MaxLength(2000)]
     public string Content { get; set; } = string.Empty;
 
-    public int? CoverImageId { get; set; }
+    public int CoverImageId { get; set; }
 
     [ForeignKey(nameof(CoverImageId))]
-    public Resource? CoverImage { get; set; }
+    public Resource CoverImage { get; set; } = default!;
 
     public uint Views { get; set; }
 
     [MaxLength(100)]
     public string Tags { get; set; } = string.Empty;
+
+    public ArticleType Type { get; set; }
 }

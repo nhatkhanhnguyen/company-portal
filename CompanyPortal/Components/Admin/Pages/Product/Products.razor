@@ -1,9 +1,11 @@
-﻿@using MediatR
+﻿@rendermode @(new InteractiveServerRenderMode(prerender:false))
+@using CompanyPortal.Core.Enums
+@using MediatR
 @using CompanyPortal.CQRS.Products.Queries
 @using CompanyPortal.Core.Extensions
 @using CompanyPortal.CQRS.Products.Commands
 @using CompanyPortal.CQRS.Resources.Commands
-@using CompanyPortal.Core.Enums
+@using CompanyPortal.CQRS.Categories.Queries
 
 @page "/Administration/Products"
 @inject IMediator Mediator
@@ -31,7 +33,7 @@ else
             AllowExcelExport="true" AllowPdfExport="true">
         <GridPageSettings PageSize="10"></GridPageSettings>
         <GridSearchSettings Fields="@(new[] { "Id", "ExternalId", "Name", "ShortDescription", "Price", "Tags" })"></GridSearchSettings>
-        <GridEvents OnToolbarClick="ToolbarClickHandler" TValue="ProductViewModel">
+        <GridEvents OnToolbarClick="ToolbarClickHandlerAsync" TValue="ProductViewModel">
         </GridEvents>
         <GridColumns>
             <GridColumn Field="@nameof(ProductViewModel.Id)" HeaderText="ID" Width="50"></GridColumn>
@@ -97,8 +99,12 @@ else
     private async Task ShowEditDialogAsync(ProductViewModel? selectedProduct)
     {
         var product = selectedProduct != null ? selectedProduct.Clone()! : new ProductViewModel();
-        var parameters = new ModalParameters().Add("product", product);
-        var modalResult = await Modal.Show<EditProductDialog>(parameters, new() { UseCustomLayout = true }).Result;
+        var categories = await Mediator.Send(new GetAllCategoriesQuery());
+
+        var parameters = new ModalParameters()
+            .Add("categories", categories)
+            .Add("product", product);
+        var modalResult = await Modal.Show<EditProductDialog>(parameters, new ModalOptions { UseCustomLayout = true }).Result;
 
         if (modalResult.Confirmed)
         {
@@ -112,7 +118,8 @@ else
             }
             else
             {
-                Modal.Show<ErrorDialog>("CÓ LỖI XẢY RA!", new ModalParameters().Add("ErrorMessage", "Có lỗi xảy ra khi lưu sản phẩm. Vui lòng thử lại sau!"));
+                Modal.Show<ErrorDialog>("CÓ LỖI XẢY RA!", new ModalParameters()
+                    .Add("ErrorMessage", "Có lỗi xảy ra khi lưu sản phẩm. Vui lòng thử lại sau!"));
             }
             _isLoading = false;
         }
@@ -120,27 +127,31 @@ else
 
     private async Task ShowViewDialogAsync(ProductViewModel selectedProduct)
     {
-        var images = await Mediator.Send(new GetProductImagesByIdQuery(selectedProduct!.Id, true));
+        var images = await Mediator.Send(new GetProductImagesByIdQuery(selectedProduct.Id, true));
         selectedProduct.Images = images;
-        var parameters = new ModalParameters().Add("Product", selectedProduct);
-        Modal.Show<ViewProductDialog>("THÔNG TIN SẢN PHẨM", parameters, new() { UseCustomLayout = true });
+        var parameters = new ModalParameters()
+            .Add("Product", selectedProduct);
+        Modal.Show<ViewProductDialog>(parameters, new ModalOptions { UseCustomLayout = true });
     }
 
     private async Task ShowDeleteDialogAsync(ProductViewModel selectedProduct)
     {
-        var parameters = new ModalParameters().Add("Product", selectedProduct);
-        var modalResult = await Modal.Show<DeleteProductDialog>("XÓA SẢN PHẨM", parameters, new() { UseCustomLayout = true }).Result;
+        var parameters = new ModalParameters()
+            .Add("Name", selectedProduct.Name)
+            .Add("ExternalId", selectedProduct.ExternalId);
+        var modalResult = await Modal.Show<DeleteProductDialog>(parameters, new ModalOptions { UseCustomLayout = true }).Result;
         if (modalResult.Confirmed)
         {
-            var data = (bool)modalResult.Data!;
-            var result = await Mediator.Send(new DeleteProductCommand(selectedProduct.Id, data));
-            if (result)
+            var forceDelete = (bool)modalResult.Data!;
+            var result = await Mediator.Send(new DeleteProductCommand(selectedProduct.Id, forceDelete));
+            if (result.IsSuccess)
             {
-                await Mediator.Send(new DeleteReferencingResourcesCommand(selectedProduct.Id, data));
+                await Mediator.Send(new DeleteResourcesByExpressionCommand(x => x.ProductId == selectedProduct.Id, forceDelete));
             }
             else
             {
-                Modal.Show<ErrorDialog>("CÓ LỖI XẢY RA!", new ModalParameters().Add("ErrorMessage", "Có lỗi xảy ra khi xóa sản phẩm. Vui lòng thử lại sau!"));
+                Modal.Show<ErrorDialog>("CÓ LỖI XẢY RA!", new ModalParameters()
+                    .Add("ErrorMessage", result.Data as string));
             }
             _isLoading = true;
             _listProduct = await Mediator.Send(new GetAllProductsQuery(true));
@@ -148,7 +159,7 @@ else
         }
     }
 
-    private async Task ToolbarClickHandler(ClickEventArgs args)
+    private async Task ToolbarClickHandlerAsync(ClickEventArgs args)
     {
         switch (args.Item.Id)
         {
@@ -184,25 +195,19 @@ else
         return result.IsSuccess;
     }
 
-    private async Task CreateProductImagesAsync(int productId, List<ResourceViewModel> newImages)
+    private Task CreateProductImagesAsync(int productId, List<ResourceViewModel> newImages)
     {
         foreach (var image in newImages)
         {
-            var imageUploadResult = await Mediator.Send(new UploadToStorageCommand(image));
-            image.Url = imageUploadResult.Url;
-            image.BlobName = imageUploadResult.BlobName;
             image.ProductId = productId;
             image.ResourceType = ResourceType.Image;
-            await Mediator.Send(new CreateResourceCommand(image));
         }
+
+        return Mediator.Send(new CreateResourcesCommand(newImages));
     }
 
-    private async Task DeleteProductImagesAsync(List<ResourceViewModel> images, bool forceDelete = false)
+    private Task DeleteProductImagesAsync(List<ResourceViewModel> images, bool forceDelete = false)
     {
-        var result = await Mediator.Send(new DeleteResourcesCommand(images.Select(x => x.Id).ToList(), forceDelete));
-        if (result && forceDelete)
-        {
-            await Mediator.Send(new DeleteFromStorageCommand(images.Select(x => x.BlobName).ToList()));
-        }
+        return Mediator.Send(new DeleteResourcesCommand(images.Select(x => x.Id).ToList(), forceDelete));
     }
 }

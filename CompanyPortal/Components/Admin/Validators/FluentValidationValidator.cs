@@ -7,17 +7,12 @@ namespace CompanyPortal.Components.Admin.Validators;
 
 public class FluentValidationValidator : ComponentBase
 {
-    [CascadingParameter]
-    private EditContext? EditContext { get; set; }
+    [Inject] private IServiceProvider ServiceProvider { get; set; } = default!;
+    [CascadingParameter] private EditContext EditContext { get; set; } = default!;
+    [Parameter] public required Type ValidatorType { get; set; }
 
-    [Parameter]
-    public required Type ValidatorType { get; set; }
-
-    private IValidator? Validator;
-    private ValidationMessageStore? ValidationMessageStore;
-
-    [Inject]
-    private IServiceProvider? ServiceProvider { get; set; }
+    private IValidator? _validator;
+    private ValidationMessageStore? _validationMessageStore;
 
     public override async Task SetParametersAsync(ParameterView parameters)
     {
@@ -47,20 +42,19 @@ public class FluentValidationValidator : ComponentBase
         }
     }
 
-    private async void ValidationRequested(object sender, ValidationRequestedEventArgs args)
+    private async void ValidationRequested(object? sender, ValidationRequestedEventArgs args)
     {
-        ValidationMessageStore?.Clear();
+        _validationMessageStore?.Clear();
         var validationContext =
             new ValidationContext<object>(EditContext.Model);
-        var result =
-            await Validator.ValidateAsync(validationContext);
+        var result = await _validator?.ValidateAsync(validationContext)!;
         AddValidationResult(EditContext.Model, result);
     }
 
-    private async void FieldChanged(object sender, FieldChangedEventArgs args)
+    private async void FieldChanged(object? sender, FieldChangedEventArgs args)
     {
         var fieldIdentifier = args.FieldIdentifier;
-        ValidationMessageStore?.Clear(fieldIdentifier);
+        _validationMessageStore?.Clear(fieldIdentifier);
 
         var propertiesToValidate = new[] { fieldIdentifier.FieldName };
         var fluentValidationContext =
@@ -70,19 +64,19 @@ public class FluentValidationValidator : ComponentBase
                 validatorSelector: new FluentValidation.Internal.MemberNameValidatorSelector(propertiesToValidate)
             );
 
-        var result = await Validator.ValidateAsync(fluentValidationContext);
+        var result = await _validator?.ValidateAsync(fluentValidationContext)!;
 
         AddValidationResult(fieldIdentifier.Model, result);
     }
 
     private void ValidatorTypeChanged()
     {
-        Validator = (IValidator)ServiceProvider.GetService(ValidatorType);
+        _validator = (IValidator)ServiceProvider.GetService(ValidatorType)!;
     }
 
     private void EditContextChanged()
     {
-        ValidationMessageStore = new ValidationMessageStore(EditContext);
+        _validationMessageStore = new ValidationMessageStore(EditContext);
         HookUpEditContextEvents();
     }
 
@@ -97,7 +91,7 @@ public class FluentValidationValidator : ComponentBase
         foreach (var error in validationResult.Errors)
         {
             var fieldIdentifier = new FieldIdentifier(model, error.PropertyName);
-            ValidationMessageStore.Add(fieldIdentifier, error.ErrorMessage);
+            _validationMessageStore?.Add(fieldIdentifier, error.ErrorMessage);
         }
         EditContext.NotifyValidationStateChanged();
     }

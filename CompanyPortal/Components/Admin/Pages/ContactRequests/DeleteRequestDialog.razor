@@ -20,8 +20,8 @@
     [CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; } = default!;
     [Parameter] public ContactRequestViewModel ContactRequest { get; set; } = new();
 
-    private async Task DeleteAsync()
+    private Task DeleteAsync()
     {
-        await BlazoredModal.CloseAsync(ModalResult.Ok(true));
+        return BlazoredModal.CloseAsync(ModalResult.Ok(true));
     }
 }

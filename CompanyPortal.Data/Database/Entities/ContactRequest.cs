@@ -6,6 +6,9 @@ namespace CompanyPortal.Data.Database.Entities;
 
 public class ContactRequest : EntityBase
 {
+    [MaxLength(200)]
+    public string Title { get; set; } = string.Empty;
+
     [MaxLength(100)]
     public string Fullname { get; set; } = string.Empty;
 

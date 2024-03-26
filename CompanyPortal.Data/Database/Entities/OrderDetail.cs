@@ -8,8 +8,8 @@ public class OrderDetail : EntityBase
 {
     public int ProductId { get; set; }
 
-    [ForeignKey(nameof(ProductId))]
-    public Product? Product { get; set; }
+    [ForeignKey(nameof(ProductId))] 
+    public Product Product { get; set; } = default!;
 
     public decimal Price { get; set; } // Price at the time ordered
 

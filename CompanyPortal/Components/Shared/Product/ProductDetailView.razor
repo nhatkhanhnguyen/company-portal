@@ -1,68 +1,65 @@
 ﻿@using System.Globalization
 
-@if (Product != null)
-{
-    <section class="product-details">
-        <div class="container">
-            <div class="row">
-                <div class="col-6">
-                    <SfCarousel CssClass="template-carousel" AutoPlay>
-                        <ChildContent>
-                            @foreach (var image in Product.Images)
-                            {
-                                <CarouselItem>
-                                    <figure class="img-container">
-                                        <img src="@image.Url" alt="@image.Name" style="height:100%;width:100%; object-fit: cover" />
-                                    </figure>
-                                </CarouselItem>
-                            }
-                        </ChildContent>
-                        <IndicatorsTemplate>
-                            <div class="indicator">
-                                <img src="@Product.Images[context.Index].Url" alt="image" style="height:100%;width:100%;" />
-                            </div>
-                        </IndicatorsTemplate>
-                    </SfCarousel>
+<section class="product-details">
+    <div class="container">
+        <div class="row">
+            <div class="col-6">
+                <SfCarousel CssClass="template-carousel" AutoPlay>
+                    <ChildContent>
+                        @foreach (var image in Product.Images)
+                        {
+                            <CarouselItem>
+                                <figure class="img-container">
+                                    <img src="@image.Url" alt="@image.Name" style="height:100%;width:100%; object-fit: cover" />
+                                </figure>
+                            </CarouselItem>
+                        }
+                    </ChildContent>
+                    <IndicatorsTemplate>
+                        <div class="indicator">
+                            <img src="@Product.Images[context.Index].Url" alt="image" style="height:100%;width:100%;" />
+                        </div>
+                    </IndicatorsTemplate>
+                </SfCarousel>
+            </div>
+            <div class="col-6">
+                <h1 class="mb-1">@Product.Name</h1>
+                <h3 class="mb-3">@Product.Price.ToString("C", CultureInfo.GetCultureInfo("vi-vn"))</h3>
+                <div class="product-details-rating">
+                    <i class="fa fa-star"></i>
+                    <i class="fa fa-star"></i>
+                    <i class="fa fa-star"></i>
+                    <i class="fa fa-star"></i>
+                    <i class="fa fa-star"></i>
+                    <span class="ms-5">@Product.ReviewCount đánh giá từ người mua</span>
                 </div>
-                <div class="col-6">
-                    <h1 class="mb-1">@Product.Name</h1>
-                    <h3 class="mb-3">@Product.Price.ToString("C", CultureInfo.GetCultureInfo("vi-vn"))</h3>
-                    <div class="product-details-rating">
-                        <i class="fa fa-star"></i>
-                        <i class="fa fa-star"></i>
-                        <i class="fa fa-star"></i>
-                        <i class="fa fa-star"></i>
-                        <i class="fa fa-star"></i>
-                        <span class="ms-5">@Product.ReviewCount đánh giá từ người mua</span>
+                <hr />
+                <div class="mt-3 mb-3">
+                    <p class="mb-3">@Product.ShortDescription</p>
+                    <p>Mã sản phẩm: @Product.ExternalId</p>
+                </div>
+                <div class="row align-items-center">
+                    <div class="col-lg-3 col-sm-6">
+                        <label for="inputPassword6" class="col-form-label">Số lượng</label>
                     </div>
-                    <hr />
-                    <div class="mt-3 mb-3">
-                        <p class="mb-3">Aliquam hendrerit a augue insuscipit. Etiam aliquam massa quis des mauris commodo venenatis ligula commodo leez sed blandit convallis dignissim onec vel pellentesque neque.@Product.ShortDescription</p>
-                        <p>Mã sản phẩm: @Product.ExternalId</p>
+                    <div class="col-lg-3 col-sm-6">
+                        <InputNumber min="1" class="form-control float-start" @bind-Value="Quantity" disabled="@IsEditing" />
                     </div>
-                    <div class="row align-items-center">
-                        <div class="col-lg-3 col-sm-6">
-                            <label for="inputPassword6" class="col-form-label">Số lượng</label>
-                        </div>
-                        <div class="col-lg-3 col-sm-6">
-                            <InputNumber min="1" class="form-control float-start" @bind-Value="Quantity" disabled="@IsEditing" />
-                        </div>
-                        <div class="col-lg-6 col-sm-12">
-                            <button class="btn btn-success btn-lg rounded-pill float-end" disabled="@IsEditing"><i class="fa-solid fa-cart-shopping"></i> Thêm vào giỏ</button>
-                        </div>
+                    <div class="col-lg-6 col-sm-12">
+                        <button class="btn btn-success btn-lg rounded-pill float-end" disabled="@IsEditing"><i class="fa-solid fa-cart-shopping"></i> Thêm vào giỏ</button>
                     </div>
+                </div>
 
-                </div>
             </div>
         </div>
-    </section>
-    <section class="product-description">
-        <div class="container">
-            <h3 class="product-description__title">Mô tả sản phẩm</h3>
-            <p class="product-description__text1">@((MarkupString)Product.FullDescription)</p>
-        </div>
-    </section>
-}
+    </div>
+</section>
+<section class="product-description">
+    <div class="container">
+        <h3 class="product-description__title">Mô tả sản phẩm</h3>
+        <p class="product-description__text1">@((MarkupString)Product.FullDescription)</p>
+    </div>
+</section>
 
 @code {
     [Parameter] public ProductViewModel Product { get; set; } = default!;

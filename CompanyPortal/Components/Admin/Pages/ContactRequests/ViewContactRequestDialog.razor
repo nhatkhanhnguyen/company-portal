@@ -1,5 +1,22 @@
-﻿<h3>ViewContactRequestDialog</h3>
+﻿<ModalDialog SizeClass="modal-lg">
+    <Header>
+        <h5 class="modal-title">XEM YÊU CẦU</h5>
+        <button type="button" class="btn-close" aria-label="Close" @onclick="() => BlazoredModal.CancelAsync()"></button>
+    </Header>
+    <Body>
+        <p>@Request.Content</p>
+    </Body>
+    <Footer>
+        <div class="row">
+            <div class="col-12">
+                <LoadingButton Type="submit" IconCss="fa-solid fa-floppy-disk" ForForm="FormResponse" ButtonCssClass="btn-primary rounded-pill me-2" LoadingText="ĐANG LƯU" NormalText="LƯU" />
+                <button type="button" class="btn btn-success rounded-pill" @onclick="() => BlazoredModal.CancelAsync()"><i class="fa-solid fa-xmark"></i> ĐÓNG</button>
+            </div>
+        </div>
+    </Footer>
+</ModalDialog>
 
 @code {
-
+    [CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; } = default!;
+    [Parameter] public ContactRequestViewModel Request { get; set; } = default!;
 }

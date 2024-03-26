@@ -11,8 +11,7 @@ namespace CompanyPortal.CQRS.Products.Commands;
 
 public record CreateProductCommand(ProductViewModel Product) : IRequest<Result>
 {
-    public class Handler(IRepository<Product> repository, IUnitOfWork uow,
-        IMapper mapper, ILogger<Handler> logger) : IRequestHandler<CreateProductCommand, Result>
+    public class Handler(IRepository<Product> repository, IUnitOfWork uow, IMapper mapper, ILogger<Handler> logger) : IRequestHandler<CreateProductCommand, Result>
     {
         public async Task<Result> Handle(CreateProductCommand request,
             CancellationToken cancellationToken)
@@ -27,7 +26,7 @@ public record CreateProductCommand(ProductViewModel Product) : IRequest<Result>
             catch (Exception ex)
             {
                 logger.LogError(ex, ex.Message);
-                return Result.Error<string>("Có lỗi xảy ra khi đang lưu sản phẩm vào CSDL.");
+                return Result.Error("Có lỗi xảy ra khi đang lưu sản phẩm vào CSDL.");
             }
         }
     }

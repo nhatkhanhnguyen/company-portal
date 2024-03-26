@@ -20,15 +20,15 @@ public sealed class RepositoryBase<TEntity>(ApplicationDbContext context, IUserP
         return _dbSet.AsNoTracking();
     }
 
-    public async Task<List<TEntity>> GetAllListAsync(CancellationToken cancellationToken)
+    public Task<List<TEntity>> GetAllListAsync(CancellationToken cancellationToken)
     {
-        return await GetAll().ToListAsync(cancellationToken);
+        return GetAll().ToListAsync(cancellationToken);
     }
 
-    public async Task<List<TEntity>> GetAllListAsync(Expression<Func<TEntity, bool>> predicate,
+    public Task<List<TEntity>> GetAllListAsync(Expression<Func<TEntity, bool>> predicate,
         CancellationToken cancellationToken)
     {
-        return await GetAll().Where(predicate).ToListAsync(cancellationToken);
+        return GetAll().Where(predicate).ToListAsync(cancellationToken);
     }
 
     public IQueryable<TEntity> Query(Expression<Func<TEntity, bool>> predicate)
@@ -55,7 +55,7 @@ public sealed class RepositoryBase<TEntity>(ApplicationDbContext context, IUserP
     public Task<TEntity?> FirstOrDefaultAsync(Expression<Func<TEntity, bool>> predicate,
         CancellationToken cancellationToken)
     {
-        return _dbSet.Where(predicate).FirstOrDefaultAsync(cancellationToken);
+        return _dbSet.Where(predicate).AsNoTracking().FirstOrDefaultAsync(cancellationToken);
     }
 
     public async Task InsertAsync(TEntity entity, CancellationToken cancellationToken)
@@ -64,14 +64,14 @@ public sealed class RepositoryBase<TEntity>(ApplicationDbContext context, IUserP
         await _dbSet.AddAsync(entity, cancellationToken);
     }
 
-    public async Task InsertAsync(ICollection<TEntity> entities, CancellationToken cancellationToken)
+    public Task InsertAsync(ICollection<TEntity> entities, CancellationToken cancellationToken)
     {
         foreach (var entity in entities)
         {
             UpdateEntityInfo(entity);
         }
 
-        await _dbSet.AddRangeAsync(entities, cancellationToken);
+        return _dbSet.AddRangeAsync(entities, cancellationToken);
     }
 
     public void Update(TEntity entity)

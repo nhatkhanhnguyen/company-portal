@@ -1,6 +1,4 @@
-﻿using AutoMapper;
-
-using CompanyPortal.Core.Common;
+﻿using CompanyPortal.Core.Common;
 using CompanyPortal.Data.Common;
 using CompanyPortal.Data.Database.Entities;
 
@@ -32,7 +30,7 @@ public record MarkRequestAsReadCommand(int RequestId) : IRequest<Result>
             catch (Exception ex)
             {
                 logger.LogError(ex, ex.Message);
-                return Result.Error<string>("Có lỗi xảy ra khi đang lưu thông tin yêu cầu vào CSDL.");
+                return Result.Error("Có lỗi xảy ra khi đang lưu thông tin yêu cầu vào CSDL.");
             }
         }
     }

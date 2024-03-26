@@ -27,5 +27,12 @@
 </div>
 
 @code {
-    [Parameter] public List<ProductCardViewModel> Products { get; set; } = [];
+    [Parameter]
+    public List<ProductViewModel> Products { get; set; } =
+    [
+        new ProductViewModel { Name = "A SD asd as dasd asd", Price = 100000 , Images = [new ResourceViewModel { Url = "/images/carousel-sample/1.jpg" }], Rate = 5 },
+    new ProductViewModel { Name = "awdasd asd awasd a", Price = 100000 , Images = [new ResourceViewModel { Url = "/images/carousel-sample/1.jpg" }], Rate = 5 },
+    new ProductViewModel { Name = "trhg dfg hdf gh", Price = 100000 , Images = [new ResourceViewModel { Url = "/images/carousel-sample/1.jpg" }], Rate = 5 },
+    new ProductViewModel { Name = "sert sdfg sdfg", Price = 100000 , Images = [new ResourceViewModel { Url = "/images/carousel-sample/1.jpg" }], Rate = 5 }
+    ];
 }

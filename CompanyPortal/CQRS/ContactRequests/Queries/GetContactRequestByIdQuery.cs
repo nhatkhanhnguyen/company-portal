@@ -3,7 +3,6 @@
 using CompanyPortal.Data.Common;
 using CompanyPortal.Data.Database.Entities;
 using CompanyPortal.ViewModels;
-
 using MediatR;
 
 namespace CompanyPortal.CQRS.ContactRequests.Queries;

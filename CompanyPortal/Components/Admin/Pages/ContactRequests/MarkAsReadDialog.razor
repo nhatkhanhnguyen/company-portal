@@ -1,0 +1,22 @@
+﻿<ModalDialog>
+    <Header>
+        <h5 class="modal-title">ĐÁNH DẤU ĐÃ ĐỌC</h5>
+        <button type="button" class="btn-close" aria-label="Close" @onclick="() => BlazoredModal.CancelAsync()"></button>
+    </Header>
+    <Body>
+        <p>Bạn có chắc chắn là muốn đánh dấu yêu cầu liên hệ của <b>@Fullname</b> là đã đọc không?</p>
+    </Body>
+    <Footer>
+        <div class="row">
+            <div class="col-12">
+                <LoadingButton IconCss="fa-solid fa-check" ButtonCssClass="btn-danger rounded-pill me-2" LoadingText="ĐANG ĐÁNH DẤU" NormalText="CHẮC CHẮN" Click="() => BlazoredModal.CloseAsync(ModalResult.Ok(true))" />
+                <button class="btn btn-info rounded-pill" @onclick="() => BlazoredModal.CancelAsync()"><i class="fa-solid fa-xmark"></i> KHÔNG</button>
+            </div>
+        </div>
+    </Footer>
+</ModalDialog>
+
+@code {
+    [CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; } = default!;
+    [Parameter] public string Fullname { get; set; } = string.Empty;
+}

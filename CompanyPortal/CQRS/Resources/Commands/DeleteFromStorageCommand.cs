@@ -6,8 +6,7 @@ namespace CompanyPortal.CQRS.Resources.Commands;
 
 public record DeleteFromStorageCommand(List<string> BlobNames) : IRequest
 {
-    public class Handler(BlobServiceClient blobServiceClient, ILogger<Handler> logger)
-        : IRequestHandler<DeleteFromStorageCommand>
+    public class Handler(BlobServiceClient blobServiceClient, ILogger<Handler> logger) : IRequestHandler<DeleteFromStorageCommand>
     {
         public async Task Handle(DeleteFromStorageCommand request, CancellationToken cancellationToken)
         {

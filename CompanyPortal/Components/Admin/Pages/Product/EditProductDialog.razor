@@ -1,5 +1,4 @@
-﻿@using CompanyPortal.CQRS.Categories.Queries
-@using CompanyPortal.CQRS.Products.Queries
+﻿@using CompanyPortal.CQRS.Products.Queries
 @using Syncfusion.Blazor.RichTextEditor
 @using MediatR
 
@@ -8,85 +7,78 @@
 <ModalDialog SizeClass="modal-xl">
     <Header>
         <h5 class="modal-title">@(Product.Id > 0 ? "CHỈNH SỬA SẢN PHẨM" : "THÊM SẢN PHẨM") </h5>
-        <button type="button" class="btn-close" aria-label="Close" @onclick="Cancel"></button>
+        <button type="button" class="btn-close" aria-label="Close" @onclick="() => BlazoredModal.CancelAsync()"></button>
     </Header>
     <Body>
-        @if (_isLoading)
-        {
-            <Spinner></Spinner>
-        }
-        else
-        {
-            <EditForm Model="Product" OnValidSubmit="Submit" id="FormProduct" class="row g-3">
-                <div class="col-lg-6 col-sm-12">
-                    <Label For="@(() => Product.Images)" CssClass="form-label"></Label>
-                    <FileUploader Files="Product.Images" ButtonText="Chọn ảnh" Id="fileUploader" AcceptFileExtensions=".jpg,.png" AllowMultiple="true" ShowPreview></FileUploader>
-                </div>
-                <fieldset class="col-lg-6 col-sm-12">
-                    <FluentValidationValidator ValidatorType="typeof(ProductFormValidator)" />
-                    <div class="row">
-                        <div class="col-12 mb-3">
-                            <Label For="@(() => Product.Name)" CssClass="form-label"></Label>
-                            <InputText class="form-control" maxlength="100" @bind-Value="Product.Name" />
-                            <ValidationMessage For="@(() => Product.Name)" />
-                        </div>
-                        <div class="col-lg-6 col-sm-12 mb-3">
-                            <Label For="@(() => Product.CategoryId)" CssClass="form-label"></Label>
-                            <SfComboBox TValue="int" TItem="CategoryViewModel" @bind-Value="Product.CategoryId" class="form-control" DataSource="Categories">
-                                <ComboBoxFieldSettings Value="Id" Text="Name"></ComboBoxFieldSettings>
-                            </SfComboBox>
-                            <ValidationMessage For="@(() => Product.CategoryId)" />
-                        </div>
-                        <div class="col-lg-6 col-sm-12 mb-3">
-                            <Label For="@(() => Product.ExternalId)" CssClass="form-label"></Label>
-                            <div class="input-group mb-3">
-                                <InputText class="form-control" maxlength="20" @bind-Value="Product.ExternalId" disabled="@Product.AutoGenerateExternalId" />
-                                <div class="input-group-text">
-                                    <InputCheckbox class="form-check-input me-2" @bind-Value="Product.AutoGenerateExternalId" />
-                                    <Label For="@(() => Product.AutoGenerateExternalId)" CssClass="form-check-label"></Label>
-                                </div>
+        <EditForm Model="Product" OnValidSubmit="Submit" id="FormProduct" class="row g-3">
+            <div class="col-lg-6 col-sm-12">
+                <Label For="@(() => Product.Images)" CssClass="form-label"></Label>
+                <FileUploader Files="Product.Images" ButtonText="Chọn ảnh" Id="fileUploader" AcceptFileExtensions=".jpg,.png" AllowMultiple="true" ShowPreview></FileUploader>
+            </div>
+            <fieldset class="col-lg-6 col-sm-12">
+                <FluentValidationValidator ValidatorType="typeof(ProductFormValidator)" />
+                <div class="row">
+                    <div class="col-12 mb-3">
+                        <Label For="@(() => Product.Name)" CssClass="form-label"></Label>
+                        <InputText class="form-control" maxlength="100" @bind-Value="Product.Name" />
+                        <ValidationMessage For="@(() => Product.Name)" />
+                    </div>
+                    <div class="col-lg-6 col-sm-12 mb-3">
+                        <Label For="@(() => Product.CategoryId)" CssClass="form-label"></Label>
+                        <SfComboBox TValue="int" TItem="CategoryViewModel" @bind-Value="Product.CategoryId" class="form-control" DataSource="Categories">
+                            <ComboBoxFieldSettings Value="Id" Text="Name"></ComboBoxFieldSettings>
+                        </SfComboBox>
+                        <ValidationMessage For="@(() => Product.CategoryId)" />
+                    </div>
+                    <div class="col-lg-6 col-sm-12 mb-3">
+                        <Label For="@(() => Product.ExternalId)" CssClass="form-label"></Label>
+                        <div class="input-group mb-3">
+                            <InputText class="form-control" maxlength="20" @bind-Value="Product.ExternalId" disabled="@Product.AutoGenerateExternalId" />
+                            <div class="input-group-text">
+                                <InputCheckbox class="form-check-input me-2" @bind-Value="Product.AutoGenerateExternalId" />
+                                <Label For="@(() => Product.AutoGenerateExternalId)" CssClass="form-check-label"></Label>
                             </div>
-                            <ValidationMessage For="@(() => Product.Name)" />
                         </div>
-                        <div class="col-12 mb-3">
-                            <Label For="@(() => Product.Tags)" CssClass="form-label"></Label>
-                            <InputText type="text" maxlength="50" @bind-Value="Product.Tags" class="form-control" placeholder="airplane car ..." />
-                        </div>
-                        <div class="col-12 mb-3">
-                            <Label For="@(() => Product.ShortDescription)" CssClass="form-label"></Label>
-                            <InputTextArea type="text" maxlength="300" @bind-Value="Product.ShortDescription" class="form-control" placeholder="airplane car ..." />
-                            <ValidationMessage For="@(() => Product.ShortDescription)" />
-                        </div>
-                        <div class="col-12 mb-3">
-                            <Label For="@(() => Product.FullDescription)" CssClass="form-label"></Label>
-                            <SfRichTextEditor ID="descriptionEditor" MaxLength="700" @bind-Value="Product.FullDescription" Height="300">
-                                <RichTextEditorToolbarSettings Items="@_descriptionEditorTools" />
-                            </SfRichTextEditor>
-                            <ValidationMessage For="@(() => Product.FullDescription)" />
-                        </div>
-                        <div class="col-12 mb-3">
-                            <Label For="@(() => Product.Price)" CssClass="form-label"></Label>
-                            <InputNumber @bind-Value="Product.Price" class="form-control" />
-                            <ValidationMessage For="@(() => Product.Price)" />
-                        </div>
-                        <div class="col-12">
-                            <div class="form-check d-flex">
-                                <InputCheckbox @bind-Value="Product.MarkedAsInactive" class="form-check-input align-self-baseline" />
-                                <span class="form-check-label ms-2">
-                                    <Label For="@(() => Product.MarkedAsInactive)" CssClass="form-label"></Label>
-                                </span>
-                            </div>
+                        <ValidationMessage For="@(() => Product.Name)" />
+                    </div>
+                    <div class="col-12 mb-3">
+                        <Label For="@(() => Product.Tags)" CssClass="form-label"></Label>
+                        <InputText type="text" maxlength="50" @bind-Value="Product.Tags" class="form-control" placeholder="airplane car ..." />
+                    </div>
+                    <div class="col-12 mb-3">
+                        <Label For="@(() => Product.ShortDescription)" CssClass="form-label"></Label>
+                        <InputTextArea type="text" maxlength="300" @bind-Value="Product.ShortDescription" class="form-control" placeholder="airplane car ..." />
+                        <ValidationMessage For="@(() => Product.ShortDescription)" />
+                    </div>
+                    <div class="col-12 mb-3">
+                        <Label For="@(() => Product.FullDescription)" CssClass="form-label"></Label>
+                        <SfRichTextEditor ID="descriptionEditor" MaxLength="700" @bind-Value="Product.FullDescription" Height="300">
+                            <RichTextEditorToolbarSettings Items="@_descriptionEditorTools" />
+                        </SfRichTextEditor>
+                        <ValidationMessage For="@(() => Product.FullDescription)" />
+                    </div>
+                    <div class="col-12 mb-3">
+                        <Label For="@(() => Product.Price)" CssClass="form-label"></Label>
+                        <InputNumber @bind-Value="Product.Price" class="form-control" />
+                        <ValidationMessage For="@(() => Product.Price)" />
+                    </div>
+                    <div class="col-12">
+                        <div class="form-check d-flex">
+                            <InputCheckbox @bind-Value="Product.MarkedAsInactive" class="form-check-input align-self-baseline" />
+                            <span class="form-check-label ms-2">
+                                <Label For="@(() => Product.MarkedAsInactive)" CssClass="form-label"></Label>
+                            </span>
                         </div>
                     </div>
-                </fieldset>
-            </EditForm>
-        }
+                </div>
+            </fieldset>
+        </EditForm>
     </Body>
     <Footer>
         <div class="row">
             <div class="col-12">
                 <LoadingButton Type="submit" IconCss="fa-solid fa-floppy-disk" ForForm="FormProduct" ButtonCssClass="btn-primary rounded-pill me-2" LoadingText="ĐANG LƯU" NormalText="LƯU" />
-                <button type="button" class="btn btn-success rounded-pill" @onclick="Cancel"><i class="fa-solid fa-xmark"></i> ĐÓNG</button>
+                <button type="button" class="btn btn-success rounded-pill" @onclick="() => BlazoredModal.CancelAsync()"><i class="fa-solid fa-xmark"></i> ĐÓNG</button>
             </div>
         </div>
     </Footer>
@@ -98,20 +90,15 @@
     [Parameter] public List<CategoryViewModel> Categories { get; set; } = [];
 
     private readonly List<ToolbarItemModel> _descriptionEditorTools = DataGrid.ContentEditorTools;
-    private bool _isLoading = true;
 
     protected override async Task OnInitializedAsync()
     {
-        Categories = await Mediator.Send(new GetAllCategoriesQuery());
         if (Product.Id > 0)
         {
             var images = await Mediator.Send(new GetProductImagesByIdQuery(Product.Id, true));
             Product.Images = [.. images];
         }
-        _isLoading = false;
     }
-
-    private void Cancel() => BlazoredModal.CancelAsync();
 
     private void Submit()
     {

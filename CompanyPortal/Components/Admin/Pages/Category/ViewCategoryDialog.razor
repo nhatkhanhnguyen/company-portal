@@ -7,7 +7,7 @@
 <ModalDialog SizeClass="modal-lg">
     <Header>
         <h5 class="modal-title">THÔNG TIN DANH MỤC</h5>
-        <button type="button" class="btn-close" aria-label="Close" @onclick="CancelAsync"></button>
+        <button type="button" class="btn-close" aria-label="Close" @onclick="() => BlazoredModal.CancelAsync()"></button>
     </Header>
     <Body>
         <div class="row">
@@ -53,7 +53,7 @@
                             </tbody>
                         </table>
                     }
-                </div>
+                </div> 
             </div>
         </div>
     </Body>
@@ -62,16 +62,11 @@
 @code {
     [CascadingParameter] IModalService Modal { get; set; } = default!;
     [CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; } = default!;
-    [Parameter] public CategoryViewModel Category { get; set; } = default!;
-    private bool _isLoading;
-
-    private string _errorMessage = string.Empty;
-
-    private async Task CancelAsync() => await BlazoredModal.CancelAsync();
+    [Parameter] public CategoryViewModel Category { get; set; }
+    private bool _isLoading = true;
 
     protected override async Task OnInitializedAsync()
     {
-        _isLoading = true;
         Category.Products = await Mediator.Send(new GetCategoryProductsByIdQuery(Category.Id, true));
         _isLoading = false;
     }
